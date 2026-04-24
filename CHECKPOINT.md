@@ -46,12 +46,21 @@ src/
     └── integration.test.ts # 44 tests
 
 web/
-├── index.html             # Demo UI
-└── demo.js                # Pipeline simulation
+├── index.html             # Omni-View 3-screen demo
+├── demo.js                # Screen navigation + pipeline sim
+├── omni-view.test.ts      # 6 Playwright browser tests
+└── playwright.config.ts   # Browser test config
+
+web/3d/
+├── index.html             # 3D Digital Twin (Three.js)
+├── js/app.js             # Three.js application
+├── server.js             # WebSocket sync server
+└── omni-view-3d.test.ts   # 3D browser tests
 ```
 
 ## Test Results
-- Tests: 44/44 passing
+- Jest: 44/44 passing
+- Playwright: 6/6 passing
 - Build: TypeScript compiles clean
 - All SC criteria verified
 
@@ -71,3 +80,9 @@ web/
 ## Pending (Optional / Future)
 - Task 7: RAG Guardrails & Traceability
 - HAM-3: Web UI HAM Integration (partially done via demo.js)
+
+## Refactor Notes (2026-04-24)
+- NexoraPipeline refactored to use UEB pub/sub pattern
+- 3D WebGL canvas unified with Tailwind UI
+- GPU-based water shader for 60 FPS rendering
+- Unified web app with 4 views (3D, EOC, Orgs, Field)

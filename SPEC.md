@@ -50,3 +50,9 @@ The system uses a **Central Orchestrator (MLLM)** to manage a federated network 
 - **SC-2:** The `ResourceAllocationAgent` produces a supply plan based on `SituationalAwareness` geodata.
 - **SC-3:** Memory persists across agent transitions, allowing the Resource agent to "remember" Early Warning signals.
 - **SC-4:** All agent I/O follows the registered schema without data loss.
+
+## User Interfaces (Omni-View Demo)
+Per `docs/design/FIGMA_SPEC.md`, three views for different disaster response layers:
+- **EOC Dashboard** (Command): Task graph visualization for Head Commander
+- **Siloed Organizations** (Logistics/Medical): Split-screen for cross-agency coordination
+- **Dark Mode Rescue** (Field): Mobile HAM radio interface for frontline responders

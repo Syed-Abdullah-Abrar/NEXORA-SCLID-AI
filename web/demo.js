@@ -1,5 +1,5 @@
-// NEXORA-SCLID-AI Web Demo
-// Vanilla JS implementation per SOUL.md
+// NEXORA Omni-View Demo
+// Multi-screen disaster response visualization
 
 const memoryBank = {
   current: new Map(),
@@ -9,8 +9,9 @@ const memoryBank = {
 
 let eventLog = [];
 let pipelineReady = false;
+let currentScreen = 1;
 
-// Simulated pipeline classes matching src/ behavior
+// Simulated pipeline classes
 class SimulatedTaskPlanner {
   async generatePlan(query) {
     const normalizedQuery = query.toLowerCase();
@@ -41,6 +42,7 @@ const agents = {
   resource_allocation: new SimulatedAgent('resource_allocation'),
 };
 
+// Logging
 function log(message, type = 'system') {
   const entry = { time: new Date().toISOString(), message, type };
   eventLog.push(entry);
@@ -49,6 +51,7 @@ function log(message, type = 'system') {
 
 function renderEventLog() {
   const logEl = document.getElementById('eventLog');
+  if (!logEl) return;
   logEl.innerHTML = eventLog.slice(-20).reverse().map(e =>
     `<div class="log-entry ${e.type}">[${new Date(e.time).toLocaleTimeString()}] ${e.message}</div>`
   ).join('');
@@ -57,6 +60,8 @@ function renderEventLog() {
 
 function renderMemoryBank() {
   const grid = document.getElementById('memoryGrid');
+  if (!grid) return;
+
   const allArtifacts = [
     ...Array.from(memoryBank.current.values()),
     ...Array.from(memoryBank.shortTerm.values()),
@@ -77,16 +82,15 @@ function renderMemoryBank() {
   `).join('');
 }
 
+// Pipeline execution
 async function runPipeline() {
   const queryInput = document.getElementById('queryInput');
-  const query = queryInput.value;
+  const query = queryInput?.value || 'Flood Response';
 
   log(`Starting pipeline: "${query}"`, 'system');
 
   const plan = await planner.generatePlan(query);
   log(`Generated ${plan.tasks.length} tasks`, 'system');
-
-  // Update task graph visualization
   renderTaskGraph(plan.tasks);
 
   const outputs = {
@@ -95,8 +99,8 @@ async function runPipeline() {
     'ra-output': null,
   };
 
-  // Early Warning Agent
-  document.getElementById('ew-status').textContent = 'Processing...';
+  // Early Warning
+  updateAgentStatus('ew-status', 'Processing...');
   await sleep(600);
 
   const ewData = {
@@ -110,13 +114,13 @@ async function runPipeline() {
   const ewArtifact = { id: `ew-${Date.now()}`, source: 'early_warning', data: ewData, timestamp: new Date().toISOString(), tags: ['early_warning', 'hazard', 'flood'] };
   memoryBank.current.set(ewArtifact.id, ewArtifact);
 
-  document.getElementById('ew-output').textContent = JSON.stringify(ewData, null, 2);
-  document.getElementById('ew-status').textContent = 'Complete';
+  updateAgentOutput('ew-output', ewData);
+  updateAgentStatus('ew-status', 'Complete');
   log(`Early Warning: ${ewData.hazard} detected - ${ewData.alertLevel}`, 'hazard');
   outputs['ew-output'] = ewData;
 
-  // Situational Awareness Agent
-  document.getElementById('sa-status').textContent = 'Processing...';
+  // Situational Awareness
+  updateAgentStatus('sa-status', 'Processing...');
   await sleep(800);
 
   const saData = {
@@ -131,13 +135,13 @@ async function runPipeline() {
   const saArtifact = { id: `sa-${Date.now()}`, source: 'situational_awareness', data: saData, timestamp: new Date().toISOString(), tags: ['situational', 'flood', 'geo-data'] };
   memoryBank.shortTerm.set(saArtifact.id, saArtifact);
 
-  document.getElementById('sa-output').textContent = JSON.stringify(saData, null, 2);
-  document.getElementById('sa-status').textContent = 'Complete';
-  log(`Situational: ${saData.affectedPopulation} people affected, ${saData.recommendedActions.length} actions generated`, 'situational');
+  updateAgentOutput('sa-output', saData);
+  updateAgentStatus('sa-status', 'Complete');
+  log(`Situational: ${saData.affectedPopulation} people affected`, 'situational');
   outputs['sa-output'] = saData;
 
-  // Resource Allocation Agent
-  document.getElementById('ra-status').textContent = 'Processing...';
+  // Resource Allocation
+  updateAgentStatus('ra-status', 'Processing...');
   await sleep(700);
 
   const raData = {
@@ -155,14 +159,24 @@ async function runPipeline() {
   const raArtifact = { id: `ra-${Date.now()}`, source: 'resource_allocation', data: raData, timestamp: new Date().toISOString(), tags: ['resource', 'allocation'] };
   memoryBank.longTerm.set(raArtifact.id, raArtifact);
 
-  document.getElementById('ra-output').textContent = JSON.stringify(raData, null, 2);
-  document.getElementById('ra-status').textContent = 'Complete';
-  log(`Resource Allocation: Plan ${raData.plan} - ${raData.personnelRequired} personnel deployed`, 'resource');
+  updateAgentOutput('ra-output', raData);
+  updateAgentStatus('ra-status', 'Complete');
+  log(`Resource Allocation: Plan ${raData.plan} - ${raData.personnelRequired} personnel`, 'resource');
   outputs['ra-output'] = raData;
 
   renderMemoryBank();
   log('Pipeline complete', 'system');
   pipelineReady = true;
+}
+
+function updateAgentStatus(id, text) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = text;
+}
+
+function updateAgentOutput(id, data) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = JSON.stringify(data, null, 2);
 }
 
 function renderTaskGraph(tasks) {
@@ -185,19 +199,16 @@ let hamOnline = false;
 function toggleHAM() {
   hamOnline = !hamOnline;
   const statusEl = document.getElementById('hamStatus');
-  statusEl.className = 'ham-status' + (hamOnline ? ' online' : '');
-  const hamLog = document.getElementById('hamLog');
-  const entry = document.createElement('div');
-  entry.className = 'log-entry';
-  entry.textContent = hamOnline ? 'HAM Bridge connected - offline mode active' : 'HAM Bridge disconnected';
-  hamLog.appendChild(entry);
+  if (statusEl) {
+    statusEl.className = 'ham-status' + (hamOnline ? ' online' : '');
+  }
 }
 
 async function simulateHAM() {
   const hamLog = document.getElementById('hamLog');
   const statusEl = document.getElementById('hamStatus');
 
-  statusEl.className = 'ham-status online';
+  if (statusEl) statusEl.className = 'ham-status online';
   hamOnline = true;
 
   const hamInput = {
@@ -216,10 +227,12 @@ async function simulateHAM() {
 
   memoryBank.current.set(hamInput.id, hamInput);
 
-  const entry = document.createElement('div');
-  entry.className = 'log-entry hazard';
-  entry.textContent = `[HAM] ${hamInput.data.callsign}: ${hamInput.data.message}`;
-  hamLog.appendChild(entry);
+  if (hamLog) {
+    const entry = document.createElement('div');
+    entry.className = 'log-entry hazard';
+    entry.textContent = `[HAM] ${hamInput.data.callsign}: ${hamInput.data.message}`;
+    hamLog.appendChild(entry);
+  }
 
   renderMemoryBank();
   log(`HAM Input: ${hamInput.data.message}`, 'hazard');
@@ -234,15 +247,51 @@ async function sendHAMMessage() {
   const hamLog = document.getElementById('hamLog');
   const raData = memoryBank.longTerm.values().next().value?.data;
 
-  const entry = document.createElement('div');
-  entry.className = 'log-entry resource';
-  entry.textContent = `[HAM OUT] Resource plan ${raData?.plan || 'UNKNOWN'} broadcast - ${raData?.personnelRequired || '?'} personnel`;
-  hamLog.appendChild(entry);
+  if (hamLog) {
+    const entry = document.createElement('div');
+    entry.className = 'log-entry resource';
+    entry.textContent = `[HAM OUT] Resource plan ${raData?.plan || 'UNKNOWN'} broadcast - ${raData?.personnelRequired || '?'} personnel`;
+    hamLog.appendChild(entry);
+  }
   log('Resource plan broadcast via HAM radio', 'resource');
 }
 
+// Screen navigation (called from HTML)
+function showScreen(n) {
+  currentScreen = n;
+  document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+  const target = document.getElementById(`screen-${n}`);
+  if (target) target.classList.remove('hidden');
+
+  document.querySelectorAll('.screen-nav-btn').forEach(btn => {
+    if (btn.dataset.screen == n) {
+      btn.classList.add('bg-nexora-agent', 'text-white');
+      btn.classList.remove('text-nexora-muted', 'hover:bg-nexora-surface');
+    } else {
+      btn.classList.remove('bg-nexora-agent', 'text-white');
+      btn.classList.add('text-nexora-muted', 'hover:bg-nexora-surface');
+    }
+  });
+}
+
+// Push to Talk simulation for Dark Mode screen
+function pushToTalk() {
+  log('Push-to-talk activated - voice captured', 'system');
+  // Simulate voice synthesis
+  setTimeout(() => {
+    log('VoiceSynth: Broadcasting alert to UEB', 'system');
+  }, 500);
+}
+
 // Init
-toggleHAM();
-renderMemoryBank();
-log('NEXORA-SCLID-AI Demo initialized', 'system');
-log('Type "Flood Response" and click Run Pipeline to start', 'system');
+function init() {
+  // Try init functions that exist
+  if (document.getElementById('hamStatus')) toggleHAM();
+  if (document.getElementById('memoryGrid')) renderMemoryBank();
+  log('NEXORA Omni-View Demo initialized', 'system');
+}
+
+// Export for testing
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = { SimulatedTaskPlanner, SimulatedAgent, memoryBank, log, showScreen, pushToTalk };
+}
