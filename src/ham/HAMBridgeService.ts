@@ -1,11 +1,14 @@
 import { DisasterEvent, MemoryArtifact } from '../types';
+import { APRSParsingError } from '../types/errors';
 
 export class HAMBridgeService {
-  async parseAPRS(raw: string): Promise<DisasterEvent | null> {
+  async parseAPRS(raw: string): Promise<DisasterEvent> {
     const aprsRegex = /^([A-Z0-9]+)>[^\/]+\/([^$]+)\$([^\r\n]+)/;
     const match = raw.match(aprsRegex);
 
-    if (!match) return null;
+    if (!match) {
+      throw new APRSParsingError(`Invalid APRS format: ${raw.substring(0, 50)}...`, raw);
+    }
 
     const [, callsign, coords, message] = match;
     const position = this.parseCoordinates(coords);

@@ -1,5 +1,6 @@
 import { MemoryArtifact } from '../types';
 import { BaseAgent } from './BaseAgent';
+import { VectorStore } from '../memory/VectorStore';
 
 interface RoutePoint {
   name: string;
@@ -14,9 +15,19 @@ interface Route {
   waypoints: string[];
 }
 
+interface RAGValidation {
+  isValid: boolean;
+  confidence: number;
+  similarPlans: Array<{ planId: string; similarity: number }>;
+  warnings: string[];
+}
+
 export class ResourceAllocationAgent extends BaseAgent {
+  private ragStore: VectorStore;
+
   constructor() {
     super('resource_allocation', 'resource_allocation');
+    this.ragStore = new VectorStore();
   }
 
   async ingest(input: unknown): Promise<MemoryArtifact> {
@@ -54,7 +65,42 @@ export class ResourceAllocationAgent extends BaseAgent {
       priority: data.riskLevel && data.riskLevel >= 80 ? 'critical' : 'high',
     };
 
-    return this.createArtifact(planData, ['resource', 'allocation', data.hazard || 'unknown'], 'high');
+    const artifact = await this.createArtifact(planData, ['resource', 'allocation', data.hazard || 'unknown'], 'high');
+
+    // RAG validation before saving to long-term memory
+    const ragValidation = await this.ragValidate(artifact);
+    if (!ragValidation.isValid) {
+      console.warn('RAG validation warnings:', ragValidation.warnings);
+    }
+
+    return artifact;
+  }
+
+  async ragValidate(planArtifact: MemoryArtifact): Promise<RAGValidation> {
+    const planText = JSON.stringify(planArtifact.data);
+    const planVector = await this.ragStore.embed(planText);
+
+    // Search for similar historical plans
+    const similarPlans = await this.ragStore.search(planVector, 3);
+
+    const warnings: string[] = [];
+    let confidence = 0.5;
+
+    if (similarPlans.length > 0) {
+      const avgSimilarity = similarPlans.reduce((sum, p) => sum + p.similarity, 0) / similarPlans.length;
+      confidence = Math.min(0.95, 0.5 + avgSimilarity * 0.3);
+
+      if (avgSimilarity > 0.8) {
+        warnings.push('Similar plan found in historical data - consider reusing successful approach');
+      }
+    }
+
+    return {
+      isValid: confidence >= 0.4,
+      confidence,
+      similarPlans: similarPlans.map(p => ({ planId: p.id, similarity: p.similarity })),
+      warnings,
+    };
   }
 
   private calculatePersonnel(population?: number, riskLevel?: number): number {

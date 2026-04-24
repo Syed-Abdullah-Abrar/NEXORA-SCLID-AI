@@ -1,21 +1,18 @@
 import { AgentSkill, TaskGraph } from '../types';
 
-export class TaskPlanner {
-  private skills: AgentSkill[];
+export interface PlannerAdapter {
+  generatePlan(query: string, availableSkills: AgentSkill[]): Promise<TaskGraph>;
+}
 
-  constructor(skills: AgentSkill[]) {
-    this.skills = skills;
-  }
-
-  async generatePlan(query: string): Promise<TaskGraph> {
+export class SimplePlannerAdapter implements PlannerAdapter {
+  async generatePlan(query: string, availableSkills: AgentSkill[]): Promise<TaskGraph> {
     const normalizedQuery = query.toLowerCase();
 
     if (normalizedQuery.includes('flood') || normalizedQuery.includes('warning')) {
       return this.buildFloodResponseGraph();
     }
 
-    // Default: single task for the first matching skill
-    const firstMatch = this.skills[0];
+    const firstMatch = availableSkills[0];
     if (!firstMatch) {
       return { tasks: [] };
     }
@@ -36,5 +33,17 @@ export class TaskPlanner {
     const resourceTask = { id: 'ra_1', agentId: 'resource_allocation', dependencies: ['ew_1', 'sa_1'], input: {} };
 
     return { tasks: [earlyWarningTask, situationalTask, resourceTask] };
+  }
+}
+
+export class TaskPlanner {
+  private adapter: PlannerAdapter;
+
+  constructor(adapter: PlannerAdapter = new SimplePlannerAdapter()) {
+    this.adapter = adapter;
+  }
+
+  async generatePlan(query: string, availableSkills: AgentSkill[] = []): Promise<TaskGraph> {
+    return this.adapter.generatePlan(query, availableSkills);
   }
 }

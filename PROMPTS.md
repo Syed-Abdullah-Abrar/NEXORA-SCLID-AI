@@ -191,12 +191,10 @@ Open `web/index.html` in browser to see:
 - Event log with color-coded entries
 - Simulated HAM radio input/output
 
-### Verification Checklist
-- [ ] TaskPlanner generates 3-task graph for "Flood Response"
-- [ ] Each agent produces MemoryArtifact with correct schema
-- [ ] MemoryBank.store() and get() work across all 3 tiers
-- [ ] HAMBridgeService parses APRS format correctly
-- [ ] VoiceSynthesizer speaks (or logs) broadcast messages
-- [ ] All 44 tests pass
-- [ ] Build compiles without errors
-- [ ] Web demo loads and runs pipeline simulation
+### Potential Updates & Next Steps for Engineer
+While the initial Phase 1-3 implementation is solid and the HAM Radio bridge is a strong addition, the Auditor requires the following refinements to transition from a prototype to a hardened orchestration framework:
+
+1. **RAG/Vector Guardrail Enforcement (SC-4 Addendum):** The current `ResourceAllocationAgent` produces a plan, but the `VectorStore` integration is mock/local. **Update required:** Implement a strict RAG retrieval step using `VectorStore.search()` to validate the allocation plan against historical procedures before saving to the `long` memory tier.
+2. **UEB (Unified Event Bus) Hardening:** The current `NexoraPipeline` relies on direct asynchronous method calls (e.g., `this.earlyWarning.ingest()`). **Update required:** Refactor `index.ts` to use a true `EventEmitter` pattern for the `DisasterEvent` schema defined in `TECHNICAL_SPEC.md`. Agents should subscribe to topics like `hazard.detected` rather than being invoked sequentially by the pipeline class.
+3. **HAM Bridge Error Propagation:** The `HAMBridgeService.parseAPRS` returns `null` on failure. **Update required:** Throw strongly-typed errors (e.g., `APRSParsingError`) so the Orchestrator can log the failure to the `MemoryBank` as an anomalous event rather than silently failing.
+4. **TaskPlanner MLLM Interface:** The `TaskPlanner` currently hardcodes the "Flood Response" graph. **Update required:** Abstract the hardcoded logic into an interface where an actual local SLM (or mocked LLM service) parses the intent and dynamically queries the `AgentRegistry`.

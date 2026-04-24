@@ -9,7 +9,7 @@ import { AgentRegistry } from '../orchestrator/AgentRegistry';
 describe('Pipeline Integration', () => {
   describe('Full disaster response flow', () => {
     it('SC-1: TaskPlanner decomposes flood query into 3-step graph', async () => {
-      const planner = new TaskPlanner([]);
+      const planner = new TaskPlanner();
       const result = await planner.generatePlan('Flood Response');
 
       expect(result.tasks).toHaveLength(3);

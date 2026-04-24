@@ -6,6 +6,7 @@ NEXORA-SCLID-AI is a multi-agent orchestration framework designed for augmented 
 - **MLLM Orchestrator**: A central Task Planner that decomposes objectives into actionable sub-tasks.
 - **Unified Event Bus (UEB)**: Asynchronous communication protocol for decoupled, resilient agent interactions.
 - **3-Tier Memory Bank**: Vectorized storage for maintaining context across the disaster lifecycle.
+- **HAM Radio Bridge**: Dedicated offline transport (APRS, Voice, Packet AX.25) for absolute operational resilience in disconnected environments.
 
 ## Specialized Pipeline
 1. **Early Warning Agent**: Predicts hazards via sensor and weather data.
@@ -14,4 +15,5 @@ NEXORA-SCLID-AI is a multi-agent orchestration framework designed for augmented 
 
 ## Operational Modes
 - **Command Mode**: High-bandwidth coordination for EOC commanders.
-- **Dark Mode**: Quantized, offline orchestration for field responders in disconnected zones.
+- **Dark Mode**: Quantized, offline orchestration for field responders using the HAM Radio Bridge for decentralized intelligence.
+- **Web Demo**: A browser-based interface visualizing the orchestration pipeline in real-time (`web/index.html`).

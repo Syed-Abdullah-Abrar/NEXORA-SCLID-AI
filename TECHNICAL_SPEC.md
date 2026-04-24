@@ -10,13 +10,21 @@ src/
 │   ├── MemoryBank.ts        # 3-tier storage management
 │   └── VectorStore.ts       # Local vector search implementation
 ├── agents/
-│   ├── BaseAgent.ts         # Abstract class for all sub-agents
-│   ├── EarlyWarning.ts      # Sub-agent implementation
-│   ├── Situational.ts       # Sub-agent implementation
-│   └── ResourceAlloc.ts     # Sub-agent implementation
+│   ├── BaseAgent.ts                 # Abstract class for all sub-agents
+│   ├── EarlyWarningAgent.ts         # Sub-agent implementation
+│   ├── SituationalAwarenessAgent.ts # Sub-agent implementation
+│   └── ResourceAllocationAgent.ts   # Sub-agent implementation
+├── ham/
+│   ├── HAMBridgeService.ts          # APRS parsing & voice transcription
+│   ├── PacketRadioHandler.ts        # AX.25 frame encoding/decoding
+│   └── VoiceSynthesizer.ts          # Voice broadcast logic
 ├── types/
 │   └── index.ts             # Global interfaces and schemas
-└── index.ts                 # Main entry point
+└── index.ts                 # Main NexoraPipeline entry point
+
+web/
+├── index.html               # Interactive demo UI
+└── demo.js                  # Pipeline visualization script
 ```
 
 ## 2. Core Interfaces (`src/types/index.ts`)

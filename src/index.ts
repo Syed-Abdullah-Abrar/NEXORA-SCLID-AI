@@ -1,4 +1,5 @@
 import { MemoryArtifact, AgentSkill, AgentDomain, GeoData } from './types';
+import { APRSParsingError } from './types/errors';
 import { TaskPlanner } from './orchestrator/TaskPlanner';
 import { AgentRegistry } from './orchestrator/AgentRegistry';
 import { MemoryBank } from './memory/MemoryBank';
@@ -21,7 +22,7 @@ export class NexoraPipeline {
   private packetRadio: PacketRadioHandler;
 
   constructor() {
-    this.planner = new TaskPlanner([]);
+    this.planner = new TaskPlanner();
     this.registry = new AgentRegistry();
     this.memoryBank = new MemoryBank();
     this.earlyWarning = new EarlyWarningAgent();
@@ -74,11 +75,25 @@ export class NexoraPipeline {
   }
 
   async processHAMInput(aprsData: string): Promise<MemoryArtifact> {
-    const event = await this.hamBridge.parseAPRS(aprsData);
-    if (!event) throw new Error('Invalid APRS format');
-
-    await this.memoryBank.store(event.payload, 'current');
-    return event.payload;
+    try {
+      const event = await this.hamBridge.parseAPRS(aprsData);
+      await this.memoryBank.store(event.payload, 'current');
+      return event.payload;
+    } catch (err) {
+      if (err instanceof APRSParsingError) {
+        // Log anomalous event to memory bank
+        const errorArtifact: MemoryArtifact = {
+          id: `error-${Date.now()}`,
+          timestamp: new Date().toISOString(),
+          source: 'ham_bridge_error',
+          data: { error: err.message, rawData: err.rawData },
+          tags: ['error', 'anomaly', 'ham_bridge'],
+        };
+        await this.memoryBank.store(errorArtifact, 'short');
+        throw err;
+      }
+      throw err;
+    }
   }
 
   async broadcastViaHAM(plan: MemoryArtifact, mode: 'voice' | 'packet' = 'voice'): Promise<string> {

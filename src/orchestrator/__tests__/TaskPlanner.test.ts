@@ -3,32 +3,8 @@ import { AgentSkill, Task } from '../../types';
 describe('TaskPlanner', () => {
   describe('generatePlan', () => {
     it('should decompose "Flood Response" query into 3-step dependency graph', async () => {
-      const skills: AgentSkill[] = [
-        {
-          id: 'early_warning',
-          domain: 'early_warning',
-          description: 'Predicts hazards from sensor/weather data',
-          inputSchema: { type: 'object' },
-          outputSchema: { type: 'object' },
-        },
-        {
-          id: 'situational_awareness',
-          domain: 'situational_awareness',
-          description: 'Fuses multi-modal data for live operational picture',
-          inputSchema: { type: 'object' },
-          outputSchema: { type: 'object' },
-        },
-        {
-          id: 'resource_allocation',
-          domain: 'resource_allocation',
-          description: 'Optimizes distribution of personnel and supplies',
-          inputSchema: { type: 'object' },
-          outputSchema: { type: 'object' },
-        },
-      ];
-
       const { TaskPlanner } = await import('../TaskPlanner');
-      const planner = new TaskPlanner(skills);
+      const planner = new TaskPlanner();
 
       const result = await planner.generatePlan('Flood Response');
 
@@ -48,18 +24,8 @@ describe('TaskPlanner', () => {
     });
 
     it('should complete decomposition within 2 seconds', async () => {
-      const skills: AgentSkill[] = [
-        {
-          id: 'early_warning',
-          domain: 'early_warning',
-          description: 'Predicts hazards',
-          inputSchema: { type: 'object' },
-          outputSchema: { type: 'object' },
-        },
-      ];
-
       const { TaskPlanner } = await import('../TaskPlanner');
-      const planner = new TaskPlanner(skills);
+      const planner = new TaskPlanner();
 
       const start = Date.now();
       await planner.generatePlan('Flood Response');

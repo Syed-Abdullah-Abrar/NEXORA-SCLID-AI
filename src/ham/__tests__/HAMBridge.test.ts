@@ -1,4 +1,5 @@
 import { DisasterEvent } from '../../types';
+import { APRSParsingError } from '../../types/errors';
 
 describe('HAMBridgeService', () => {
   describe('parseAPRS', () => {
@@ -30,12 +31,11 @@ describe('HAMBridgeService', () => {
       expect(data2?.position?.longitude).toBe(-71.06);
     });
 
-    it('returns null for malformed APRS', async () => {
+    it('throws APRSParsingError for malformed APRS', async () => {
       const { HAMBridgeService } = await import('../../ham/HAMBridgeService');
       const bridge = new HAMBridgeService();
 
-      const result = await bridge.parseAPRS('INVALID_DATA');
-      expect(result).toBeNull();
+      await expect(bridge.parseAPRS('INVALID_DATA')).rejects.toThrow(APRSParsingError);
     });
   });
 
