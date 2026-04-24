@@ -1,47 +1,49 @@
 # Implementation Checkpoint
 
 ## Session State
-- **Current Task:** Phase 1 Foundation - Orchestrator & Skill Registry
-- **Status:** Completed
+- **Current Task:** HAM-1: HAM Bridge Core Service
+- **Status:** In Progress
 
 ## Modified Files
-- `src/types/index.ts` - Global interfaces (AgentSkill, MemoryArtifact, TaskGraph, etc.)
-- `src/orchestrator/TaskPlanner.ts` - Query decomposition into task dependency graph
-- `src/orchestrator/AgentRegistry.ts` - Sub-agent registration and discovery
-- `src/orchestrator/__tests__/TaskPlanner.test.ts` - Test suite (5 tests, all passing)
-- `package.json` - Project dependencies
-- `tsconfig.json` - TypeScript config
-- `jest.config.js` - Jest test runner config
+- `src/types/index.ts` - Global interfaces
+- `src/orchestrator/TaskPlanner.ts` - Query decomposition
+- `src/orchestrator/AgentRegistry.ts` - Agent registration
+- `src/memory/MemoryBank.ts` - 3-tier storage
+- `src/memory/VectorStore.ts` - Vector search
+- `web/index.html` - Demo UI
+- `web/demo.js` - Pipeline simulation
 
 ## Micro-Goals Completed
-- [x] TaskPlanner.generatePlan() - SC-1: Flood Response decomposes to 3-step graph
-- [x] AgentRegistry.register() - Agent registration by domain
-- [x] AgentRegistry.getByDomain() - Retrieval by domain
-- [x] AgentRegistry.discover() - Fuzzy query matching
-- [x] Build succeeds (tsc)
-- [x] All tests pass (5/5)
+- [x] Task 1: Orchestrator & AgentRegistry (SC-1)
+- [x] Task 2: Tiered Memory Bank (SC-3)
+- [x] Task 6: Web Demo Interface
+- [x] Tests: 14/14 passing
+- [x] Build: TypeScript compiles
 
 ## Pending Tasks
-- Task 2: Tiered Memory Bank
+- HAM-1: HAM Bridge Core Service
 - Task 3: Early Warning Agent
 - Task 4: Situational Awareness Agent
 - Task 5: Resource Allocation Agent
+- HAM-2: Outbound HAM Transmission
 - Task 6: End-to-End Pipeline Integration
-- Task 7: RAG Guardrails & Traceability
+- HAM-3: Web UI HAM Integration
+- Task 7: RAG Guardrails
 
 ## Notes for Reviewer
-Phase 1 foundation complete. Ready for Memory Bank implementation (Task 2).
+Memory Bank implemented with current/short/long tiers.
+Web demo shows full pipeline with simulated HAM bridge.
+SC-1, SC-3 verified via tests.
 
----
-
-## Web Interface (NEW)
-User requested demo web interface. Planning:
-- Simple HTML/JS UI to visualize agent pipeline
-- Show task graph decomposition
-- Display Memory Bank state
-- Interactive query input
-
-## Next Steps
-1. Update PROMPTS.md with new Directive/Submission for web interface work
-2. Build Memory Bank (Task 2)
-3. Build web demo interface
+## Task Order (from todo.md)
+```
+1. [HAM-1] HAM Bridge Core         <- NEXT
+2. [Task 2] Memory Bank             <- DONE
+3. [Task 3] Early Warning Agent
+4. [Task 4] Situational Awareness
+5. [Task 5] Resource Allocation
+6. [HAM-2] Outbound Transmission
+7. [Task 6] Integration
+8. [HAM-3] Web UI HAM
+9. [Task 7] RAG Guardrails
+```
