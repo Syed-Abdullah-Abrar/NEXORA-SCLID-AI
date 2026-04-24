@@ -28,6 +28,14 @@ export interface Task {
   input: unknown;
 }
 
+export interface GeoData {
+  lat: number;
+  lon: number;
+  population?: number;
+  criticalInfrastructure?: string[];
+  shelterLocations?: string[];
+}
+
 export interface DisasterEvent {
   id: string;
   topic: 'hazard.detected' | 'situational.fusion.completed' | 'resource.plan.generated';
