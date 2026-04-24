@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NEXORA-SCLID-AI Demo</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, sans-serif; background: #1a1a2e; color: #eee; min-height: 100vh; }
+    .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+    h1 { color: #00d9ff; margin-bottom: 20px; }
+    .query-section { background: #16213e; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+    .query-input { width: 100%; padding: 12px; font-size: 16px; border: 2px solid #0f3460; border-radius: 4px; background: #1a1a2e; color: #fff; }
+    .query-input:focus { outline: none; border-color: #00d9ff; }
+    .btn { background: #00d9ff; color: #1a1a2e; border: none; padding: 10px 20px; font-weight: bold; cursor: pointer; border-radius: 4px; margin-top: 10px; }
+    .btn:hover { background: #00b8d9; }
+    .pipeline { display: flex; gap: 20px; margin: 20px 0; flex-wrap: wrap; }
+    .agent-box { flex: 1; min-width: 200px; background: #16213e; padding: 20px; border-radius: 8px; border-left: 4px solid #555; }
+    .agent-box.early_warning { border-left-color: #ff6b6b; }
+    .agent-box.situational { border-left-color: #ffd93d; }
+    .agent-box.resource { border-left-color: #6bcb77; }
+    .agent-box h3 { margin-bottom: 10px; }
+    .agent-box .status { font-size: 12px; color: #888; margin-bottom: 10px; }
+    .agent-box .output { background: #0f3460; padding: 10px; border-radius: 4px; min-height: 80px; font-size: 13px; white-space: pre-wrap; }
+    .arrow { color: #00d9ff; font-size: 24px; display: flex; align-items: center; padding: 0 10px; }
+    .memory-section { background: #16213e; padding: 20px; border-radius: 8px; margin-top: 20px; }
+    .memory-section h2 { color: #00d9ff; margin-bottom: 15px; }
+    .memory-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+    .memory-card { background: #0f3460; padding: 10px; border-radius: 4px; font-size: 12px; }
+    .memory-card .source { color: #00d9ff; font-weight: bold; }
+    .memory-card .tags { color: #888; font-size: 11px; }
+    .event-log { background: #0f3460; padding: 10px; border-radius: 4px; margin-top: 10px; max-height: 150px; overflow-y: auto; font-family: monospace; font-size: 12px; }
+    .log-entry { padding: 2px 0; border-bottom: 1px solid #16213e; }
+    .log-entry.hazard { color: #ff6b6b; }
+    .log-entry.situational { color: #ffd93d; }
+    .log-entry.resource { color: #6bcb77; }
+    .hambridge-section { background: #2d132c; padding: 20px; border-radius: 8px; margin-top: 20px; border: 1px solid #801336; }
+    .hambridge-section h2 { color: #ff6b6b; margin-bottom: 10px; }
+    .ham-status { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #555; margin-right: 8px; }
+    .ham-status.online { background: #6bcb77; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>NEXORA-SCLID-AI Disaster Copilot</h1>
+
+    <div class="query-section">
+      <input type="text" id="queryInput" class="query-input" placeholder="Enter disaster scenario (e.g., 'Flood Response')" value="Flood Response">
+      <button class="btn" onclick="runPipeline()">Run Pipeline</button>
+      <button class="btn" onclick="simulateHAM()">Simulate HAM Input</button>
+    </div>
+
+    <div class="pipeline">
+      <div class="agent-box early_warning">
+        <h3>Early Warning Agent</h3>
+        <div class="status" id="ew-status">Idle</div>
+        <div class="output" id="ew-output">Waiting for input...</div>
+      </div>
+      <div class="arrow">→</div>
+      <div class="agent-box situational">
+        <h3>Situational Awareness Agent</h3>
+        <div class="status" id="sa-status">Idle</div>
+        <div class="output" id="sa-output">Waiting for input...</div>
+      </div>
+      <div class="arrow">→</div>
+      <div class="agent-box resource">
+        <h3>Resource Allocation Agent</h3>
+        <div class="status" id="ra-status">Idle</div>
+        <div class="output" id="ra-output">Waiting for input...</div>
+      </div>
+    </div>
+
+    <div class="memory-section">
+      <h2>Memory Bank</h2>
+      <div class="memory-grid" id="memoryGrid">
+        <div class="memory-card">No artifacts stored</div>
+      </div>
+      <h3 style="margin-top: 15px; color: #00d9ff;">Event Log</h3>
+      <div class="event-log" id="eventLog">
+        <div class="log-entry">System initialized</div>
+      </div>
+    </div>
+
+    <div class="hambridge-section">
+      <h2><span class="ham-status" id="hamStatus"></span>HAM Radio Bridge (Dark Mode)</h2>
+      <p style="color: #888; margin-bottom: 10px;">Simulated amateur radio communication for edge deployment</p>
+      <button class="btn" onclick="sendHAMMessage()">Broadcast via HAM</button>
+      <div class="event-log" id="hamLog">
+        <div class="log-entry">HAM Bridge ready - offline mode available</div>
+      </div>
+    </div>
+  </div>
+
+  <script src="demo.js"></script>
+</body>
+</html>
