@@ -8,6 +8,38 @@ const memoryBank = {
 };
 
 let eventLog = [];
+let pipelineReady = false;
+
+// Simulated pipeline classes matching src/ behavior
+class SimulatedTaskPlanner {
+  async generatePlan(query) {
+    const normalizedQuery = query.toLowerCase();
+    if (normalizedQuery.includes('flood') || normalizedQuery.includes('warning')) {
+      return {
+        tasks: [
+          { id: 'ew_1', agentId: 'early_warning', dependencies: [], input: { hazard: 'flood' } },
+          { id: 'sa_1', agentId: 'situational_awareness', dependencies: ['ew_1'], input: {} },
+          { id: 'ra_1', agentId: 'resource_allocation', dependencies: ['ew_1', 'sa_1'], input: {} },
+        ],
+      };
+    }
+    return { tasks: [] };
+  }
+}
+
+class SimulatedAgent {
+  constructor(id) { this.id = id; }
+  async ingest(input) {
+    return { id: `${this.id}-${Date.now()}`, source: this.id, data: input, timestamp: new Date().toISOString(), tags: [] };
+  }
+}
+
+const planner = new SimulatedTaskPlanner();
+const agents = {
+  early_warning: new SimulatedAgent('early_warning'),
+  situational_awareness: new SimulatedAgent('situational_awareness'),
+  resource_allocation: new SimulatedAgent('resource_allocation'),
+};
 
 function log(message, type = 'system') {
   const entry = { time: new Date().toISOString(), message, type };
@@ -17,9 +49,9 @@ function log(message, type = 'system') {
 
 function renderEventLog() {
   const logEl = document.getElementById('eventLog');
-  logEl.innerHTML = eventLog.map(e =>
+  logEl.innerHTML = eventLog.slice(-20).reverse().map(e =>
     `<div class="log-entry ${e.type}">[${new Date(e.time).toLocaleTimeString()}] ${e.message}</div>`
-  ).reverse().join('');
+  ).join('');
   logEl.scrollTop = 0;
 }
 
@@ -39,38 +71,10 @@ function renderMemoryBank() {
   grid.innerHTML = allArtifacts.map(a => `
     <div class="memory-card">
       <div class="source">${a.source}</div>
-      <div>${JSON.stringify(a.data)}</div>
-      <div class="tags">${a.tags.join(', ')}</div>
+      <div>${typeof a.data === 'object' ? JSON.stringify(a.data).substring(0, 80) : a.data}</div>
+      <div class="tags">${a.tags?.join(', ') || ''}</div>
     </div>
   `).join('');
-}
-
-async function generatePlan(query) {
-  // Simulate TaskPlanner behavior from src/orchestrator/TaskPlanner.ts
-  const normalizedQuery = query.toLowerCase();
-  if (normalizedQuery.includes('flood') || normalizedQuery.includes('warning')) {
-    return {
-      tasks: [
-        { id: 'ew_1', agentId: 'early_warning', dependencies: [], input: { hazard: 'flood' } },
-        { id: 'sa_1', agentId: 'situational_awareness', dependencies: ['ew_1'], input: {} },
-        { id: 'ra_1', agentId: 'resource_allocation', dependencies: ['ew_1', 'sa_1'], input: {} },
-      ],
-    };
-  }
-  return { tasks: [] };
-}
-
-function simulateAgent(agentId, input, callback) {
-  return new Promise(resolve => {
-    const statusEl = document.getElementById(`${agentId.replace('_', '-')}-status`);
-    statusEl.textContent = 'Processing...';
-
-    setTimeout(() => {
-      const output = callback(input);
-      statusEl.textContent = 'Complete';
-      resolve(output);
-    }, 800 + Math.random() * 400);
-  });
 }
 
 async function runPipeline() {
@@ -79,85 +83,100 @@ async function runPipeline() {
 
   log(`Starting pipeline: "${query}"`, 'system');
 
-  const plan = await generatePlan(query);
+  const plan = await planner.generatePlan(query);
   log(`Generated ${plan.tasks.length} tasks`, 'system');
 
-  const ewOutput = document.getElementById('ew-output');
-  const saOutput = document.getElementById('sa-output');
-  const raOutput = document.getElementById('ra-output');
+  // Update task graph visualization
+  renderTaskGraph(plan.tasks);
+
+  const outputs = {
+    'ew-output': null,
+    'sa-output': null,
+    'ra-output': null,
+  };
 
   // Early Warning Agent
-  const ewArtifact = {
-    id: `ew-${Date.now()}`,
-    timestamp: new Date().toISOString(),
-    source: 'early_warning',
-    data: {
-      hazard: 'flood',
-      severity: 'HIGH',
-      affectedArea: 'Zone A - Low lying residential area',
-      confidence: 0.92,
-      alertLevel: 'EVACUATE',
-    },
-    tags: ['early_warning', 'flood', 'zone-a', 'evacuate'],
+  document.getElementById('ew-status').textContent = 'Processing...';
+  await sleep(600);
+
+  const ewData = {
+    hazard: 'flood',
+    severity: 'HIGH',
+    confidence: 0.92,
+    affectedArea: 'Zone A - Low lying residential',
+    alertLevel: 'EVACUATE',
   };
 
-  await simulateAgent('early_warning', { query }, () => {
-    memoryBank.current.set(ewArtifact.id, ewArtifact);
-    ewOutput.textContent = JSON.stringify(ewArtifact.data, null, 2);
-    log(`Early Warning: ${ewArtifact.data.hazard} detected - ${ewArtifact.data.alertLevel}`, 'hazard');
-    return ewArtifact;
-  });
+  const ewArtifact = { id: `ew-${Date.now()}`, source: 'early_warning', data: ewData, timestamp: new Date().toISOString(), tags: ['early_warning', 'hazard', 'flood'] };
+  memoryBank.current.set(ewArtifact.id, ewArtifact);
+
+  document.getElementById('ew-output').textContent = JSON.stringify(ewData, null, 2);
+  document.getElementById('ew-status').textContent = 'Complete';
+  log(`Early Warning: ${ewData.hazard} detected - ${ewData.alertLevel}`, 'hazard');
+  outputs['ew-output'] = ewData;
 
   // Situational Awareness Agent
-  const saArtifact = {
-    id: `sa-${Date.now()}`,
-    timestamp: new Date().toISOString(),
-    source: 'situational_awareness',
-    data: {
-      location: '42.36°N, 71.06°W',
-      affectedPopulation: 12500,
-      sheltersAvailable: 3,
-      shelterCapacity: 850,
-      roadBlocks: ['Route 9', 'Main St Bridge'],
-      weatherConditions: 'Heavy rain continuing, 2-3 inches expected',
-    },
-    tags: ['situational', 'flood', 'geo-data'],
+  document.getElementById('sa-status').textContent = 'Processing...';
+  await sleep(800);
+
+  const saData = {
+    unifiedPicture: `${ewData.severity} ${ewData.hazard} warning for ${ewData.affectedArea}. 12500 people in affected zone.`,
+    riskLevel: 73,
+    affectedPopulation: 12500,
+    criticalInfrastructure: ['General Hospital', 'Elementary School'],
+    shelterLocations: ['Community Center', 'High School'],
+    recommendedActions: ['Evacuate flood-prone zones', 'Open shelters', 'Deploy sandbags'],
   };
 
-  await simulateAgent('situational', { hazardData: ewArtifact.data }, () => {
-    memoryBank.shortTerm.set(saArtifact.id, saArtifact);
-    saOutput.textContent = JSON.stringify(saArtifact.data, null, 2);
-    log(`Situational: ${saArtifact.data.affectedPopulation} people affected, ${saArtifact.data.sheltersAvailable} shelters open`, 'situational');
-    return saArtifact;
-  });
+  const saArtifact = { id: `sa-${Date.now()}`, source: 'situational_awareness', data: saData, timestamp: new Date().toISOString(), tags: ['situational', 'flood', 'geo-data'] };
+  memoryBank.shortTerm.set(saArtifact.id, saArtifact);
+
+  document.getElementById('sa-output').textContent = JSON.stringify(saData, null, 2);
+  document.getElementById('sa-status').textContent = 'Complete';
+  log(`Situational: ${saData.affectedPopulation} people affected, ${saData.recommendedActions.length} actions generated`, 'situational');
+  outputs['sa-output'] = saData;
 
   // Resource Allocation Agent
-  const raArtifact = {
-    id: `ra-${Date.now()}`,
-    timestamp: new Date().toISOString(),
-    source: 'resource_allocation',
-    data: {
-      plan: 'EVACUATE_ZONE_A',
-      actions: [
-        { type: 'EVACUATE', area: 'Zone A', priority: 1, personnel: 45 },
-        { type: 'SETUP_SHELTER', location: 'Community Center', capacity: 300 },
-        { type: 'ROUTE_BLOCK', road: 'Route 9', alternative: 'I-495 detour' },
-        { type: 'SUPPLY_DROP', location: 'Emergency staging', supplies: ['water', 'food', 'medical'] },
-      ],
-      estimatedCompletion: '4-6 hours',
-    },
-    tags: ['resource', 'allocation', 'plan'],
+  document.getElementById('ra-status').textContent = 'Processing...';
+  await sleep(700);
+
+  const raData = {
+    plan: 'FLOOD_HIGH_' + Date.now().toString(36).toUpperCase(),
+    personnelRequired: 45,
+    actions: [
+      { type: 'EVACUATE', target: 'Zone A', priority: 1, personnel: 20 },
+      { type: 'SETUP_SHELTER', target: 'Community Center', priority: 2, personnel: 10 },
+      { type: 'DISTRIBUTE_SUPPLIES', target: 'All shelters', priority: 3, personnel: 15 },
+    ],
+    supplyList: ['water', 'food', 'medical kits', 'sandbags', 'boats'],
+    estimatedDuration: '6-12 hours',
   };
 
-  await simulateAgent('resource', { situationalData: saArtifact.data }, () => {
-    memoryBank.longTerm.set(raArtifact.id, raArtifact);
-    raOutput.textContent = JSON.stringify(raArtifact.data, null, 2);
-    log(`Resource Allocation: Plan ${raArtifact.data.plan} - ${raArtifact.data.actions.length} actions`, 'resource');
-    return raArtifact;
-  });
+  const raArtifact = { id: `ra-${Date.now()}`, source: 'resource_allocation', data: raData, timestamp: new Date().toISOString(), tags: ['resource', 'allocation'] };
+  memoryBank.longTerm.set(raArtifact.id, raArtifact);
+
+  document.getElementById('ra-output').textContent = JSON.stringify(raData, null, 2);
+  document.getElementById('ra-status').textContent = 'Complete';
+  log(`Resource Allocation: Plan ${raData.plan} - ${raData.personnelRequired} personnel deployed`, 'resource');
+  outputs['ra-output'] = raData;
 
   renderMemoryBank();
   log('Pipeline complete', 'system');
+  pipelineReady = true;
+}
+
+function renderTaskGraph(tasks) {
+  const graphEl = document.getElementById('taskGraph');
+  if (!graphEl) return;
+
+  graphEl.innerHTML = tasks.map((t, i) => {
+    const deps = t.dependencies.length ? `← ${t.dependencies.join(', ')}` : '';
+    return `<div class="task-node ${t.agentId}">Task ${i + 1}: ${t.agentId} ${deps}</div>`;
+  }).join('');
+}
+
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 // HAM Bridge simulation
@@ -170,7 +189,7 @@ function toggleHAM() {
   const hamLog = document.getElementById('hamLog');
   const entry = document.createElement('div');
   entry.className = 'log-entry';
-  entry.textContent = hamOnline ? 'HAM Bridge connected - awaiting transmission' : 'HAM Bridge disconnected';
+  entry.textContent = hamOnline ? 'HAM Bridge connected - offline mode active' : 'HAM Bridge disconnected';
   hamLog.appendChild(entry);
 }
 
@@ -179,6 +198,7 @@ async function simulateHAM() {
   const statusEl = document.getElementById('hamStatus');
 
   statusEl.className = 'ham-status online';
+  hamOnline = true;
 
   const hamInput = {
     id: `ham-${Date.now()}`,
@@ -188,50 +208,41 @@ async function simulateHAM() {
       type: 'APRS',
       callsign: 'KB1ABC',
       position: '4236.00N/07103.60W',
-      message: 'Flooding reported at Main St and Route 9 intersection - water rising',
-      priority: 'high',
+      message: 'Flooding at Main St and Route 9 - water rising rapidly',
+      priority: 'critical',
     },
     tags: ['ham', 'aprs', 'field-report'],
   };
+
+  memoryBank.current.set(hamInput.id, hamInput);
 
   const entry = document.createElement('div');
   entry.className = 'log-entry hazard';
   entry.textContent = `[HAM] ${hamInput.data.callsign}: ${hamInput.data.message}`;
   hamLog.appendChild(entry);
 
-  memoryBank.current.set(hamInput.id, hamInput);
   renderMemoryBank();
   log(`HAM Input: ${hamInput.data.message}`, 'hazard');
-
-  const response = {
-    id: `ham-resp-${Date.now()}`,
-    timestamp: new Date().toISOString(),
-    source: 'RESOURCE_ALLOCATION',
-    data: {
-      type: 'ACK',
-      message: 'KB1ABC - Roger your report. Evacuation team en route. Standby.',
-    },
-    tags: ['ham', 'response'],
-  };
-
-  setTimeout(() => {
-    const ackEntry = document.createElement('div');
-    ackEntry.className = 'log-entry resource';
-    ackEntry.textContent = `[HAM OUT] ${response.data.message}`;
-    hamLog.appendChild(ackEntry);
-  }, 1500);
 }
 
-function sendHAMMessage() {
+async function sendHAMMessage() {
+  if (!pipelineReady) {
+    alert('Run pipeline first');
+    return;
+  }
+
   const hamLog = document.getElementById('hamLog');
+  const raData = memoryBank.longTerm.values().next().value?.data;
+
   const entry = document.createElement('div');
   entry.className = 'log-entry resource';
-  entry.textContent = `[HAM OUT] Resource plan broadcast: EVACUATE_ZONE_A - 45 personnel deployed`;
+  entry.textContent = `[HAM OUT] Resource plan ${raData?.plan || 'UNKNOWN'} broadcast - ${raData?.personnelRequired || '?'} personnel`;
   hamLog.appendChild(entry);
-  log('Resource plan broadcast via HAM', 'resource');
+  log('Resource plan broadcast via HAM radio', 'resource');
 }
 
 // Init
 toggleHAM();
 renderMemoryBank();
-log('Web demo initialized', 'system');
+log('NEXORA-SCLID-AI Demo initialized', 'system');
+log('Type "Flood Response" and click Run Pipeline to start', 'system');
