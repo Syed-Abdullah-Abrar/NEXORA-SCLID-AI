@@ -1,1 +1,0 @@
-{"version":3,"file":"AgentRegistry.d.ts","sourceRoot":"","sources":["../../src/orchestrator/AgentRegistry.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,WAAW,EAAE,UAAU,EAAE,MAAM,UAAU,CAAC;AAEnD,qBAAa,aAAa;IACxB,OAAO,CAAC,MAAM,CAA6C;IAE3D,QAAQ,CAAC,KAAK,EAAE,UAAU,GAAG,IAAI;IAQjC,WAAW,CAAC,MAAM,EAAE,WAAW,GAAG,UAAU,EAAE;IAI9C,QAAQ,CAAC,KAAK,EAAE,MAAM,GAAG,UAAU,EAAE;CAYtC"}
