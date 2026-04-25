@@ -3,144 +3,221 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NEXORA AI Orchestrator (Presenter)</title>
+  <title>S.C.L.I.D AI — Orchestrator (Presenter)</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
-  <style>
-    .neural-bg { background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%); }
-    .status-badge { padding: 4px 8px; border-radius: 6px; font-size: 10px; font-weight: bold; text-transform: uppercase; border: 1px solid transparent; }
-    .status-idle { border-color: #334155; color: #94A3B8; background: #0F172A; }
-    .status-processing { border-color: #3B82F6; color: #3B82F6; background: rgba(59, 130, 246, 0.1); }
-    .status-complete { border-color: #10B981; color: #10B981; background: rgba(16, 185, 129, 0.1); }
-    .status-pending_approval { border-color: #F59E0B; color: #F59E0B; background: rgba(245, 158, 11, 0.1); }
-  </style>
 </head>
-<body class="neural-bg text-nexora-text min-h-screen flex flex-col p-6 font-sans">
-  <header class="mb-8 flex justify-between items-end">
+<body class="bg-[#070B14] text-nexora-text min-h-screen flex flex-col p-5 font-['Inter'] grid-bg">
+
+  <!-- Header -->
+  <header class="mb-6 flex justify-between items-end">
     <div>
-      <h1 class="text-4xl font-black text-nexora-agent tracking-tighter">PROJECT NEXORA <span class="text-white font-light text-xl ml-2">PRESENTER</span></h1>
-      <p class="text-nexora-muted uppercase text-xs tracking-[0.5em] mt-1">Autonomous Disaster Orchestration</p>
+      <div class="flex items-center gap-3 mb-1">
+        <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-sm shadow-lg shadow-blue-500/20">🛡️</div>
+        <h1 class="text-3xl font-black text-white tracking-tight">S.C.L.I.D <span class="text-blue-400 font-light text-lg ml-1">PRESENTER</span></h1>
+      </div>
+      <p class="text-[9px] font-bold text-slate-500 uppercase tracking-[0.4em] ml-11">Swarm Co-Pilot for Logistics and Intelligent Dispatch</p>
     </div>
-    <div class="px-4 py-2 glass-box border border-nexora-success/30 text-nexora-success text-[10px] font-bold tracking-widest uppercase flex items-center gap-2">
-      <div id="statusDot" class="w-2 h-2 rounded-full bg-nexora-muted"></div>
-      <span id="statusText">Syncing...</span>
+    <div class="glass-box-subtle px-4 py-2 flex items-center gap-2">
+      <div id="statusDot" class="w-2 h-2 rounded-full bg-slate-600"></div>
+      <span id="statusText" class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Connecting...</span>
     </div>
   </header>
 
-  <div class="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-8 overflow-hidden mb-24">
-    <!-- UEB Log -->
-    <div class="lg:col-span-2 flex flex-col space-y-4 overflow-hidden">
-      <div class="text-[10px] font-bold text-nexora-agent uppercase tracking-widest">Unified Event Bus (UEB) Real-Time Stream</div>
-      <div id="uebLog" class="flex-1 bg-black/50 border border-nexora-border rounded-xl p-6 font-mono text-sm overflow-y-auto space-y-3">
-         <div class="text-nexora-muted italic">Awaiting System State...</div>
+  <!-- Main Grid: 3 columns -->
+  <div class="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-5 overflow-hidden mb-28">
+
+    <!-- LEFT: UEB Log (5 cols) -->
+    <div class="lg:col-span-5 flex flex-col space-y-3 overflow-hidden">
+      <div class="section-label text-blue-400">Unified Event Bus — Real-Time Stream</div>
+      <div id="uebLog" class="flex-1 bg-black/40 border border-slate-800 rounded-xl p-4 font-mono text-[11px] overflow-y-auto space-y-2">
+        <div class="text-slate-600 italic">Awaiting system state...</div>
       </div>
     </div>
 
-    <!-- Sidebar -->
-    <div class="space-y-8">
+    <!-- CENTER: Chat (4 cols) -->
+    <div class="lg:col-span-4 flex flex-col overflow-hidden">
+      <div class="section-label text-purple-400 mb-3">Commander AI Chat — S.C.L.I.D M2.5</div>
+      <div class="flex-1 bg-black/30 border border-slate-800 rounded-xl p-4 flex flex-col overflow-hidden">
+        <div id="chat-log" class="flex-1 overflow-y-auto space-y-3 pr-1">
+          <div class="text-xs italic text-slate-600 text-center py-8">Type a command to talk to S.C.L.I.D...</div>
+        </div>
+        <div class="mt-3 flex gap-2">
+          <input type="text" id="chat-input" class="chat-input flex-1" placeholder="E.g., Deploy flood response...">
+          <button id="send-chat-btn" class="chat-send-btn">SEND</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Sidebar (3 cols) -->
+    <div class="lg:col-span-3 space-y-5 overflow-y-auto">
       <!-- LLM Thought -->
       <div>
-        <div class="text-[10px] font-bold text-nexora-warning uppercase tracking-widest mb-2">MiniMax MLLM Thought Process</div>
-        <div class="bg-nexora-surface border border-nexora-warning/30 rounded-xl p-4 min-h-[140px] flex items-center justify-center">
-           <div id="llm-process" class="text-sm italic text-center leading-relaxed">Awaiting data burst...</div>
+        <div class="section-label text-amber-400 mb-2">MiniMax M2.5 — Thought Process</div>
+        <div class="bg-black/30 border border-amber-500/20 rounded-xl p-4 min-h-[100px] flex items-center justify-center">
+          <div id="llm-process" class="text-[11px] italic text-center leading-relaxed text-amber-200/60">Awaiting data burst...</div>
         </div>
       </div>
 
-      <!-- Agent Grid -->
+      <!-- Agent Pipeline -->
       <div>
-        <div class="text-[10px] font-bold text-nexora-muted uppercase tracking-widest mb-3">Agent Pipeline Status</div>
-        <div class="grid grid-cols-1 gap-3">
-           <div class="flex justify-between items-center bg-nexora-bg/50 p-3 rounded-lg border border-nexora-border">
-              <span class="text-xs font-medium">Early Warning Agent</span>
-              <span id="ew-status" class="status-badge status-idle">IDLE</span>
-           </div>
-           <div class="flex justify-between items-center bg-nexora-bg/50 p-3 rounded-lg border border-nexora-border">
-              <span class="text-xs font-medium">Situational Awareness</span>
-              <span id="sa-status" class="status-badge status-idle">IDLE</span>
-           </div>
-           <div class="flex justify-between items-center bg-nexora-bg/50 p-3 rounded-lg border border-nexora-border">
-              <span class="text-xs font-medium">Resource Allocation</span>
-              <span id="ra-status" class="status-badge status-idle">IDLE</span>
-           </div>
+        <div class="section-label mb-3">Agent Pipeline Status</div>
+        <div class="space-y-2">
+          <div class="flex justify-between items-center bg-black/30 p-3 rounded-lg border border-slate-800">
+            <span class="text-[11px] font-semibold">🔴 Early Warning</span>
+            <span id="ew-status" class="status-badge status-idle">IDLE</span>
+          </div>
+          <div class="flex justify-between items-center bg-black/30 p-3 rounded-lg border border-slate-800">
+            <span class="text-[11px] font-semibold">🟡 Situational Awareness</span>
+            <span id="sa-status" class="status-badge status-idle">IDLE</span>
+          </div>
+          <div class="flex justify-between items-center bg-black/30 p-3 rounded-lg border border-slate-800">
+            <span class="text-[11px] font-semibold">🟢 Resource Allocation</span>
+            <span id="ra-status" class="status-badge status-idle">IDLE</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Memory Bank -->
+      <div>
+        <div class="section-label text-emerald-400 mb-2">Memory Bank <span id="memory-count" class="text-slate-600">(0)</span></div>
+        <div id="memory-bank" class="space-y-2 max-h-48 overflow-y-auto">
+          <div class="text-[10px] text-slate-600 italic">No artifacts yet.</div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Presenter Bar -->
-  <div class="fixed bottom-0 left-0 right-0 glass-box m-6 p-6 flex justify-between items-center border border-white/10 shadow-2xl">
-    <div class="max-w-xl">
-       <h2 id="frame-title" class="text-nexora-agent font-bold text-sm mb-1 uppercase tracking-widest">Krypton Response</h2>
-       <p id="presenterScript" class="text-white/80 text-base italic leading-relaxed">System Ready. Awaiting trigger.</p>
-    </div>
-    <div class="flex items-center gap-6">
-       <button id="prevBtn" class="px-6 py-3 bg-nexora-surface border border-nexora-border rounded-lg hover:bg-slate-700 font-bold transition-all disabled:opacity-30">← PREV</button>
-       <div id="frameIndicator" class="text-3xl font-black font-mono w-24 text-center">00/00</div>
-       <button id="nextBtn" class="px-10 py-4 bg-nexora-agent text-white rounded-xl hover:bg-blue-600 font-black shadow-[0_0_40px_rgba(59,130,246,0.3)] transform hover:scale-105 active:scale-95 transition-all">NEXT STEP →</button>
+  <!-- Presenter Control Bar -->
+  <div class="fixed bottom-0 left-0 right-0 m-5">
+    <div class="glass-box p-5 flex justify-between items-center border border-white/5 shadow-2xl">
+      <div class="max-w-lg">
+        <h2 id="frame-title" class="text-blue-400 font-bold text-[11px] mb-1 uppercase tracking-[0.15em]">Krypton Response</h2>
+        <p id="presenterScript" class="text-white/70 text-sm italic leading-relaxed">System ready. Press NEXT to begin the story.</p>
+      </div>
+      <div class="flex items-center gap-5">
+        <button id="prevBtn" class="px-5 py-2.5 bg-slate-800 border border-slate-700 rounded-lg hover:bg-slate-700 font-bold text-sm transition-all disabled:opacity-20" disabled>← PREV</button>
+        <div id="frameIndicator" class="text-2xl font-black font-mono w-20 text-center tracking-tight">01/07</div>
+        <button id="nextBtn" class="px-8 py-3.5 bg-blue-500 text-white rounded-xl hover:bg-blue-600 font-black text-sm shadow-[0_0_30px_rgba(59,130,246,0.25)] transform hover:scale-[1.03] active:scale-95 transition-all">NEXT →</button>
+      </div>
     </div>
   </div>
 
   <script src="story-client.js"></script>
   <script>
-    console.log("Presenter UI Initializing...");
-    const client = new StoryClient('ws://' + window.location.hostname + ':8080');
+    const wsProtocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
+    const client = new StoryClient(wsProtocol + window.location.host);
 
+    // ── Chat ──
+    function appendChat(role, text) {
+      const chatLog = document.getElementById('chat-log');
+      if (chatLog.querySelector('.italic')) chatLog.innerHTML = '';
+
+      const entry = document.createElement('div');
+      if (role === 'user') {
+        entry.className = 'chat-user';
+        entry.innerHTML = '<div class="chat-label text-white">PRESENTER</div><div class="chat-text text-white/90 text-right">' + text + '</div>';
+      } else if (role === 'loading') {
+        entry.id = 'chat-loading';
+        entry.className = 'chat-loading';
+        entry.innerHTML = '<div class="chat-label text-blue-400">S.C.L.I.D M2.5</div><div class="chat-text text-blue-300/70">Analyzing scenario...</div>';
+      } else {
+        const loadingEl = document.getElementById('chat-loading');
+        if (loadingEl) loadingEl.remove();
+        entry.className = 'chat-ai';
+        entry.innerHTML = '<div class="chat-label text-blue-400">S.C.L.I.D M2.5</div><div class="chat-text text-white/85">' + text + '</div>';
+      }
+      chatLog.appendChild(entry);
+      chatLog.scrollTop = chatLog.scrollHeight;
+    }
+
+    client.onChatLoading = () => appendChat('loading');
+    client.onChatResponse = (r) => appendChat('ai', r);
+
+    document.getElementById('send-chat-btn').addEventListener('click', () => {
+      const input = document.getElementById('chat-input');
+      const text = input.value.trim();
+      if (text) { appendChat('user', text); client.sendChat(text); input.value = ''; }
+    });
+    document.getElementById('chat-input').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') document.getElementById('send-chat-btn').click();
+    });
+
+    // ── State Updates ──
     client.onConnect = () => {
-      console.log("Connected to LangGraph Server");
       document.getElementById('statusDot').style.backgroundColor = '#10B981';
       document.getElementById('statusText').textContent = 'Live Sync';
+      document.getElementById('statusText').style.color = '#10B981';
     };
 
     client.onStateChange = (state) => {
-      console.log("State Update Received:", state);
-      const uiState = state.ui_state;
+      const ui = state.ui_state;
 
-      // Header & Navigation
+      // Frame info
       document.getElementById('frame-title').textContent = state.title;
       document.getElementById('presenterScript').textContent = state.presenter_script;
-      document.getElementById('frameIndicator').textContent = `${(state.frameIndex + 1).toString().padStart(2, '0')}/${state.totalFrames.toString().padStart(2, '0')}`;
+      document.getElementById('frameIndicator').textContent =
+        (state.frameIndex + 1).toString().padStart(2, '0') + '/' + state.totalFrames.toString().padStart(2, '0');
       document.getElementById('prevBtn').disabled = state.frameIndex === 0;
       document.getElementById('nextBtn').disabled = state.frameIndex === state.totalFrames - 1;
 
-      // UEB Log
-      if (uiState.ueb_log) {
+      // UEB Log — append full log
+      if (ui.ueb_log_full) {
         const uebLog = document.getElementById('uebLog');
-        const logEntry = document.createElement('div');
-        logEntry.className = 'p-3 bg-slate-900/80 border-l-2 border-nexora-agent rounded-r animate-in fade-in slide-in-from-left-4 duration-500';
-        logEntry.innerHTML = `<span class="text-nexora-muted text-xs mr-2">[${new Date().toLocaleTimeString()}]</span> ${uiState.ueb_log}`;
-        uebLog.appendChild(logEntry);
+        uebLog.innerHTML = '';
+        ui.ueb_log_full.forEach(msg => {
+          const entry = document.createElement('div');
+          let cls = 'ueb-entry';
+          if (msg.includes('🔴') || msg.includes('CRITICAL')) cls += ' critical';
+          else if (msg.includes('🟡') || msg.includes('WARNING')) cls += ' warning';
+          else if (msg.includes('🟢') || msg.includes('✅')) cls += ' success';
+          entry.className = cls;
+          entry.textContent = msg;
+          uebLog.appendChild(entry);
+        });
         uebLog.scrollTop = uebLog.scrollHeight;
       }
 
-      // LLM Thought Box
+      // LLM Thought
       const llmBox = document.getElementById('llm-process');
-      if (state.frameIndex === 1) llmBox.textContent = "QUERY: Analyze Silver River spike... RESULT: 92% match to 1998 Flood Pattern. ACTION: Issue Critical Warning.";
-      else if (state.frameIndex === 4) llmBox.textContent = "REROUTING: A* Search initiated. OBSTACLE: Highland Pass. RESULT: Mountain Trail optimized. Time Saved: 180m.";
-      else if (state.frameIndex === 0) llmBox.textContent = "IDLE. Awaiting mission objectives.";
-      else llmBox.textContent = "MLLM: Orchestrating agent workflow based on " + state.title + "...";
+      if (state.frameIndex === 0) llmBox.textContent = "IDLE. Monitoring Krypton sensor arrays.";
+      else if (state.frameIndex === 1) llmBox.textContent = "QUERY: Analyze Silver River precipitation spike...\nRESULT: 92% match to 1998 Flood Pattern.\nACTION: Issue CRITICAL warning to EOC.";
+      else if (state.frameIndex === 4) llmBox.textContent = "REROUTING: A* Search initiated.\nOBSTACLE: Highland Pass blocked.\nSOLUTION: Old Mine Trail — saves 180 min.\nNODES ANALYZED: 2,450";
+      else llmBox.textContent = "MLLM: Orchestrating agent cascade for \"" + state.title + "\"...";
 
       // Agent Status
-      updateAgent('ew', uiState.agent_statuses.early_warning);
-      updateAgent('sa', uiState.agent_statuses.situational);
-      updateAgent('ra', uiState.agent_statuses.resource);
+      updateAgent('ew', ui.agent_statuses.early_warning);
+      updateAgent('sa', ui.agent_statuses.situational);
+      updateAgent('ra', ui.agent_statuses.resource);
+
+      // Memory Bank
+      if (ui.memory_bank) {
+        const mb = document.getElementById('memory-bank');
+        document.getElementById('memory-count').textContent = '(' + ui.memory_bank.length + ')';
+        if (ui.memory_bank.length === 0) {
+          mb.innerHTML = '<div class="text-[10px] text-slate-600 italic">No artifacts yet.</div>';
+        } else {
+          mb.innerHTML = ui.memory_bank.slice(-5).reverse().map(a =>
+            '<div class="memory-card">' +
+              '<div class="source">' + a.source + '</div>' +
+              '<div class="data">' + (a.data || '').substring(0, 120) + '...</div>' +
+            '</div>'
+          ).join('');
+        }
+      }
     };
 
     function updateAgent(id, status) {
-      const el = document.getElementById(`${id}-status`);
+      const el = document.getElementById(id + '-status');
       if (el) {
         el.className = 'status-badge status-' + (status || 'idle');
-        el.textContent = (status || 'idle').replace('_', ' ');
+        el.textContent = (status || 'idle').replace('_', ' ').toUpperCase();
       }
     }
 
-    document.getElementById('nextBtn').addEventListener('click', () => {
-      console.log("Next button clicked");
-      client.nextFrame();
-    });
-    document.getElementById('prevBtn').addEventListener('click', () => {
-      console.log("Prev button clicked");
-      client.prevFrame();
-    });
+    document.getElementById('nextBtn').addEventListener('click', () => client.nextFrame());
+    document.getElementById('prevBtn').addEventListener('click', () => client.prevFrame());
 
     client.connect();
   </script>

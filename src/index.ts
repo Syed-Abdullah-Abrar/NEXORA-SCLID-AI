@@ -32,6 +32,9 @@ export class NexoraPipeline {
   private voiceSynth: VoiceSynthesizer;
   private packetRadio: PacketRadioHandler;
   private subscriptions: Array<() => void> = [];
+  private agentStatuses: { early_warning: string; situational: string; resource: string } = {
+    early_warning: 'idle', situational: 'idle', resource: 'idle'
+  };
 
   constructor(eventBus: UnifiedEventBus = globalEventBus) {
     this.eventBus = eventBus;
@@ -183,9 +186,9 @@ export class NexoraPipeline {
 
   async broadcastViaHAM(plan: MemoryArtifact, mode: 'voice' | 'packet' = 'voice'): Promise<string> {
     if (mode === 'voice') {
-      return this.voiceSynth.broadcastPlan(plan.data as { plan?: string; actions?: Array<{ type: string; target?: string }> }, 'NEXORA');
+      return this.voiceSynth.broadcastPlan(plan.data as { plan?: string; actions?: Array<{ type: string; target?: string }> }, 'SCLID');
     } else {
-      return this.packetRadio.encodeAX25('NEXORA', 'ALL', JSON.stringify(plan.data)).toString();
+      return this.packetRadio.encodeAX25('SCLID', 'ALL', JSON.stringify(plan.data)).toString();
     }
   }
 
@@ -195,6 +198,65 @@ export class NexoraPipeline {
 
   getAgentRegistry(): AgentRegistry {
     return this.registry;
+  }
+
+  getAgentStatuses(): { early_warning: string; situational: string; resource: string } {
+    return { ...this.agentStatuses };
+  }
+
+  /**
+   * Runs the full 3-agent cascade triggered by a chat command or UEB topic.
+   * Returns all produced artifacts and updates agent statuses in real-time.
+   */
+  async runAgentCascade(
+    weatherData?: unknown,
+    geodata?: unknown,
+    onStatusChange?: (statuses: { early_warning: string; situational: string; resource: string }) => void
+  ): Promise<{ artifacts: MemoryArtifact[]; finalPlan: MemoryArtifact | null }> {
+    const artifacts: MemoryArtifact[] = [];
+    const notify = () => { if (onStatusChange) onStatusChange(this.getAgentStatuses()); };
+
+    // Step 1: Early Warning
+    this.agentStatuses.early_warning = 'processing';
+    notify();
+    const ewInput = weatherData || { stationId: 'KRYPTON-001', rainfall: 6, riverLevel: 20, humidity: 92 };
+    const ewArtifact = await this.earlyWarning.ingest(ewInput);
+    artifacts.push(ewArtifact);
+    await this.memoryBank.store(ewArtifact, 'current');
+    this.eventBus.publish(UEB_TOPICS.HAZARD_DETECTED, { artifact: ewArtifact });
+    this.agentStatuses.early_warning = 'complete';
+    notify();
+
+    // Step 2: Situational Awareness
+    this.agentStatuses.situational = 'processing';
+    notify();
+    const geoInput = geodata as GeoData || {
+      lat: 42.36, lon: -71.06, population: 45000,
+      criticalInfrastructure: ['Krypton General Hospital', 'Silver River Bridge', 'Power Substation Alpha'],
+      shelterLocations: ['Krypton Community Center', 'Lincoln High School', 'St. Mary\'s Church']
+    };
+    const saArtifact = await this.situational.fuse(ewArtifact, geoInput);
+    artifacts.push(saArtifact);
+    await this.memoryBank.store(saArtifact, 'short');
+    this.eventBus.publish(UEB_TOPICS.SITUATIONAL_FUSION_COMPLETED, { artifact: saArtifact });
+    this.agentStatuses.situational = 'complete';
+    notify();
+
+    // Step 3: Resource Allocation
+    this.agentStatuses.resource = 'processing';
+    notify();
+    const raArtifact = await this.resource.allocate(saArtifact);
+    artifacts.push(raArtifact);
+    await this.memoryBank.store(raArtifact, 'long');
+    this.eventBus.publish(UEB_TOPICS.RESOURCE_PLAN_GENERATED, { artifact: raArtifact });
+    this.agentStatuses.resource = 'complete';
+    notify();
+
+    return { artifacts, finalPlan: raArtifact };
+  }
+
+  resetAgentStatuses(): void {
+    this.agentStatuses = { early_warning: 'idle', situational: 'idle', resource: 'idle' };
   }
 
   destroy(): void {

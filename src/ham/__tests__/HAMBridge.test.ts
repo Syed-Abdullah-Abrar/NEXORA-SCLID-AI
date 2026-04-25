@@ -97,9 +97,9 @@ describe('HAMBridgeService', () => {
         metadata: { priority: 'critical', isLocal: true },
       };
 
-      const aprs = bridge.formatAPRS(event, 'NEXORA');
+      const aprs = bridge.formatAPRS(event, 'SCLID');
 
-      expect(aprs).toContain('NEXORA');
+      expect(aprs).toContain('SCLID');
       expect(aprs).toContain('EVACUATE');
     });
   });

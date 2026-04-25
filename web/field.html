@@ -3,120 +3,191 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NEXORA Field Marshall (Dark Mode)</title>
+  <title>S.C.L.I.D AI — Field Marshall (Dark Mode)</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
 </head>
-<body class="bg-black text-nexora-success min-h-screen font-mono selection:bg-nexora-success selection:text-black">
-  <!-- Scanline Overlay -->
-  <div class="fixed inset-0 pointer-events-none z-50 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,118,0.06))] bg-[length:100%_2px,3px_100%] opacity-20"></div>
+<body class="bg-black text-emerald-400 min-h-screen font-['JetBrains_Mono'] selection:bg-emerald-500 selection:text-black">
 
-  <div class="h-full flex flex-col p-4 max-w-lg mx-auto border-x border-nexora-border">
-    <header class="flex justify-between items-center mb-6 border-b border-nexora-border pb-4">
+  <!-- Scanline Overlay -->
+  <div class="fixed inset-0 pointer-events-none z-50 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.04),rgba(0,255,0,0.02),rgba(0,0,118,0.04))] bg-[length:100%_2px,3px_100%] opacity-15"></div>
+
+  <!-- CRT Vignette -->
+  <div class="fixed inset-0 pointer-events-none z-40" style="background: radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,0.6) 100%);"></div>
+
+  <div class="h-full flex flex-col p-4 max-w-lg mx-auto border-x border-emerald-900/30 relative z-10">
+
+    <!-- Header -->
+    <header class="flex justify-between items-center mb-5 border-b border-emerald-900/40 pb-3">
       <div>
-        <div class="text-[10px] font-bold tracking-[0.3em] text-nexora-muted uppercase">TAC-UNIT / F-101</div>
-        <div class="text-xs font-bold text-nexora-success">LOCATION: KRYPTON SECTOR 7</div>
+        <div class="text-[8px] font-bold tracking-[0.4em] text-emerald-700 uppercase">S.C.L.I.D AI — TAC-UNIT / F-101</div>
+        <div class="text-[11px] font-bold text-emerald-400 mt-0.5">LOCATION: KRYPTON SECTOR 7</div>
       </div>
-      <div id="statusDot" class="w-2 h-2 rounded-full bg-nexora-success shadow-[0_0_8px_#10B981] animate-pulse"></div>
+      <div class="flex items-center gap-2">
+        <div id="statusDot" class="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_#10B981] animate-pulse"></div>
+        <span class="text-[8px] text-emerald-600 uppercase tracking-widest">DARK MODE</span>
+      </div>
     </header>
 
-    <div class="flex-1 flex flex-col space-y-6 overflow-hidden">
-       <!-- Offline Indicator -->
-       <div class="grid grid-cols-2 gap-4">
-          <div class="p-3 bg-red-950/20 border border-nexora-critical/30 rounded flex flex-col">
-             <span class="text-[8px] text-nexora-muted uppercase tracking-widest">Cellular Uplink</span>
-             <span class="text-[10px] text-nexora-critical font-bold uppercase mt-1">Status: Disconnected</span>
-          </div>
-          <div class="p-3 bg-green-950/20 border border-nexora-success/30 rounded flex flex-col">
-             <span class="text-[8px] text-nexora-muted uppercase tracking-widest">HAM/Packet Node</span>
-             <span class="text-[10px] text-nexora-success font-bold uppercase mt-1">Status: Linked (Decentralized)</span>
-          </div>
-       </div>
+    <div class="flex-1 flex flex-col space-y-4 overflow-hidden">
 
-       <!-- Terminal Output -->
-       <div class="flex-1 bg-slate-950/50 border border-nexora-border rounded p-4 text-xs overflow-y-auto space-y-3 relative group">
-          <div class="sticky top-0 bg-slate-950/80 backdrop-blur py-1 border-b border-white/5 mb-2 flex justify-between">
-             <span class="text-nexora-muted uppercase tracking-widest text-[8px]">AX.25 Packet Stream</span>
-             <span class="text-[8px] text-nexora-success animate-pulse">REC...</span>
-          </div>
-          <div id="terminal-content" class="space-y-3">
-             <div class="text-nexora-muted opacity-50 italic">Awaiting radio burst...</div>
-          </div>
-       </div>
+      <!-- Network Status -->
+      <div class="grid grid-cols-2 gap-3">
+        <div class="p-2.5 bg-red-950/15 border border-red-900/30 rounded-lg flex flex-col">
+          <span class="text-[7px] text-red-800 uppercase tracking-[0.2em]">Cellular Uplink</span>
+          <span class="text-[9px] text-red-500 font-bold uppercase mt-0.5">✕ DISCONNECTED</span>
+        </div>
+        <div class="p-2.5 bg-emerald-950/15 border border-emerald-900/30 rounded-lg flex flex-col">
+          <span class="text-[7px] text-emerald-800 uppercase tracking-[0.2em]">HAM/Packet Radio</span>
+          <span class="text-[9px] text-emerald-400 font-bold uppercase mt-0.5">✓ DECENTRALIZED LINK</span>
+        </div>
+      </div>
 
-       <!-- AR Compass Section -->
-       <div id="ar-view" class="h-48 bg-slate-900/40 border border-nexora-border rounded-xl relative overflow-hidden flex flex-col items-center justify-center grayscale opacity-30 transition-all duration-1000">
-          <div class="absolute inset-0 flex items-center justify-center opacity-10">
-             <svg viewBox="0 0 100 100" class="w-full h-full">
-                <circle cx="50" cy="50" r="48" fill="none" stroke="currentColor" stroke-width="0.5" stroke-dasharray="2 2" />
-             </svg>
-          </div>
-          
-          <svg viewBox="0 0 100 100" class="w-24 h-24 drop-shadow-[0_0_10px_currentColor]">
-             <circle cx="50" cy="50" r="45" stroke="currentColor" fill="none" stroke-width="1" stroke-dasharray="4 4" class="opacity-20" />
-             <path id="compass-arrow" d="M 50 10 L 60 50 L 50 45 L 40 50 Z" fill="currentColor" transform="rotate(0 50 50)" class="transition-transform duration-1000" />
+      <!-- Terminal Output -->
+      <div class="flex-1 bg-black border border-emerald-900/20 rounded-lg p-3 text-[10px] overflow-y-auto relative">
+        <div class="sticky top-0 bg-black/90 backdrop-blur pb-2 border-b border-emerald-900/20 mb-2 flex justify-between z-10">
+          <span class="text-emerald-800 uppercase tracking-[0.2em] text-[7px]">AX.25 Packet Stream</span>
+          <span class="text-[7px] text-emerald-500 animate-pulse">● REC</span>
+        </div>
+        <div id="terminal-content" class="space-y-2">
+          <div class="text-emerald-800/50 italic">Awaiting radio burst...</div>
+        </div>
+      </div>
+
+      <!-- S.C.L.I.D Directives (receives chat broadcasts) -->
+      <div class="bg-emerald-950/10 border border-emerald-900/25 rounded-lg p-3 max-h-32 overflow-y-auto">
+        <div class="text-[7px] text-emerald-700 uppercase tracking-[0.2em] mb-2">S.C.L.I.D AI DIRECTIVES</div>
+        <div id="ai-directives" class="text-[9px] text-emerald-500/70 space-y-1">
+          <div class="italic text-emerald-800">No directives received.</div>
+        </div>
+      </div>
+
+      <!-- AR Compass -->
+      <div id="ar-view" class="h-40 bg-black border border-emerald-900/15 rounded-xl relative overflow-hidden flex flex-col items-center justify-center opacity-25 transition-all duration-1000">
+        <div class="absolute inset-0 flex items-center justify-center opacity-5">
+          <svg viewBox="0 0 100 100" class="w-full h-full">
+            <circle cx="50" cy="50" r="48" fill="none" stroke="currentColor" stroke-width="0.3" stroke-dasharray="1.5 1.5" />
+            <circle cx="50" cy="50" r="35" fill="none" stroke="currentColor" stroke-width="0.2" stroke-dasharray="1 2" />
           </svg>
-          
-          <div class="mt-4 text-[10px] font-bold tracking-[0.2em] uppercase" id="compass-label">Awaiting Navigation Data</div>
-       </div>
+        </div>
+
+        <svg viewBox="0 0 100 100" class="w-20 h-20 drop-shadow-[0_0_12px_currentColor]">
+          <circle cx="50" cy="50" r="45" stroke="currentColor" fill="none" stroke-width="0.8" stroke-dasharray="3 3" class="opacity-15" />
+          <circle cx="50" cy="50" r="30" stroke="currentColor" fill="none" stroke-width="0.5" stroke-dasharray="2 4" class="opacity-10" />
+          <path id="compass-arrow" d="M 50 12 L 58 50 L 50 46 L 42 50 Z" fill="currentColor" transform="rotate(0 50 50)" class="transition-transform duration-1000" />
+        </svg>
+
+        <div class="mt-3 text-[9px] font-bold tracking-[0.15em] uppercase" id="compass-label">Awaiting Navigation Data</div>
+      </div>
     </div>
 
-    <!-- PTT Button Area -->
-    <div class="mt-6 pt-4 border-t border-nexora-border">
-       <div class="flex justify-between items-center mb-4 px-2">
-          <span class="text-[8px] text-nexora-muted uppercase">VoiceSynth Engine: ACTIVE</span>
-          <span class="text-[8px] text-nexora-muted uppercase">Encryption: AES-256-DARK</span>
-       </div>
-       <button class="w-full py-6 bg-nexora-success text-black font-black rounded-xl text-lg shadow-[0_0_30px_rgba(16,185,129,0.3)] active:scale-95 transition-all transform hover:brightness-110">
-          PUSH TO TALK (SOS)
-       </button>
+    <!-- Field Chat Input -->
+    <div class="mt-4 pt-3 border-t border-emerald-900/30">
+      <div class="flex justify-between items-center mb-2 px-1">
+        <span class="text-[7px] text-emerald-800 uppercase tracking-[0.15em]">VoiceSynth: ACTIVE</span>
+        <span class="text-[7px] text-emerald-800 uppercase tracking-[0.15em]">Encryption: AES-256</span>
+      </div>
+      <div class="flex gap-2">
+        <input type="text" id="field-chat-input" class="flex-1 bg-emerald-950/20 border border-emerald-900/50 rounded-lg px-3 py-2 text-[10px] text-emerald-400 placeholder-emerald-800 focus:outline-none focus:border-emerald-500/50" placeholder="Enter Field SOS / Report...">
+        <button id="field-send-btn" class="px-4 bg-emerald-500 text-black font-black rounded-lg text-xs shadow-[0_0_15px_rgba(16,185,129,0.2)] active:scale-95 transition-all hover:brightness-110">
+          TX
+        </button>
+      </div>
     </div>
   </div>
 
   <script src="story-client.js"></script>
   <script>
-    const client = new StoryClient('ws://localhost:8080');
-    
+    const wsProtocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
+    const client = new StoryClient(wsProtocol + window.location.host);
+
+    // Receive AI chat broadcasts in the directives panel
+    client.onChatResponse = (response) => {
+      const dir = document.getElementById('ai-directives');
+      if (dir.querySelector('.italic')) dir.innerHTML = '';
+      const entry = document.createElement('div');
+      entry.className = 'text-emerald-400/80 border-l border-emerald-700/40 pl-2 animate-fade-in';
+      entry.innerHTML = '<span class="text-[7px] text-emerald-600 block mb-0.5">S.C.L.I.D ' + new Date().toLocaleTimeString() + '</span>' + response.substring(0, 200);
+      dir.appendChild(entry);
+      dir.scrollTop = dir.scrollHeight;
+    };
+
     client.onStateChange = (state) => {
-      const uiState = state.ui_state;
+      const ui = state.ui_state;
       const terminal = document.getElementById('terminal-content');
-      
-      // Update Terminal Log
-      if(state.frameIndex > 0 && uiState.ueb_log) {
+
+      // Terminal Log
+      if (state.frameIndex > 0 && ui.ueb_log) {
         const entry = document.createElement('div');
-        entry.className = 'animate-in fade-in slide-in-from-bottom-2 duration-300';
-        entry.innerHTML = `<span class="text-[8px] text-nexora-muted mr-2">${new Date().toLocaleTimeString()}</span> <span class="text-white/80">></span> ${uiState.ueb_log}`;
+        entry.className = 'animate-fade-in';
+        entry.innerHTML = '<span class="text-emerald-800 mr-1">' + new Date().toLocaleTimeString() + ' ></span> <span class="text-emerald-300/80">' + ui.ueb_log + '</span>';
         terminal.appendChild(entry);
-        terminal.scrollTop = terminal.scrollHeight;
+        terminal.parentElement.scrollTop = terminal.parentElement.scrollHeight;
       } else if (state.frameIndex === 0) {
-        terminal.innerHTML = '<div class="text-nexora-muted opacity-50 italic">Awaiting radio burst...</div>';
+        terminal.innerHTML = '<div class="text-emerald-800/50 italic">Awaiting radio burst...</div>';
       }
-      
-      // Update AR View / Compass
+
+      // Dark Mode SOS injection at frame 6
+      if (state.frameIndex === 6) {
+        const sos = document.createElement('div');
+        sos.className = 'text-red-400 font-bold animate-fade-in mt-2 p-2 border border-red-900/30 rounded bg-red-950/10';
+        sos.innerHTML = '⚠ SOS DECODED — KB1ABC<br>MSG: "15 TRAPPED AT KRYPTON LIBRARY"<br>LOC: 42.36°N, -71.05°W<br>PRIORITY: ALPHA';
+        if (!terminal.querySelector('.text-red-400')) terminal.appendChild(sos);
+      }
+
+      // AR Compass
       const isRescueActive = state.frameIndex >= 5;
       const arView = document.getElementById('ar-view');
       const arrow = document.getElementById('compass-arrow');
       const label = document.getElementById('compass-label');
-      
-      arView.style.opacity = isRescueActive ? '1' : '0.2';
-      arView.style.filter = isRescueActive ? 'none' : 'grayscale(1)';
-      arView.className = `h-48 border rounded-xl relative overflow-hidden flex flex-col items-center justify-center transition-all duration-1000 ${isRescueActive ? 'bg-green-500/5 border-nexora-success shadow-[inset_0_0_20px_rgba(16,185,129,0.1)]' : 'bg-slate-900/40 border-nexora-border'}`;
-      
+
+      arView.style.opacity = isRescueActive ? '1' : '0.25';
+
       if (state.frameIndex === 6) {
         arrow.setAttribute('transform', 'rotate(-45 50 50)');
-        arrow.style.color = '#3B82F6'; // Agent Blue for Final Path
-        label.textContent = 'FINAL MILE: KRYPTON LIBRARY';
-        label.className = 'mt-4 text-[10px] font-black text-nexora-agent animate-pulse';
+        arView.style.color = '#3B82F6';
+        arView.className = arView.className.replace('border-emerald-900/15', 'border-blue-500/30');
+        label.textContent = 'FINAL MILE → KRYPTON LIBRARY';
+        label.className = 'mt-3 text-[9px] font-black text-blue-400 animate-pulse tracking-[0.1em] uppercase';
       } else if (isRescueActive) {
         arrow.setAttribute('transform', 'rotate(45 50 50)');
-        arrow.style.color = '#10B981';
+        arView.style.color = '#10B981';
         label.textContent = 'ROUTE DATA RECEIVED';
       } else {
         arrow.setAttribute('transform', 'rotate(0 50 50)');
-        arrow.style.color = 'currentColor';
+        arView.style.color = '#10B981';
         label.textContent = 'Awaiting Navigation Data';
       }
     };
+
+    // ── Field Chat Transmission ──
+    const chatInput = document.getElementById('field-chat-input');
+    const sendBtn = document.getElementById('field-send-btn');
+    
+    function sendFieldReport() {
+      const text = chatInput.value.trim();
+      if (!text) return;
+      
+      // Send to server
+      client.sendChat("[FIELD REPORT] " + text);
+      
+      // Add local echo to directives panel
+      const dir = document.getElementById('ai-directives');
+      if (dir.querySelector('.italic')) dir.innerHTML = '';
+      const entry = document.createElement('div');
+      entry.className = 'text-emerald-500/50 border-l border-emerald-900/40 pl-2 text-right mb-2 mt-2 animate-fade-in';
+      entry.innerHTML = '<span class="text-[7px] text-emerald-700 block mb-0.5">TX ' + new Date().toLocaleTimeString() + '</span>' + text;
+      dir.appendChild(entry);
+      dir.scrollTop = dir.scrollHeight;
+      
+      chatInput.value = '';
+    }
+
+    sendBtn.addEventListener('click', sendFieldReport);
+    chatInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') sendFieldReport();
+    });
 
     client.connect();
   </script>

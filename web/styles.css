@@ -1,149 +1,394 @@
-/* NEXORA EOC Dashboard - Shared Styles */
+/* ═══════════════════════════════════════════════════════════════
+   S.C.L.I.D AI — Design System
+   Swarm Co-Pilot for Logistics and Intelligent Dispatch
+   ═══════════════════════════════════════════════════════════════ */
 
 /* Design Tokens */
 :root {
-  --nexora-bg: #0F172A;
-  --nexora-surface: #1E293B;
-  --nexora-border: #334155;
-  --nexora-text: #F8FAFC;
-  --nexora-muted: #94A3B8;
+  --nexora-bg: #070B14;
+  --nexora-bg-alt: #0C1220;
+  --nexora-surface: #111827;
+  --nexora-surface-raised: #1A2332;
+  --nexora-border: #1E293B;
+  --nexora-border-glow: rgba(59, 130, 246, 0.15);
+  --nexora-text: #F1F5F9;
+  --nexora-muted: #64748B;
   --nexora-agent: #3B82F6;
+  --nexora-agent-glow: rgba(59, 130, 246, 0.4);
   --nexora-warning: #F59E0B;
   --nexora-critical: #EF4444;
   --nexora-success: #10B981;
+  --nexora-purple: #8B5CF6;
+
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
 }
 
-/* Base Reset */
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+/* Base */
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: var(--font-sans);
   background: var(--nexora-bg);
   color: var(--nexora-text);
   min-height: 100vh;
   overflow-y: auto;
+  -webkit-font-smoothing: antialiased;
 }
 
-/* Glass Box Component */
+/* ─── Glass Components ─── */
 .glass-box {
-  background: rgba(30, 41, 59, 0.7);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(17, 24, 39, 0.75);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 1rem;
+}
+
+.glass-box-subtle {
+  background: rgba(17, 24, 39, 0.4);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.04);
   border-radius: 0.75rem;
 }
 
-/* Agent Status Badges */
-.status-idle {
+/* ─── Card ─── */
+.card {
   background: var(--nexora-surface);
-  color: var(--nexora-muted);
-}
-.status-processing {
-  background: rgba(59, 130, 246, 0.2);
-  color: var(--nexora-agent);
-}
-.status-complete {
-  background: rgba(16, 185, 129, 0.2);
-  color: var(--nexora-success);
-}
-.status-pending_approval {
-  background: rgba(245, 158, 11, 0.2);
-  color: var(--nexora-warning);
+  border: 1px solid var(--nexora-border);
+  border-radius: 1rem;
+  padding: 1.25rem;
+  transition: border-color 0.3s, box-shadow 0.3s;
 }
 
-/* Pulse Animation */
+.card:hover {
+  border-color: rgba(59, 130, 246, 0.2);
+}
+
+.card-glow {
+  box-shadow: 0 0 30px rgba(59, 130, 246, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+/* ─── Agent Status Badges ─── */
+.status-badge {
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border: 1px solid transparent;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.status-idle {
+  border-color: #1E293B;
+  color: var(--nexora-muted);
+  background: var(--nexora-bg);
+}
+
+.status-processing {
+  border-color: var(--nexora-agent);
+  color: var(--nexora-agent);
+  background: rgba(59, 130, 246, 0.1);
+  animation: statusPulse 1.5s ease-in-out infinite;
+}
+
+.status-complete {
+  border-color: var(--nexora-success);
+  color: var(--nexora-success);
+  background: rgba(16, 185, 129, 0.1);
+}
+
+.status-pending_approval {
+  border-color: var(--nexora-warning);
+  color: var(--nexora-warning);
+  background: rgba(245, 158, 11, 0.1);
+  animation: statusPulse 2s ease-in-out infinite;
+}
+
+@keyframes statusPulse {
+  0%, 100% { opacity: 1; box-shadow: none; }
+  50% { opacity: 0.7; box-shadow: 0 0 12px currentColor; }
+}
+
+/* ─── Animations ─── */
 @keyframes pulse {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.5; }
 }
-.pulse-dot {
-  animation: pulse 2s ease-in-out infinite;
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-/* Route Status Indicators */
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-12px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(12px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes glowPulse {
+  0%, 100% { box-shadow: 0 0 5px var(--nexora-agent-glow); }
+  50% { box-shadow: 0 0 20px var(--nexora-agent-glow), 0 0 40px rgba(59, 130, 246, 0.1); }
+}
+
+.pulse-dot { animation: pulse 2s ease-in-out infinite; }
+.animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
+.animate-slide-left { animation: slideInLeft 0.4s ease-out forwards; }
+.animate-slide-right { animation: slideInRight 0.4s ease-out forwards; }
+.animate-glow { animation: glowPulse 3s ease-in-out infinite; }
+
+/* SVG map animations */
+@keyframes pingSlow {
+  0% { r: 14; opacity: 0.15; }
+  50% { r: 22; opacity: 0; }
+  100% { r: 14; opacity: 0.15; }
+}
+.animate-ping-slow { animation: pingSlow 2.5s ease-in-out infinite; }
+
+.route-trace {
+  stroke-dasharray: 600;
+  stroke-dashoffset: 600;
+  animation: tracePath 1.5s ease-out forwards;
+}
+@keyframes tracePath {
+  to { stroke-dashoffset: 0; }
+}
+
+/* ─── Chat Bubbles ─── */
+.chat-user {
+  background: rgba(30, 41, 59, 0.8);
+  border-right: 2px solid var(--nexora-text);
+  border-radius: 0.75rem;
+  padding: 0.75rem 1rem;
+  margin-left: 2rem;
+  animation: slideInRight 0.3s ease-out;
+}
+
+.chat-ai {
+  background: rgba(0, 0, 0, 0.4);
+  border-left: 2px solid var(--nexora-agent);
+  border-radius: 0.75rem;
+  padding: 0.75rem 1rem;
+  margin-right: 2rem;
+  animation: slideInLeft 0.3s ease-out;
+}
+
+.chat-loading {
+  background: rgba(0, 0, 0, 0.3);
+  border-left: 2px solid var(--nexora-agent);
+  border-radius: 0.75rem;
+  padding: 0.75rem 1rem;
+  margin-right: 2rem;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.chat-label {
+  font-size: 9px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  margin-bottom: 4px;
+}
+
+.chat-text {
+  font-size: 12px;
+  line-height: 1.6;
+  font-weight: 500;
+  white-space: pre-wrap;
+}
+
+.chat-input {
+  background: var(--nexora-bg);
+  border: 1px solid var(--nexora-border);
+  border-radius: 0.5rem;
+  padding: 0.625rem 0.875rem;
+  font-size: 12px;
+  color: var(--nexora-text);
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  font-family: var(--font-sans);
+}
+
+.chat-input:focus {
+  border-color: var(--nexora-agent);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.chat-send-btn {
+  background: var(--nexora-agent);
+  color: white;
+  padding: 0.625rem 1.25rem;
+  border-radius: 0.5rem;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.chat-send-btn:hover {
+  background: #2563EB;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.chat-send-btn:active {
+  transform: scale(0.95);
+}
+
+/* ─── Memory Bank Card ─── */
+.memory-card {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--nexora-border);
+  border-radius: 0.5rem;
+  padding: 0.625rem;
+  font-size: 10px;
+  animation: fadeIn 0.3s ease-out;
+  transition: border-color 0.2s;
+}
+
+.memory-card:hover {
+  border-color: var(--nexora-agent);
+}
+
+.memory-card .source {
+  color: var(--nexora-agent);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 9px;
+}
+
+.memory-card .data {
+  color: var(--nexora-muted);
+  margin-top: 4px;
+  line-height: 1.4;
+  font-family: var(--font-mono);
+  font-size: 9px;
+}
+
+/* ─── Route Status ─── */
 .route-blocked {
   stroke: var(--nexora-critical);
-  stroke-dasharray: 4 2;
+  stroke-width: 3;
+  stroke-dasharray: 6 3;
+  fill: none;
 }
+
 .route-active {
   stroke: var(--nexora-success);
   stroke-width: 3;
+  fill: none;
 }
+
 .route-optimal {
   stroke: var(--nexora-agent);
   stroke-width: 4;
-  filter: drop-shadow(0 0 6px var(--nexora-agent));
+  fill: none;
+  filter: drop-shadow(0 0 8px var(--nexora-agent));
 }
 
-/* Risk Heatmap */
+/* ─── Heatmap ─── */
 .heatmap-zone {
-  fill: rgba(239, 68, 68, 0.3);
-  animation: heatmap-pulse 3s ease-in-out infinite;
-}
-@keyframes heatmap-pulse {
-  0%, 100% { opacity: 0.3; }
-  50% { opacity: 0.6; }
+  fill: rgba(239, 68, 68, 0.25);
+  animation: heatmapPulse 3s ease-in-out infinite;
 }
 
-/* Terminal Style */
+@keyframes heatmapPulse {
+  0%, 100% { opacity: 0.25; r: 100; }
+  50% { opacity: 0.5; r: 110; }
+}
+
+/* ─── Terminal ─── */
 .terminal-bg {
-  background: #050505;
-  border: 1px solid #1a1a1a;
-  font-family: 'Fira Code', monospace;
+  background: #020408;
+  border: 1px solid #0A1628;
+  font-family: var(--font-mono);
 }
 
-/* Progress Bar */
-.progress-bar {
-  background: linear-gradient(to right, var(--nexora-agent), var(--nexora-success));
+/* ─── UEB Log Entry ─── */
+.ueb-entry {
+  padding: 0.5rem 0.75rem;
+  background: rgba(15, 23, 42, 0.6);
+  border-left: 2px solid var(--nexora-agent);
+  border-radius: 0 0.5rem 0.5rem 0;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  animation: slideInLeft 0.3s ease-out;
+  transition: background 0.2s;
 }
 
-/* Button Styles */
+.ueb-entry:hover {
+  background: rgba(15, 23, 42, 0.9);
+}
+
+.ueb-entry.critical { border-left-color: var(--nexora-critical); }
+.ueb-entry.warning { border-left-color: var(--nexora-warning); }
+.ueb-entry.success { border-left-color: var(--nexora-success); }
+
+/* ─── Button Styles ─── */
 .btn-primary {
   background: var(--nexora-agent);
   color: white;
   padding: 0.75rem 1.5rem;
-  border-radius: 0.5rem;
-  font-weight: 600;
-  transition: all 0.2s;
-}
-.btn-primary:hover {
-  background: rgba(59, 130, 246, 0.8);
-}
-.btn-primary:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-/* Card Component */
-.card {
-  background: var(--nexora-surface);
-  border: 1px solid var(--nexora-border);
   border-radius: 0.75rem;
-  padding: 1rem;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: var(--font-sans);
 }
 
-/* Typography */
+.btn-primary:hover {
+  background: #2563EB;
+  box-shadow: 0 0 30px rgba(59, 130, 246, 0.3);
+  transform: translateY(-1px);
+}
+
+.btn-primary:active {
+  transform: scale(0.97);
+}
+
+.btn-primary:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* ─── Section Label ─── */
+.section-label {
+  font-size: 9px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--nexora-muted);
+}
+
+/* ─── Typography ─── */
 .text-agent { color: var(--nexora-agent); }
 .text-warning { color: var(--nexora-warning); }
 .text-critical { color: var(--nexora-critical); }
 .text-success { color: var(--nexora-success); }
 .text-muted { color: var(--nexora-muted); }
 
-/* Scrollbar Styling */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-::-webkit-scrollbar-track {
-  background: var(--nexora-bg);
-}
-::-webkit-scrollbar-thumb {
-  background: var(--nexora-border);
-  border-radius: 4px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: var(--nexora-muted);
+/* ─── Scrollbar ─── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #1E293B; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--nexora-muted); }
+
+/* ─── Grid Background Pattern ─── */
+.grid-bg {
+  background-image:
+    linear-gradient(rgba(59, 130, 246, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(59, 130, 246, 0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
 }

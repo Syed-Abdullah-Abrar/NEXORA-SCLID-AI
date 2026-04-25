@@ -3,106 +3,189 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NEXORA SCLID-AI</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+  <title>S.C.L.I.D AI — Disaster Copilot</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
   <style>
     body {
-      background: var(--nexora-bg);
-      color: var(--nexora-text);
       display: flex;
       align-items: center;
       justify-content: center;
       min-height: 100vh;
-      margin: 0;
+      overflow: hidden;
     }
+
     .landing-container {
       text-align: center;
-      max-width: 600px;
+      max-width: 680px;
       padding: 2rem;
+      position: relative;
+      z-index: 1;
     }
+
+    /* Animated background orbs */
+    .bg-orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(120px);
+      opacity: 0.15;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .bg-orb-1 { width: 500px; height: 500px; background: var(--nexora-agent); top: -200px; left: -100px; animation: orbFloat 12s ease-in-out infinite; }
+    .bg-orb-2 { width: 400px; height: 400px; background: var(--nexora-purple); bottom: -150px; right: -100px; animation: orbFloat 15s ease-in-out infinite reverse; }
+    .bg-orb-3 { width: 300px; height: 300px; background: var(--nexora-success); top: 50%; left: 50%; transform: translate(-50%, -50%); animation: orbFloat 18s ease-in-out infinite; }
+
+    @keyframes orbFloat {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      33% { transform: translate(30px, -20px) scale(1.05); }
+      66% { transform: translate(-20px, 15px) scale(0.95); }
+    }
+
+    .shield-icon {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 1.5rem;
+      background: linear-gradient(135deg, var(--nexora-agent), var(--nexora-purple));
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      box-shadow: 0 8px 32px rgba(59, 130, 246, 0.3);
+    }
+
     .logo {
-      font-size: 3rem;
-      font-weight: 700;
-      color: var(--nexora-agent);
-      letter-spacing: 0.2em;
-      margin-bottom: 1rem;
+      font-size: 2.5rem;
+      font-weight: 900;
+      letter-spacing: 0.15em;
+      margin-bottom: 0.25rem;
+      background: linear-gradient(135deg, #fff 0%, var(--nexora-agent) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
-    .tagline {
-      font-size: 1.25rem;
+
+    .logo-sub {
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.35em;
       color: var(--nexora-muted);
-      margin-bottom: 3rem;
+      text-transform: uppercase;
+      margin-bottom: 2.5rem;
     }
+
     .role-cards {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 1rem;
+      gap: 0.875rem;
       text-align: left;
     }
+
     .role-card {
       background: var(--nexora-surface);
       border: 1px solid var(--nexora-border);
-      border-radius: 0.75rem;
+      border-radius: 1rem;
       padding: 1.5rem;
       text-decoration: none;
       color: var(--nexora-text);
-      transition: all 0.2s;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
     }
-    .role-card:hover {
-      border-color: var(--nexora-agent);
-      transform: translateY(-2px);
-      box-shadow: 0 4px 20px rgba(59, 130, 246, 0.2);
-    }
-    .role-card h3 {
-      color: var(--nexora-agent);
-      margin-bottom: 0.5rem;
-      font-size: 1rem;
-    }
-    .role-card p {
-      font-size: 0.875rem;
-      color: var(--nexora-muted);
-    }
-    .role-card.ai { border-left: 3px solid var(--nexora-agent); }
-    .role-card.eoc { border-left: 3px solid var(--nexora-critical); }
-    .role-card.field { border-left: 3px solid var(--nexora-success); }
-    .role-card.logistics { border-left: 3px solid var(--nexora-warning); }
 
-    .footer-note {
-      margin-top: 3rem;
+    .role-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .role-card:hover::before { opacity: 1; }
+    .role-card:hover {
+      border-color: rgba(255, 255, 255, 0.1);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    .role-card.ai::before { background: linear-gradient(90deg, var(--nexora-agent), transparent); }
+    .role-card.eoc::before { background: linear-gradient(90deg, var(--nexora-critical), transparent); }
+    .role-card.field::before { background: linear-gradient(90deg, var(--nexora-success), transparent); }
+    .role-card.logistics::before { background: linear-gradient(90deg, var(--nexora-warning), transparent); }
+
+    .role-card .role-icon {
+      font-size: 1.5rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .role-card h3 {
+      font-size: 0.875rem;
+      font-weight: 700;
+      margin-bottom: 0.375rem;
+    }
+
+    .role-card.ai h3 { color: var(--nexora-agent); }
+    .role-card.eoc h3 { color: var(--nexora-critical); }
+    .role-card.field h3 { color: var(--nexora-success); }
+    .role-card.logistics h3 { color: var(--nexora-warning); }
+
+    .role-card p {
       font-size: 0.75rem;
       color: var(--nexora-muted);
+      line-height: 1.5;
+    }
+
+    .footer-note {
+      margin-top: 2.5rem;
+      font-size: 0.625rem;
+      color: var(--nexora-muted);
+      font-family: var(--font-mono);
+      letter-spacing: 0.05em;
     }
   </style>
 </head>
-<body>
+<body class="grid-bg">
+  <div class="bg-orb bg-orb-1"></div>
+  <div class="bg-orb bg-orb-2"></div>
+  <div class="bg-orb bg-orb-3"></div>
+
   <div class="landing-container">
-    <div class="logo">NEXORA</div>
-    <div class="tagline">Situational Command & Logistics Integration for Disaster AI</div>
+    <div class="shield-icon">🛡️</div>
+    <div class="logo">S.C.L.I.D</div>
+    <div class="logo-sub">Swarm Co-Pilot for Logistics and Intelligent Dispatch</div>
 
     <div class="role-cards">
       <a href="ai-view.html" class="role-card ai">
+        <div class="role-icon">🧠</div>
         <h3>AI Orchestrator</h3>
-        <p>The glass-box view. Monitor the Unified Event Bus, Memory Bank, and advance the story.</p>
+        <p>Glass-box view. Monitor the Unified Event Bus, Memory Bank, and control the story.</p>
       </a>
 
       <a href="eoc.html" class="role-card eoc">
-        <h3>EOC Dashboard</h3>
-        <p>Commander's macro view. 2D city map with risk heatmaps and casualty estimates.</p>
+        <div class="role-icon">🎯</div>
+        <h3>EOC Command</h3>
+        <p>Commander's macro view. Risk heatmaps, AI chat, and deployment authorization.</p>
       </a>
 
       <a href="field.html" class="role-card field">
+        <div class="role-icon">📡</div>
         <h3>Field Operations</h3>
-        <p>Dark mode terminal. HAM radio interface with AR safe route navigation.</p>
+        <p>Dark mode terminal. HAM radio bridge with AR safe route navigation.</p>
       </a>
 
       <a href="logistics.html" class="role-card logistics">
+        <div class="role-icon">🚛</div>
         <h3>Logistics</h3>
-        <p>Resource allocation dashboard. Supply chain, inventory, and route optimization.</p>
+        <p>Supply chain dashboard. A* route optimization and inventory tracking.</p>
       </a>
     </div>
 
     <div class="footer-note">
-      WebSocket server: <code>node web/server.js</code> | Port 8080
+      START SERVER: <code>npm run start</code> → ws://localhost:8080
     </div>
   </div>
 </body>

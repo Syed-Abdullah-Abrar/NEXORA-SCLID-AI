@@ -3,71 +3,127 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NEXORA EOC Commander</title>
+  <title>S.C.L.I.D AI — EOC Command Center</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
 </head>
-<body class="bg-nexora-bg text-nexora-text min-h-screen">
-  <div class="h-full flex flex-col p-6">
-    <header class="flex justify-between items-center mb-6">
-      <div>
-        <h1 class="text-2xl font-bold text-nexora-agent tracking-tighter">EOC COMMAND CENTER</h1>
-        <p class="text-nexora-muted text-[10px] tracking-[0.4em] uppercase">Krypton Metropolitan Response</p>
+<body class="bg-[#070B14] text-nexora-text min-h-screen grid-bg">
+  <div class="h-full flex flex-col p-5">
+
+    <!-- Header -->
+    <header class="flex justify-between items-center mb-5">
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-red-500 to-orange-600 flex items-center justify-center text-sm shadow-lg shadow-red-500/20">🎯</div>
+        <div>
+          <h1 class="text-xl font-black text-white tracking-tight">EOC COMMAND CENTER</h1>
+          <p class="text-[9px] font-bold text-slate-500 uppercase tracking-[0.3em]">Krypton Metropolitan — S.C.L.I.D AI Network</p>
+        </div>
       </div>
-      <div class="flex items-center gap-4">
-        <div id="connection-status" class="text-[10px] font-bold text-nexora-success uppercase px-2 py-1 glass-box border border-nexora-success/20">Sync Active</div>
+      <div class="flex items-center gap-3">
+        <div id="connection-status" class="glass-box-subtle px-3 py-1.5 text-[9px] font-bold text-emerald-400 uppercase tracking-widest">Sync Active</div>
       </div>
     </header>
 
-    <div class="flex-1 grid grid-cols-1 lg:grid-cols-4 gap-6 overflow-hidden">
-      <!-- Main Map Section -->
-      <div class="lg:col-span-3 bg-nexora-surface rounded-2xl border border-nexora-border relative overflow-hidden shadow-2xl">
-        <div class="absolute top-4 left-4 z-20 glass-box px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-white border border-white/10">Dynamic Risk Heatmap</div>
-        
+    <!-- Main Grid -->
+    <div class="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-5 overflow-hidden">
+
+      <!-- Map Section (8 cols) -->
+      <div class="lg:col-span-8 bg-slate-900/50 rounded-2xl border border-slate-800 relative overflow-hidden shadow-2xl">
+        <div class="absolute top-4 left-4 z-20 glass-box-subtle px-4 py-2 text-[9px] font-bold uppercase tracking-[0.15em] text-white border border-white/5">Dynamic Risk Heatmap — Krypton City</div>
+
         <div id="map-container" class="absolute inset-0 flex items-center justify-center p-12">
-          <svg id="krypton-map" viewBox="0 0 800 500" class="w-full h-full opacity-60">
-             <!-- Simplified City Grid -->
-             <rect width="800" height="500" fill="transparent" />
-             <path d="M 0 100 Q 200 150 400 100 T 800 150" stroke="#334155" fill="none" stroke-width="8" /> <!-- River -->
-             <path d="M 400 0 L 400 500" stroke="#1e293b" fill="none" stroke-width="1" />
-             <path d="M 0 250 L 800 250" stroke="#1e293b" fill="none" stroke-width="1" />
-             
-             <!-- Dynamic Elements -->
-             <g id="risk-zones"></g>
-             <g id="route-overlays"></g>
+          <svg id="krypton-map" viewBox="0 0 800 500" class="w-full h-full opacity-70">
+            <!-- City Grid & Glow Filters -->
+            <defs>
+              <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+                <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(30,41,59,0.5)" stroke-width="0.5"/>
+              </pattern>
+              <!-- Glow Filters -->
+              <filter id="glow-red" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+                <feMerge>
+                  <feMergeNode in="coloredBlur"/>
+                  <feMergeNode in="SourceGraphic"/>
+                </feMerge>
+              </filter>
+              <filter id="glow-blue" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+                <feMerge>
+                  <feMergeNode in="coloredBlur"/>
+                  <feMergeNode in="SourceGraphic"/>
+                </feMerge>
+              </filter>
+            </defs>
+            <rect width="800" height="500" fill="url(#grid)" />
+
+            <!-- Silver River -->
+            <path d="M 0 120 Q 150 160 300 110 Q 450 60 600 130 Q 700 160 800 140" stroke="#1E3A5F" fill="none" stroke-width="12" stroke-linecap="round" opacity="0.6"/>
+            <path d="M 0 120 Q 150 160 300 110 Q 450 60 600 130 Q 700 160 800 140" stroke="#3B82F6" fill="none" stroke-width="3" stroke-linecap="round" opacity="0.3"/>
+
+            <!-- City Labels -->
+            <text x="50" y="200" fill="#64748B" font-size="9" font-family="Inter" font-weight="600">DEPOT</text>
+            <text x="280" y="45" fill="#64748B" font-size="9" font-family="Inter" font-weight="600">HIGHLAND PASS</text>
+            <text x="550" y="200" fill="#64748B" font-size="9" font-family="Inter" font-weight="600">SECTOR 4</text>
+            <text x="280" y="350" fill="#64748B" font-size="9" font-family="Inter" font-weight="600">OLD MINE TRAIL</text>
+            <text x="580" y="380" fill="#64748B" font-size="9" font-family="Inter" font-weight="600">KRYPTON LIBRARY</text>
+            <text x="350" y="160" fill="#1E3A5F" font-size="8" font-family="Inter">Silver River</text>
+
+            <!-- Location Markers -->
+            <circle cx="70" cy="210" r="6" fill="#3B82F6" opacity="0.8"/>
+            <circle cx="310" cy="60" r="6" fill="#64748B" stroke="#334155" stroke-width="1"/>
+            <circle cx="580" cy="210" r="6" fill="#EF4444" opacity="0.8"/>
+            <circle cx="310" cy="340" r="6" fill="#64748B" stroke="#334155" stroke-width="1"/>
+            <circle cx="620" cy="370" r="5" fill="#10B981" opacity="0.8"/>
+
+            <!-- Dynamic Elements -->
+            <g id="risk-zones"></g>
+            <g id="route-overlays"></g>
           </svg>
         </div>
       </div>
 
-      <!-- Live Statistics -->
-      <div class="space-y-6 flex flex-col h-full overflow-hidden">
-        <div class="card border-nexora-agent/30 bg-blue-500/5">
-          <h2 class="text-[10px] font-black text-nexora-muted uppercase tracking-widest mb-4">Hazard Analytics</h2>
-          <div class="text-4xl font-black mb-1" id="prediction-level">STABLE</div>
-          <p class="text-[10px] text-nexora-muted mb-4 uppercase">Confidence: 92.4%</p>
-          <div class="h-1 bg-nexora-border rounded-full overflow-hidden">
-             <div id="risk-bar" class="h-full bg-nexora-agent transition-all duration-1000" style="width: 5%"></div>
+      <!-- Right Sidebar (4 cols) -->
+      <div class="lg:col-span-4 space-y-4 flex flex-col h-full overflow-hidden">
+
+        <!-- Hazard Analytics -->
+        <div class="card border-blue-500/10 bg-blue-500/[0.03]">
+          <div class="section-label text-blue-400 mb-3">Hazard Analytics</div>
+          <div class="text-3xl font-black mb-1" id="prediction-level">STABLE</div>
+          <p class="text-[9px] text-slate-500 mb-3 uppercase tracking-wider">Pattern Confidence: <span class="text-white font-bold">92.4%</span></p>
+          <div class="h-1.5 bg-slate-800 rounded-full overflow-hidden">
+            <div id="risk-bar" class="h-full bg-blue-500 transition-all duration-1000 rounded-full" style="width: 5%"></div>
           </div>
         </div>
 
-        <div class="card flex-1 flex flex-col overflow-hidden border-white/5">
-          <h2 class="text-[10px] font-black text-nexora-muted uppercase tracking-widest mb-4">Commander AI Chat (NEXORA M2.5)</h2>
-          <div class="space-y-4 flex-1 overflow-y-auto pr-2" id="chat-log">
-             <div class="text-xs italic text-nexora-muted">Awaiting system initialization...</div>
+        <!-- Commander Chat -->
+        <div class="card flex-1 flex flex-col overflow-hidden border-purple-500/10">
+          <div class="section-label text-purple-400 mb-3">Commander AI Chat — S.C.L.I.D M2.5</div>
+          <div class="space-y-3 flex-1 overflow-y-auto pr-1" id="chat-log">
+            <div class="text-[11px] italic text-slate-600 text-center py-4">Issue orders to S.C.L.I.D...</div>
           </div>
-          <div class="mt-4 flex gap-2">
-            <input type="text" id="chat-input" class="flex-1 bg-slate-950 border border-nexora-border rounded px-3 py-2 text-xs focus:outline-none focus:border-nexora-agent" placeholder="E.g., Start disaster response workflow...">
-            <button id="send-chat-btn" class="bg-nexora-agent text-white px-4 py-2 rounded text-xs font-bold hover:bg-blue-600 transition-colors">SEND</button>
+          <div class="mt-3 flex gap-2">
+            <input type="text" id="chat-input" class="chat-input flex-1" placeholder="E.g., Start disaster response workflow...">
+            <button id="send-chat-btn" class="chat-send-btn">SEND</button>
           </div>
         </div>
 
-        <div class="card border-nexora-warning/40 bg-amber-500/5">
-           <h2 class="text-[10px] font-black text-nexora-warning uppercase tracking-widest mb-3">Commander Action</h2>
-           <div id="auth-panel" class="hidden">
-              <p class="text-[11px] text-white/80 italic mb-4 leading-relaxed">AI recommends immediate deployment of medical units via the Mountain Trail.</p>
-              <button class="w-full py-3 bg-nexora-warning text-black font-black rounded-lg text-xs tracking-tighter hover:bg-yellow-400 transition-all active:scale-95 shadow-[0_0_20px_rgba(245,158,11,0.2)]">AUTHORIZE DEPLOYMENT</button>
-           </div>
-           <div id="auth-idle" class="text-[10px] text-nexora-muted uppercase tracking-widest text-center py-4">No Pending Decisions</div>
+        <!-- UEB Mini Log -->
+        <div class="card border-slate-700 max-h-28 overflow-y-auto">
+          <div class="section-label mb-2">Event Bus</div>
+          <div id="ueb-mini" class="space-y-1 text-[9px] font-mono text-slate-500">
+            <div>System initialized...</div>
+          </div>
+        </div>
+
+        <!-- Commander Action -->
+        <div class="card border-amber-500/20 bg-amber-500/[0.03]">
+          <div class="section-label text-amber-400 mb-2">Commander Action</div>
+          <div id="auth-panel" class="hidden">
+            <p class="text-[11px] text-white/70 italic mb-3 leading-relaxed">AI recommends immediate deployment via Mountain Trail. 45 personnel ready.</p>
+            <button class="w-full py-2.5 bg-amber-500 text-black font-black rounded-lg text-[11px] tracking-tight hover:bg-amber-400 transition-all active:scale-95 shadow-[0_0_20px_rgba(245,158,11,0.15)]">⚡ AUTHORIZE DEPLOYMENT</button>
+          </div>
+          <div id="auth-idle" class="text-[9px] text-slate-600 uppercase tracking-widest text-center py-2">No Pending Decisions</div>
         </div>
       </div>
     </div>
@@ -75,104 +131,143 @@
 
   <script src="story-client.js"></script>
   <script>
-    const client = new StoryClient('ws://localhost:8080');
-    
-    // Add chat to the log
+    const wsProtocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
+    const client = new StoryClient(wsProtocol + window.location.host);
+
+    // ── Chat ──
     function appendChat(role, text) {
       const chatLog = document.getElementById('chat-log');
-      // Remove placeholder
-      if (chatLog.innerHTML.includes('Awaiting system initialization...')) {
-        chatLog.innerHTML = '';
-      }
+      if (chatLog.querySelector('.italic')) chatLog.innerHTML = '';
       const entry = document.createElement('div');
-      
       if (role === 'user') {
-        entry.className = 'p-3 bg-slate-800 rounded border-r-2 border-nexora-text ml-8 animate-in fade-in slide-in-from-bottom-2';
-        entry.innerHTML = `<div class="text-[10px] font-bold text-white mb-1 uppercase tracking-widest text-right">EOC Commander</div><div class="text-xs text-white/90 leading-relaxed font-medium text-right">${text}</div>`;
+        entry.className = 'chat-user';
+        entry.innerHTML = '<div class="chat-label text-white">EOC COMMANDER</div><div class="chat-text text-white/90 text-right">' + text + '</div>';
       } else if (role === 'loading') {
         entry.id = 'chat-loading';
-        entry.className = 'p-3 bg-black/40 rounded border-l-2 border-nexora-agent mr-8 animate-in fade-in slide-in-from-top-2';
-        entry.innerHTML = `<div class="text-[10px] font-bold text-nexora-agent mb-1 uppercase tracking-widest">NEXORA M2.5</div><div class="text-xs text-nexora-agent leading-relaxed font-medium animate-pulse">Generating workflow...</div>`;
+        entry.className = 'chat-loading';
+        entry.innerHTML = '<div class="chat-label text-blue-400">S.C.L.I.D M2.5</div><div class="chat-text text-blue-300/60">Generating response...</div>';
       } else {
-        const loadingEl = document.getElementById('chat-loading');
-        if (loadingEl) loadingEl.remove();
-        
-        entry.className = 'p-3 bg-black/40 rounded border-l-2 border-nexora-agent mr-8 animate-in fade-in slide-in-from-top-2';
-        entry.innerHTML = `<div class="text-[10px] font-bold text-nexora-agent mb-1 uppercase tracking-widest">NEXORA M2.5</div><div class="text-xs text-white/90 leading-relaxed font-medium whitespace-pre-wrap">${text}</div>`;
+        const l = document.getElementById('chat-loading');
+        if (l) l.remove();
+        entry.className = 'chat-ai';
+        entry.innerHTML = '<div class="chat-label text-blue-400">S.C.L.I.D M2.5</div><div class="chat-text text-white/85">' + text + '</div>';
       }
       chatLog.appendChild(entry);
       chatLog.scrollTop = chatLog.scrollHeight;
     }
 
-    client.onChatLoading = () => {
-      appendChat('loading');
-    };
-
-    client.onChatResponse = (response) => {
-      appendChat('ai', response);
-    };
+    client.onChatLoading = () => appendChat('loading');
+    client.onChatResponse = (r) => appendChat('ai', r);
 
     document.getElementById('send-chat-btn').addEventListener('click', () => {
       const input = document.getElementById('chat-input');
-      const text = input.value.trim();
-      if (text) {
-        appendChat('user', text);
-        client.sendChat(text);
-        input.value = '';
-      }
+      const t = input.value.trim();
+      if (t) { appendChat('user', t); client.sendChat(t); input.value = ''; }
     });
-
     document.getElementById('chat-input').addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') {
-        document.getElementById('send-chat-btn').click();
-      }
+      if (e.key === 'Enter') document.getElementById('send-chat-btn').click();
     });
 
+    // ── State Updates ──
     client.onStateChange = (state) => {
-      const uiState = state.ui_state;
-      
-      // Header Status
-      document.getElementById('connection-status').textContent = 'Live Frame: ' + (state.frameIndex + 1);
+      const ui = state.ui_state;
+      document.getElementById('connection-status').textContent = 'LIVE — Frame ' + (state.frameIndex + 1);
 
-      // Prediction Stats
-      const isCritical = uiState.eoc_map.risk_visible;
+      // Hazard Analytics
+      const isCritical = ui.eoc_map && ui.eoc_map.risk_visible;
       document.getElementById('prediction-level').textContent = isCritical ? 'CRITICAL' : 'STABLE';
-      document.getElementById('prediction-level').className = 'text-4xl font-black mb-1 ' + (isCritical ? 'text-nexora-critical' : 'text-nexora-agent');
+      document.getElementById('prediction-level').className = 'text-3xl font-black mb-1 ' + (isCritical ? 'text-red-400' : 'text-blue-400');
       document.getElementById('risk-bar').style.width = isCritical ? '92%' : '5%';
-      document.getElementById('risk-bar').className = 'h-full transition-all duration-1000 ' + (isCritical ? 'bg-nexora-critical shadow-[0_0_10px_#EF4444]' : 'bg-nexora-agent');
-      
-      // We removed the mission-log overwrite from onStateChange since chat handles it now
-      
+      document.getElementById('risk-bar').className = 'h-full transition-all duration-1000 rounded-full ' + (isCritical ? 'bg-red-500 shadow-[0_0_10px_#EF4444]' : 'bg-blue-500');
+
+      // UEB mini log
+      if (ui.ueb_log_full) {
+        const uebMini = document.getElementById('ueb-mini');
+        uebMini.innerHTML = ui.ueb_log_full.slice(-5).map(m => '<div>' + m + '</div>').join('');
+        uebMini.scrollTop = uebMini.scrollHeight;
+      }
+
       // Authorization
-      const needsAuth = uiState.agent_statuses.resource === 'pending_approval';
+      const needsAuth = ui.agent_statuses && ui.agent_statuses.resource === 'pending_approval';
       document.getElementById('auth-panel').classList.toggle('hidden', !needsAuth);
       document.getElementById('auth-idle').classList.toggle('hidden', needsAuth);
 
-      // Map Visualization
+      // Map: Risk Zones & Hazards
       const riskZones = document.getElementById('risk-zones');
       riskZones.innerHTML = '';
       if (isCritical) {
+        // Abstract heatmap
         const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-        circle.setAttribute("cx", "300");
-        circle.setAttribute("cy", "200");
-        circle.setAttribute("r", "100");
+        circle.setAttribute("cx", "450"); circle.setAttribute("cy", "180"); circle.setAttribute("r", "120");
         circle.setAttribute("class", "heatmap-zone");
         riskZones.appendChild(circle);
+
+        const c2 = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        c2.setAttribute("cx", "300"); c2.setAttribute("cy", "130"); c2.setAttribute("r", "70");
+        c2.setAttribute("class", "heatmap-zone"); c2.style.animationDelay = '1s';
+        riskZones.appendChild(c2);
+
+        // Frame-specific explicit hazards with traits
+        const addHazard = (emoji, x, y, size = "32", filterId = "", label = "", subLabel = "", pulse = true) => {
+          const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+          if (pulse) g.classList.add("animate-pulse");
+
+          const t = document.createElementNS("http://www.w3.org/2000/svg", "text");
+          t.setAttribute("x", x); t.setAttribute("y", y);
+          t.setAttribute("font-size", size); t.setAttribute("text-anchor", "middle");
+          if (filterId) t.setAttribute("filter", `url(#${filterId})`);
+          t.textContent = emoji;
+          g.appendChild(t);
+
+          if (label) {
+            const l1 = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            l1.setAttribute("x", x); l1.setAttribute("y", (parseInt(y) + 16).toString());
+            l1.setAttribute("font-size", "10"); l1.setAttribute("text-anchor", "middle");
+            l1.setAttribute("fill", "#F1F5F9"); l1.setAttribute("font-family", "Inter"); l1.setAttribute("font-weight", "bold");
+            l1.textContent = label;
+            g.appendChild(l1);
+          }
+          if (subLabel) {
+            const l2 = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            l2.setAttribute("x", x); l2.setAttribute("y", (parseInt(y) + 26).toString());
+            l2.setAttribute("font-size", "8"); l2.setAttribute("text-anchor", "middle");
+            l2.setAttribute("fill", "#94A3B8"); l2.setAttribute("font-family", "Inter");
+            l2.textContent = subLabel;
+            g.appendChild(l2);
+          }
+          riskZones.appendChild(g);
+        };
+
+        if (state.frameIndex >= 1) {
+          addHazard("🌊", "350", "150", "32", "glow-blue", "LVL: 4.2m", "RATE: 1200 cfs");
+          addHazard("🌊", "380", "165", "24", "glow-blue");
+        }
+        if (state.frameIndex >= 2) {
+          addHazard("✕", "310", "65", "32", "glow-red", "LANDSLIDE", "THREAT: EXTREME");
+          addHazard("⚠️", "300", "50", "16", "glow-red");
+        }
+        if (state.frameIndex >= 3) {
+          addHazard("🔥", "570", "200", "32", "glow-red", "CLASS C", "ELECTRICAL FIRE");
+          addHazard("🔥", "590", "220", "24", "glow-red");
+          addHazard("⚡", "450", "150", "32", "glow-blue", "GRID OFFLINE", "SUBSTATION 4");
+        }
       }
-      
+
+      // Map: Routes
       const routes = document.getElementById('route-overlays');
       routes.innerHTML = '';
-      if (uiState.eoc_map.routes) {
-        uiState.eoc_map.routes.forEach(r => {
-           const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-           path.setAttribute("d", r.id === 'route-main' ? "M 50 150 L 200 50 L 350 150" : "M 50 150 L 200 250 L 350 150");
-           path.setAttribute("class", r.status === 'blocked' ? 'route-blocked' : 'route-active');
-           if(r.is_optimal) path.setAttribute("class", "route-optimal animate-pulse");
-           routes.appendChild(path);
+      if (ui.eoc_map && ui.eoc_map.routes) {
+        ui.eoc_map.routes.forEach(r => {
+          const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+          path.setAttribute("d", r.id === 'route-main' ? "M 70 210 Q 200 100 310 60" : "M 70 210 Q 200 300 310 340 Q 450 350 580 210");
+          if (r.status === 'blocked') path.setAttribute("class", "route-blocked");
+          else if (r.is_optimal) path.setAttribute("class", "route-optimal");
+          else path.setAttribute("class", "route-active");
+          routes.appendChild(path);
         });
       }
     };
-    
+
     client.connect();
   </script>
 </body>

@@ -3,121 +3,426 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NEXORA Logistics Organization</title>
+  <title>S.C.L.I.D AI — Logistics Command</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
 </head>
-<body class="bg-nexora-bg text-nexora-text min-h-screen">
-  <div class="h-full flex flex-col p-6">
-    <header class="flex justify-between items-center mb-6">
-      <div>
-        <h1 class="text-2xl font-bold text-nexora-warning tracking-tighter">LOGISTICS COMMAND</h1>
-        <p class="text-nexora-muted text-[10px] tracking-[0.4em] uppercase">Resource Distribution & Optimization</p>
+<body class="bg-[#070B14] text-nexora-text min-h-screen grid-bg">
+  <div class="h-full flex flex-col p-5">
+
+    <!-- Header -->
+    <header class="flex justify-between items-center mb-5">
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-sm shadow-lg shadow-amber-500/20">🚛</div>
+        <div>
+          <h1 class="text-xl font-black text-white tracking-tight">LOGISTICS COMMAND</h1>
+          <p class="text-[9px] font-bold text-slate-500 uppercase tracking-[0.3em]">Resource Distribution — S.C.L.I.D AI Network</p>
+        </div>
       </div>
-      <div id="statusDot" class="w-4 h-4 rounded-full bg-nexora-muted pulse-dot"></div>
+      <div id="statusDot" class="w-3 h-3 rounded-full bg-slate-600 pulse-dot"></div>
     </header>
 
-    <div class="flex-1 grid grid-cols-1 lg:grid-cols-4 gap-6 overflow-hidden">
-       <!-- Side Panels -->
-       <div class="space-y-6">
-          <div class="card border-nexora-warning/30 bg-amber-500/5">
-             <h2 class="text-[10px] font-black text-nexora-muted uppercase tracking-widest mb-4">Inventory Status</h2>
-             <div class="space-y-3">
-                <div class="flex justify-between text-sm"><span>Potable Water</span> <span class="font-bold">12.4k units</span></div>
-                <div class="flex justify-between text-sm"><span>Medical Kits</span> <span class="font-bold">890 units</span></div>
-                <div class="flex justify-between text-sm"><span>Sandbags</span> <span class="text-nexora-warning font-black">CRITICAL</span></div>
-             </div>
-          </div>
-          
-          <div class="card border-nexora-warning/30">
-             <h2 class="text-[10px] font-black text-nexora-muted uppercase tracking-widest mb-4">Transport Units</h2>
-             <div class="flex items-center gap-3">
-                <span class="text-4xl font-black" id="active-convoys">18</span>
-                <span class="text-[10px] text-nexora-muted uppercase leading-none">Active<br>Convoys</span>
-             </div>
-          </div>
-       </div>
+    <div class="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-5 overflow-hidden">
 
-       <!-- Main Map / Graph Section -->
-       <div class="lg:col-span-2 bg-nexora-surface rounded-2xl border border-nexora-border relative shadow-inner overflow-hidden">
-          <div class="absolute top-4 left-4 z-20 glass-box px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-nexora-warning border border-nexora-warning/20">Live Supply Network</div>
-          <div class="absolute inset-0 flex items-center justify-center p-8">
-             <svg id="route-graph" viewBox="0 0 400 300" class="w-full h-full">
-                <!-- Static Nodes -->
-                <circle cx="50" cy="150" r="8" fill="var(--nexora-agent)" /> <!-- Depot -->
-                <circle cx="200" cy="50" r="8" fill="var(--nexora-surface)" stroke="var(--nexora-border)" /> <!-- Pass -->
-                <circle cx="350" cy="150" r="8" fill="var(--nexora-critical)" /> <!-- City -->
-                <circle cx="200" cy="250" r="8" fill="var(--nexora-surface)" stroke="var(--nexora-border)" /> <!-- Trail -->
-                
-                <!-- Routes -->
-                <path id="path-main" d="M 50 150 L 200 50 L 350 150" class="route-active" />
-                <path id="path-alt" d="M 50 150 L 200 250 L 350 150" class="route-active opacity-10" />
-                
-                <!-- Obstacle -->
-                <g id="landslide-marker" class="hidden">
-                   <text x="185" y="45" fill="var(--nexora-critical)" font-size="24" font-weight="bold">×</text>
-                   <text x="175" y="30" fill="var(--nexora-critical)" font-size="8" font-weight="bold" uppercase>BLOCKAGE</text>
-                </g>
-             </svg>
-          </div>
-       </div>
+      <!-- Left: Inventory (3 cols) -->
+      <div class="lg:col-span-3 space-y-4">
+        <div class="card border-amber-500/10 bg-amber-500/[0.03]">
+          <div class="section-label text-amber-400 mb-3">Supply Inventory</div>
+          <div class="space-y-3">
+            <div class="flex justify-between text-[11px]">
+              <span class="text-slate-400">Potable Water</span>
+              <span class="font-bold text-white">12.4k units</span>
+            </div>
+            <div class="h-1 bg-slate-800 rounded-full"><div class="h-full bg-blue-500 rounded-full" style="width:78%"></div></div>
 
-       <!-- Right AI Panel -->
-       <div class="space-y-6 flex flex-col">
-          <div class="card bg-slate-950 border-nexora-agent/50 flex-1">
-             <h2 class="text-[10px] font-black text-nexora-agent uppercase tracking-widest mb-4">Minimax Optimizer</h2>
-             <div id="optimizer-status" class="text-xs font-mono space-y-3">
-                <div class="text-nexora-muted italic">Awaiting events...</div>
-             </div>
+            <div class="flex justify-between text-[11px]">
+              <span class="text-slate-400">Medical Kits</span>
+              <span class="font-bold text-white">890 units</span>
+            </div>
+            <div class="h-1 bg-slate-800 rounded-full"><div class="h-full bg-emerald-500 rounded-full" style="width:62%"></div></div>
+
+            <div class="flex justify-between text-[11px]">
+              <span class="text-slate-400">Sandbags</span>
+              <span id="sandbag-status" class="font-black text-amber-400">ADEQUATE</span>
+            </div>
+            <div class="h-1 bg-slate-800 rounded-full"><div id="sandbag-bar" class="h-full bg-amber-500 rounded-full transition-all duration-1000" style="width:45%"></div></div>
+
+            <div class="flex justify-between text-[11px]">
+              <span class="text-slate-400">Rescue Boats</span>
+              <span class="font-bold text-white">24 units</span>
+            </div>
+            <div class="h-1 bg-slate-800 rounded-full"><div class="h-full bg-purple-500 rounded-full" style="width:55%"></div></div>
           </div>
-          
-          <div class="card border-white/5 bg-white/5">
-             <h2 class="text-[10px] font-black text-nexora-muted uppercase tracking-widest mb-4">Route Analytics</h2>
-             <div id="path-metadata" class="text-xs space-y-2 font-medium text-nexora-muted">
-                ---
-             </div>
+        </div>
+
+        <div class="card border-amber-500/10">
+          <div class="section-label text-amber-400 mb-2">Transport Fleet</div>
+          <div class="flex items-center gap-3">
+            <span class="text-3xl font-black" id="active-convoys">18</span>
+            <span class="text-[9px] text-slate-500 uppercase leading-tight">Active<br>Convoys</span>
           </div>
-       </div>
+        </div>
+      </div>
+
+      <!-- Center: Route Graph (6 cols) -->
+      <div class="lg:col-span-6 bg-slate-900/40 rounded-2xl border border-slate-800 relative shadow-inner overflow-hidden">
+        <div class="absolute top-4 left-4 z-20 glass-box-subtle px-4 py-2 text-[9px] font-bold uppercase tracking-[0.15em] text-amber-400 border border-amber-500/10">Live Supply Network — A* Pathfinding</div>
+        <!-- Live ETA ticker -->
+        <div id="eta-ticker" class="absolute top-4 right-4 z-20 glass-box-subtle px-3 py-1.5 text-[8px] font-mono text-slate-500 border border-slate-700/50 hidden">
+          <span id="eta-label">ETA</span>: <span id="eta-value" class="text-white font-bold">--:--</span>
+        </div>
+        <div class="absolute inset-0 flex items-center justify-center p-8">
+          <svg id="route-graph" viewBox="0 0 400 300" class="w-full h-full">
+            <!-- Defs: grid, glow filters, markers -->
+            <defs>
+              <pattern id="lgrid" width="25" height="25" patternUnits="userSpaceOnUse">
+                <path d="M 25 0 L 0 0 0 25" fill="none" stroke="rgba(30,41,59,0.4)" stroke-width="0.3"/>
+              </pattern>
+              <filter id="glow-blue" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur stdDeviation="3" result="blur"/>
+                <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+              </filter>
+              <filter id="glow-red" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur stdDeviation="2.5" result="blur"/>
+                <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+              </filter>
+              <filter id="glow-green" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur stdDeviation="2" result="blur"/>
+                <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+              </filter>
+            </defs>
+            <rect width="400" height="300" fill="url(#lgrid)" />
+
+            <!-- Dense Background City Network (Visual only) -->
+            <g id="bg-network" opacity="0.08" stroke="#1E293B" stroke-width="1.5" fill="none" stroke-linecap="round">
+              <!-- Horizontal-ish routes -->
+              <path d="M -10 30 L 150 20 L 300 40 L 410 10" />
+              <path d="M -20 80 L 100 120 L 220 90 L 420 110" />
+              <path d="M -15 220 L 120 180 L 250 210 L 410 190" />
+              <path d="M -30 280 L 180 290 L 310 260 L 420 270" />
+              <!-- Vertical-ish routes -->
+              <path d="M 80 -10 L 100 150 L 70 310" />
+              <path d="M 180 -15 L 150 160 L 190 315" />
+              <path d="M 280 -25 L 300 140 L 270 315" />
+              <!-- Diagonal connections -->
+              <path d="M 100 120 L 150 20" />
+              <path d="M 220 90 L 300 140" />
+              <path d="M 120 180 L 150 160" />
+              <path d="M 250 210 L 310 260" />
+              <path d="M 70 290 L 15 220" />
+              <path d="M 300 40 L 420 110" />
+              <path d="M 100 120 L 50 150" />
+              <path d="M 150 160 L 200 250" />
+              <path d="M 250 210 L 350 150" />
+              <path d="M 220 90 L 200 50" />
+              <!-- Small nodes at intersections -->
+              <g fill="#1E293B" stroke="none">
+                <circle cx="150" cy="20" r="2.5"/>
+                <circle cx="300" cy="40" r="2.5"/>
+                <circle cx="100" cy="120" r="2.5"/>
+                <circle cx="220" cy="90" r="2.5"/>
+                <circle cx="120" cy="180" r="2.5"/>
+                <circle cx="250" cy="210" r="2.5"/>
+                <circle cx="180" cy="290" r="2.5"/>
+                <circle cx="310" cy="260" r="2.5"/>
+                <circle cx="150" cy="160" r="2.5"/>
+                <circle cx="300" cy="140" r="2.5"/>
+                <circle cx="70" cy="290" r="2.5"/>
+              </g>
+            </g>
+
+            <!-- Background Hazards (visible during disaster to show why dense paths aren't used) -->
+            <g id="bg-hazards" class="hidden" text-anchor="middle">
+              <!-- Hazard 1: Fire -->
+              <text x="150" y="23" font-size="20" fill="#EF4444" filter="url(#glow-red)" class="animate-pulse">🔥</text>
+              <text x="150" y="33" font-size="5" fill="#F1F5F9" font-family="Inter" font-weight="bold">CLASS C FIRE</text>
+
+              <!-- Hazard 2: Fire -->
+              <text x="300" y="43" font-size="20" fill="#EF4444" filter="url(#glow-red)" class="animate-pulse">🔥</text>
+              <text x="300" y="53" font-size="5" fill="#F1F5F9" font-family="Inter" font-weight="bold">EXTREME HEAT</text>
+
+              <!-- Hazard 3: Flood -->
+              <text x="100" y="123" font-size="20" fill="#3B82F6" filter="url(#glow-blue)" class="animate-pulse">🌊</text>
+              <text x="100" y="133" font-size="5" fill="#F1F5F9" font-family="Inter" font-weight="bold">LVL: 4.2m</text>
+
+              <!-- Hazard 4: Flood -->
+              <text x="120" y="183" font-size="20" fill="#3B82F6" filter="url(#glow-blue)" class="animate-pulse">🌊</text>
+              <text x="120" y="193" font-size="5" fill="#F1F5F9" font-family="Inter" font-weight="bold">RATE: 1200 cfs</text>
+
+              <!-- Hazard 5: Blocked -->
+              <text x="250" y="213" font-size="20" fill="#EF4444" font-weight="bold" filter="url(#glow-red)">✕</text>
+              <text x="250" y="223" font-size="5" fill="#F1F5F9" font-family="Inter" font-weight="bold">ROAD COLLAPSE</text>
+
+              <!-- Hazard 6: Blocked -->
+              <text x="150" y="163" font-size="20" fill="#EF4444" font-weight="bold" filter="url(#glow-red)">✕</text>
+            </g>
+            <!-- Intermediate waypoint nodes -->
+            <circle cx="125" cy="100" r="3" fill="#334155" id="wp-main-1"/>
+            <circle cx="275" cy="100" r="3" fill="#334155" id="wp-main-2"/>
+            <circle cx="125" cy="200" r="3" fill="#334155" id="wp-alt-1"/>
+            <circle cx="275" cy="200" r="3" fill="#334155" id="wp-alt-2"/>
+
+            <!-- Distance labels on routes -->
+            <text id="dist-main" x="200" y="85" fill="#475569" font-size="6" text-anchor="middle" font-family="JetBrains Mono" class="hidden">18.2 km</text>
+            <text id="dist-alt" x="200" y="230" fill="#475569" font-size="6" text-anchor="middle" font-family="JetBrains Mono" class="hidden">12.4 km</text>
+
+            <!-- Routes (drawn with tracing animation) -->
+            <!-- Background trace ghost -->
+            <path id="path-main-bg" d="M 50 150 L 125 100 L 200 50 L 275 100 L 350 150" fill="none" stroke="#1E293B" stroke-width="6" stroke-linecap="round"/>
+            <path id="path-alt-bg" d="M 50 150 L 125 200 L 200 250 L 275 200 L 350 150" fill="none" stroke="#1E293B" stroke-width="6" stroke-linecap="round"/>
+
+            <!-- Foreground animated routes -->
+            <path id="path-main" d="M 50 150 L 125 100 L 200 50 L 275 100 L 350 150" class="route-active" stroke-linecap="round"/>
+            <path id="path-alt" d="M 50 150 L 125 200 L 200 250 L 275 200 L 350 150" class="route-active" stroke-linecap="round" style="opacity:0.1" />
+
+            <!-- Primary Nodes -->
+            <circle cx="50" cy="150" r="10" fill="#3B82F6" opacity="0.9" filter="url(#glow-blue)"/>
+            <text x="50" y="175" fill="#64748B" font-size="7" text-anchor="middle" font-family="Inter" font-weight="600">DEPOT</text>
+
+            <circle id="node-pass" cx="200" cy="50" r="10" fill="#1E293B" stroke="#334155" stroke-width="1.5"/>
+            <text x="200" y="30" fill="#64748B" font-size="7" text-anchor="middle" font-family="Inter" font-weight="600">HIGHLAND PASS</text>
+
+            <circle cx="350" cy="150" r="10" fill="#EF4444" opacity="0.9" filter="url(#glow-red)"/>
+            <text x="350" y="175" fill="#64748B" font-size="7" text-anchor="middle" font-family="Inter" font-weight="600">SECTOR 4</text>
+
+            <circle id="node-trail" cx="200" cy="250" r="10" fill="#1E293B" stroke="#334155" stroke-width="1.5"/>
+            <text x="200" y="275" fill="#64748B" font-size="7" text-anchor="middle" font-family="Inter" font-weight="600">OLD MINE TRAIL</text>
+
+            <!-- Obstacle -->
+            <g id="landslide-marker" class="hidden">
+              <circle cx="200" cy="50" r="18" fill="rgba(239,68,68,0.08)" class="animate-ping-slow"/>
+              <circle cx="200" cy="50" r="14" fill="none" stroke="#EF4444" stroke-width="2" stroke-dasharray="3 2"/>
+              <text x="200" y="54" fill="#EF4444" font-size="16" font-weight="bold" text-anchor="middle">×</text>
+              <text x="200" y="15" fill="#EF4444" font-size="7" font-weight="bold" text-anchor="middle">BLOCKED</text>
+            </g>
+
+            <!-- Convoy dots (hidden by default, animated along paths) -->
+            <g id="convoys-main" class="hidden">
+              <circle r="4" fill="#10B981" filter="url(#glow-green)">
+                <animateMotion dur="4s" repeatCount="indefinite" path="M 50 150 L 125 100 L 200 50 L 275 100 L 350 150" />
+              </circle>
+              <circle r="3" fill="#10B981" opacity="0.7">
+                <animateMotion dur="4s" repeatCount="indefinite" path="M 50 150 L 125 100 L 200 50 L 275 100 L 350 150" begin="1.3s"/>
+              </circle>
+              <circle r="3" fill="#10B981" opacity="0.5">
+                <animateMotion dur="4s" repeatCount="indefinite" path="M 50 150 L 125 100 L 200 50 L 275 100 L 350 150" begin="2.6s"/>
+              </circle>
+            </g>
+
+            <g id="convoys-alt" class="hidden">
+              <circle r="5" fill="#3B82F6" filter="url(#glow-blue)">
+                <animateMotion dur="3s" repeatCount="indefinite" path="M 50 150 L 125 200 L 200 250 L 275 200 L 350 150" />
+              </circle>
+              <circle r="4" fill="#3B82F6" opacity="0.8">
+                <animateMotion dur="3s" repeatCount="indefinite" path="M 50 150 L 125 200 L 200 250 L 275 200 L 350 150" begin="0.6s"/>
+              </circle>
+              <circle r="4" fill="#3B82F6" opacity="0.6">
+                <animateMotion dur="3s" repeatCount="indefinite" path="M 50 150 L 125 200 L 200 250 L 275 200 L 350 150" begin="1.2s"/>
+              </circle>
+              <circle r="3" fill="#3B82F6" opacity="0.4">
+                <animateMotion dur="3s" repeatCount="indefinite" path="M 50 150 L 125 200 L 200 250 L 275 200 L 350 150" begin="1.8s"/>
+              </circle>
+              <circle r="3" fill="#3B82F6" opacity="0.3">
+                <animateMotion dur="3s" repeatCount="indefinite" path="M 50 150 L 125 200 L 200 250 L 275 200 L 350 150" begin="2.4s"/>
+              </circle>
+            </g>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Right: AI + Analytics (3 cols) -->
+      <div class="lg:col-span-3 space-y-4 flex flex-col">
+        <div class="card bg-black/40 border-blue-500/20 flex-1">
+          <div class="section-label text-blue-400 mb-3">S.C.L.I.D Optimizer</div>
+          <div id="optimizer-status" class="text-[10px] font-mono space-y-2">
+            <div class="text-slate-600 italic">Awaiting telemetry...</div>
+          </div>
+        </div>
+
+        <!-- AI Directives from chat -->
+        <div class="card border-purple-500/10 bg-purple-500/[0.02]">
+          <div class="section-label text-purple-400 mb-2">AI Directives</div>
+          <div id="ai-directives" class="text-[10px] space-y-1 max-h-24 overflow-y-auto">
+            <div class="text-slate-600 italic">No directives.</div>
+          </div>
+        </div>
+
+        <div class="card border-slate-700">
+          <div class="section-label mb-2">Route Analytics</div>
+          <div id="path-metadata" class="text-[10px] space-y-1.5 font-medium text-slate-500">
+            ---
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
   <script src="story-client.js"></script>
   <script>
-    const client = new StoryClient('ws://localhost:8080');
-    
+    const wsProtocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
+    const client = new StoryClient(wsProtocol + window.location.host);
+
+    // Receive AI directives from chat broadcasts
+    client.onChatResponse = (response) => {
+      const dir = document.getElementById('ai-directives');
+      if (dir.querySelector('.italic')) dir.innerHTML = '';
+      const entry = document.createElement('div');
+      entry.className = 'text-purple-300/80 text-[9px] animate-fade-in';
+      entry.textContent = response.substring(0, 150) + '...';
+      dir.appendChild(entry);
+      dir.scrollTop = dir.scrollHeight;
+    };
+
     client.onStateChange = (state) => {
-      const uiState = state.ui_state;
+      const ui = state.ui_state;
       const optStatus = document.getElementById('optimizer-status');
       const pathMeta = document.getElementById('path-metadata');
-      
-      // Update Map
+
+      document.getElementById('statusDot').style.backgroundColor = '#10B981';
+
+      // Map State
       const isLandslide = state.frameIndex >= 2;
       const isOptimal = state.frameIndex >= 4;
-      
-      document.getElementById('landslide-marker').classList.toggle('hidden', !isLandslide);
-      document.getElementById('path-main').className = isLandslide ? 'route-blocked' : 'route-active';
-      document.getElementById('path-alt').classList.toggle('opacity-10', !isOptimal);
-      document.getElementById('path-alt').className = isOptimal ? 'route-optimal animate-pulse' : 'route-active opacity-10';
-      
-      // Update Convoys
-      document.getElementById('active-convoys').textContent = isOptimal ? '24' : '18';
+      const isNormal = !isLandslide;
 
-      // Update Optimizer UI
-      if (isLandslide && !isOptimal) {
-        optStatus.innerHTML = '<div class="text-nexora-critical animate-pulse">> OBSTACLE DETECTED: Highland Pass<br>> INITIATING REROUTE...</div>';
-      } else if (isOptimal) {
-        optStatus.innerHTML = `<div class="text-nexora-success font-bold">> OPTIMIZATION SUCCESSFUL</div>
-                               <div class="text-white/70 text-[10px] mt-2 leading-loose">
-                                 ALGORITHM: A* Search<br>
-                                 HEURISTIC: Euclidean<br>
-                                 NODES: 2,450 analyzed<br>
-                                 RESULT: Secondary Trail Selected
-                               </div>`;
-        pathMeta.innerHTML = `<div class="flex justify-between"><span>NEW ETA:</span> <span class="text-white">-180m</span></div>
-                              <div class="flex justify-between"><span>DISTANCE:</span> <span class="text-white">12.4km</span></div>
-                              <div class="flex justify-between"><span>RISK SCORE:</span> <span class="text-nexora-success">14/100</span></div>`;
+      // ── Landslide marker ──
+      document.getElementById('landslide-marker').classList.toggle('hidden', !isLandslide);
+      document.getElementById('bg-hazards').classList.toggle('hidden', !isLandslide);
+
+      // ── Primary Route (Highland Pass) ──
+      const mainPath = document.getElementById('path-main');
+      if (isLandslide) {
+        mainPath.setAttribute('class', 'route-blocked');
+        mainPath.style.strokeDashoffset = '0';
+        mainPath.style.strokeDasharray = '6 3';
       } else {
-        optStatus.innerHTML = '<div class="text-nexora-muted italic">Awaiting telemetry...</div>';
+        // Path tracing animation: draw from start to end
+        mainPath.setAttribute('class', 'route-active');
+        const len = mainPath.getTotalLength ? mainPath.getTotalLength() : 600;
+        mainPath.style.strokeDasharray = len;
+        mainPath.style.strokeDashoffset = '0';
+        mainPath.style.transition = 'stroke-dashoffset 2s ease-out';
+      }
+
+      // ── Alternate Route (Old Mine Trail) ──
+      const altPath = document.getElementById('path-alt');
+      if (isOptimal) {
+        altPath.style.opacity = '1';
+        altPath.setAttribute('class', 'route-optimal');
+        // Animate the trace-in
+        const altLen = altPath.getTotalLength ? altPath.getTotalLength() : 600;
+        altPath.style.strokeDasharray = altLen;
+        altPath.style.strokeDashoffset = altLen;
+        altPath.style.transition = 'none';
+        requestAnimationFrame(() => {
+          altPath.style.transition = 'stroke-dashoffset 1.5s ease-out';
+          altPath.style.strokeDashoffset = '0';
+        });
+      } else {
+        altPath.style.opacity = '0.1';
+        altPath.setAttribute('class', 'route-active');
+        altPath.style.strokeDasharray = 'none';
+        altPath.style.strokeDashoffset = '0';
+      }
+
+      // ── Convoy dots ──
+      document.getElementById('convoys-main').classList.toggle('hidden', isLandslide);
+      document.getElementById('convoys-alt').classList.toggle('hidden', !isOptimal);
+
+      // ── Node highlights ──
+      const nodePass = document.getElementById('node-pass');
+      const nodeTrail = document.getElementById('node-trail');
+      if (isLandslide) {
+        nodePass.setAttribute('fill', '#7F1D1D');
+        nodePass.setAttribute('stroke', '#EF4444');
+      } else {
+        nodePass.setAttribute('fill', '#1E293B');
+        nodePass.setAttribute('stroke', '#334155');
+      }
+      if (isOptimal) {
+        nodeTrail.setAttribute('fill', '#1E3A5F');
+        nodeTrail.setAttribute('stroke', '#3B82F6');
+        nodeTrail.setAttribute('filter', 'url(#glow-blue)');
+      } else {
+        nodeTrail.setAttribute('fill', '#1E293B');
+        nodeTrail.setAttribute('stroke', '#334155');
+        nodeTrail.removeAttribute('filter');
+      }
+
+      // ── Waypoint highlights ──
+      ['wp-main-1', 'wp-main-2'].forEach(id => {
+        document.getElementById(id).setAttribute('fill', isLandslide ? '#7F1D1D' : (isNormal ? '#10B981' : '#334155'));
+      });
+      ['wp-alt-1', 'wp-alt-2'].forEach(id => {
+        document.getElementById(id).setAttribute('fill', isOptimal ? '#3B82F6' : '#334155');
+        document.getElementById(id).setAttribute('r', isOptimal ? '4' : '3');
+      });
+
+      // ── Distance labels ──
+      document.getElementById('dist-main').classList.toggle('hidden', isLandslide);
+      document.getElementById('dist-alt').classList.toggle('hidden', !isOptimal);
+      if (isLandslide) {
+        document.getElementById('dist-main').setAttribute('fill', '#EF4444');
+        document.getElementById('dist-main').textContent = '✕ BLOCKED';
+        document.getElementById('dist-main').classList.remove('hidden');
+      } else {
+        document.getElementById('dist-main').setAttribute('fill', '#475569');
+        document.getElementById('dist-main').textContent = '18.2 km';
+      }
+
+      // ── ETA Ticker ──
+      const etaTicker = document.getElementById('eta-ticker');
+      const etaValue = document.getElementById('eta-value');
+      const etaLabel = document.getElementById('eta-label');
+      if (isOptimal) {
+        etaTicker.classList.remove('hidden');
+        etaLabel.textContent = 'ETA (OPTIMAL)';
+        etaLabel.style.color = '#3B82F6';
+        etaValue.textContent = '02:45';
+        etaValue.style.color = '#3B82F6';
+      } else if (isNormal) {
+        etaTicker.classList.remove('hidden');
+        etaLabel.textContent = 'ETA';
+        etaLabel.style.color = '';
+        etaValue.textContent = '05:30';
+        etaValue.style.color = '';
+      } else {
+        etaTicker.classList.remove('hidden');
+        etaLabel.textContent = 'ETA';
+        etaLabel.style.color = '#EF4444';
+        etaValue.textContent = 'BLOCKED';
+        etaValue.style.color = '#EF4444';
+      }
+
+      // ── Convoys count ──
+      document.getElementById('active-convoys').textContent = isOptimal ? '24' : (isLandslide ? '0' : '18');
+
+      // ── Sandbags depletion ──
+      if (state.frameIndex >= 3) {
+        document.getElementById('sandbag-status').textContent = 'CRITICAL';
+        document.getElementById('sandbag-status').className = 'font-black text-red-400';
+        document.getElementById('sandbag-bar').style.width = '12%';
+        document.getElementById('sandbag-bar').className = 'h-full bg-red-500 rounded-full transition-all duration-1000 shadow-[0_0_8px_#EF4444]';
+      }
+
+      // ── Optimizer Panel ──
+      if (isLandslide && !isOptimal) {
+        optStatus.innerHTML = '<div class="text-red-400 animate-pulse">> OBSTACLE DETECTED<br>> Highland Pass: IMPASSABLE<br>> INITIATING A* REROUTE...<br>> Analyzing 2,450 nodes...</div>';
+      } else if (isOptimal) {
+        optStatus.innerHTML = '<div class="text-emerald-400 font-bold">> OPTIMIZATION COMPLETE</div>' +
+          '<div class="text-white/50 text-[9px] mt-2 leading-loose space-y-0.5">' +
+          '<div>ALGORITHM: A* Search</div>' +
+          '<div>HEURISTIC: Euclidean Distance</div>' +
+          '<div>NODES: 2,450 analyzed</div>' +
+          '<div>PATH: Old Mine Trail</div>' +
+          '<div class="text-emerald-400 font-bold mt-1">STATUS: OPTIMAL ✓</div></div>';
+        pathMeta.innerHTML = '<div class="flex justify-between"><span>TIME SAVED:</span> <span class="text-emerald-400 font-bold">180 min</span></div>' +
+          '<div class="flex justify-between"><span>DISTANCE:</span> <span class="text-white">12.4 km</span></div>' +
+          '<div class="flex justify-between"><span>RISK SCORE:</span> <span class="text-emerald-400">14/100</span></div>' +
+          '<div class="flex justify-between"><span>CONVOYS:</span> <span class="text-white">24 active</span></div>';
+      } else {
+        optStatus.innerHTML = '<div class="text-slate-600 italic">Awaiting telemetry...</div>';
         pathMeta.innerHTML = '---';
       }
     };

@@ -1,30 +1,45 @@
-# Technical Spec: NEXORA-SCLID-AI Foundation
+# Technical Spec: S.C.L.I.D AI
+
+**Swarm Co-Pilot for Logistics and Intelligent Dispatch**
 
 ## 1. Directory Structure
 ```text
 src/
+├── server.ts                  # WebSocket LangGraph orchestrator
+├── index.ts                   # NexoraPipeline entry point
+├── llm/
+│   └── MinimaxClient.ts       # MiniMax M2.5 — chat + action decision
 ├── orchestrator/
-│   ├── TaskPlanner.ts       # Logic for decomposing queries
-│   └── AgentRegistry.ts     # Registry for sub-agent skills
+│   ├── TaskPlanner.ts         # Query decomposition
+│   ├── AgentRegistry.ts       # Skill registry
+│   └── UnifiedEventBus.ts     # Pub/Sub event system
 ├── memory/
-│   ├── MemoryBank.ts        # 3-tier storage management
-│   └── VectorStore.ts       # Local vector search implementation
+│   ├── MemoryBank.ts          # 3-tier storage
+│   └── VectorStore.ts         # Cosine similarity vector search
 ├── agents/
-│   ├── BaseAgent.ts                 # Abstract class for all sub-agents
-│   ├── EarlyWarningAgent.ts         # Sub-agent implementation
-│   ├── SituationalAwarenessAgent.ts # Sub-agent implementation
-│   └── ResourceAllocationAgent.ts   # Sub-agent implementation
+│   ├── BaseAgent.ts           # Abstract base class
+│   ├── EarlyWarningAgent.ts
+│   ├── SituationalAwarenessAgent.ts
+│   └── ResourceAllocationAgent.ts
 ├── ham/
-│   ├── HAMBridgeService.ts          # APRS parsing & voice transcription
-│   ├── PacketRadioHandler.ts        # AX.25 frame encoding/decoding
-│   └── VoiceSynthesizer.ts          # Voice broadcast logic
+│   ├── HAMBridgeService.ts    # APRS parsing & voice transcription
+│   ├── PacketRadioHandler.ts  # AX.25 frame encoding
+│   └── VoiceSynthesizer.ts    # TTS broadcast logic
 ├── types/
-│   └── index.ts             # Global interfaces and schemas
-└── index.ts                 # Main NexoraPipeline entry point
+│   ├── index.ts               # Global interfaces
+│   └── errors.ts              # Custom errors
+└── __tests__/
+    └── integration.test.ts    # 6 integration tests
 
 web/
-├── index.html               # Interactive demo UI
-└── demo.js                  # Pipeline visualization script
+├── index.html                 # S.C.L.I.D landing page
+├── ai-view.html               # Presenter — UEB + Chat + Memory Bank
+├── eoc.html                   # Commander — Heatmap + Chat + Auth
+├── field.html                 # Dark Mode — HAM + AR Compass
+├── logistics.html             # Supply Chain — A* Graph + Inventory
+├── story.js                   # 7-frame City of Krypton narrative
+├── story-client.js            # WebSocket client (chat + state)
+└── styles.css                 # Shared design system
 ```
 
 ## 2. Core Interfaces (`src/types/index.ts`)
@@ -36,104 +51,115 @@ export interface AgentSkill {
   id: string;
   domain: AgentDomain;
   description: string;
-  inputSchema: object;  // JSON Schema
-  outputSchema: object; // JSON Schema
+  inputSchema: object;
+  outputSchema: object;
 }
 
 export interface MemoryArtifact {
   id: string;
   timestamp: string;
   source: string;
-  data: any;
+  data: unknown;
   tags: string[];
-  vector?: number[]; // For semantic retrieval
+  vector?: number[];
 }
 
 export interface TaskGraph {
-  tasks: {
-    id: string;
-    agentId: string;
-    dependencies: string[]; // IDs of other tasks
-    input: any;
-  }[];
+  tasks: Task[];
 }
-```
 
-## 3. Class Definitions
+export interface Task {
+  id: string;
+  agentId: string;
+  dependencies: string[];
+  input: unknown;
+}
 
-### `TaskPlanner`
-- **Goal:** Transform a natural language string into a `TaskGraph`.
-- **Method:** `generatePlan(query: string, availableSkills: AgentSkill[]): Promise<TaskGraph>`
-- **Logic:** Uses MLLM to map query intent to the Registry's skill schemas.
+export interface GeoData {
+  lat: number; lon: number;
+  population?: number;
+  criticalInfrastructure?: string[];
+  shelterLocations?: string[];
+}
 
-### `MemoryBank`
-- **Goal:** Manage the 3-tier lifecycle.
-- **Tiers:**
-  - `current`: In-memory Map for the active session.
-  - `shortTerm`: Local JSON/LevelDB for the last 24 hours.
-  - `longTerm`: Vector store (Local Chroma/Faiss) for historical retrieval.
-- **Method:** `store(artifact: MemoryArtifact, tier: 'current' | 'short' | 'long'): Promise<void>`
-- **Method:** `query(vector: number[], limit: number): Promise<MemoryArtifact[]>`
-
-## 4. Agent Communication Protocol (Unified Event Bus)
-
-Agents do not call each other directly. They interact via a **Unified Event Bus (UEB)**. This allows for asynchronous, loosely coupled coordination and ensures that data is automatically captured by the Memory Bank.
-
-### Message Pattern: Publish/Subscribe
-- **Publish:** When an agent completes a task, it publishes a `DisasterEvent`.
-- **Subscribe:** The `TaskPlanner` and `MemoryBank` subscribe to all events. The `ResourceAllocationAgent` specifically subscribes to `situational.fusion.completed` events.
-- **WebSocket Signals:** The server broadcasts `STATE_UPDATE`, `CHAT_LOADING`, and `CHAT_RESPONSE` to the connected HTML dashboards. The Commander EOC dashboard can send `CHAT_MESSAGE` over WS to query the Minimax M2.5 model.
-
-```typescript
 export interface DisasterEvent {
   id: string;
   topic: 'hazard.detected' | 'situational.fusion.completed' | 'resource.plan.generated';
   payload: MemoryArtifact;
-  metadata: {
-    priority: 'low' | 'medium' | 'high' | 'critical';
-    isLocal: boolean; // True if generated in Dark Mode
-  };
+  metadata: { priority: 'low' | 'medium' | 'high' | 'critical'; isLocal: boolean; };
 }
 ```
 
+## 3. WebSocket Protocol
+
+The `server.ts` WebSocket orchestrator handles:
+
+| Client → Server | Description |
+|-----------------|-------------|
+| `{ type: 'ADVANCE' }` | Advance to next story frame, triggers LLM `decideAction` |
+| `{ type: 'PREV' }` | Go back one frame |
+| `{ type: 'CHAT_MESSAGE', text: '...' }` | Commander chat — triggers context-aware LLM response |
+
+| Server → Client | Description |
+|-----------------|-------------|
+| `{ type: 'STATE_UPDATE', state: {...} }` | Full state including frame, UEB logs, agent statuses, memory bank |
+| `{ type: 'CHAT_LOADING' }` | Chat response is being generated |
+| `{ type: 'CHAT_RESPONSE', response: '...' }` | LLM chat reply |
+
+### Chat → Pipeline Trigger
+When a `CHAT_MESSAGE` contains deployment keywords ("deploy", "activate", "start", "respond", etc.), the server calls `pipeline.runAgentCascade()` which:
+1. Runs EarlyWarningAgent → stores artifact → publishes `hazard.detected`
+2. Runs SituationalAwarenessAgent → stores artifact → publishes `situational.fusion.completed`
+3. Runs ResourceAllocationAgent → stores artifact → publishes `resource.plan.generated`
+4. Broadcasts status changes to all clients in real-time
+
+## 4. LLM Integration (`MinimaxClient`)
+
+- **Model:** MiniMax M2.5 via OpenAI-compatible API
+- **`chatWithContext()`**: Injects current frame, memory artifacts, and agent statuses into a rich system prompt. The LLM responds as the S.C.L.I.D tactical AI.
+- **`decideAction()`**: Evaluates a scenario description and returns a UEB topic + payload in JSON.
+- **`shouldTriggerPipeline()`**: Keyword matching to detect deployment commands.
+- **`<think>` stripping**: M2.5 chain-of-thought blocks are automatically cleaned.
+- **Fallback**: Comprehensive heuristic responses for demo without API key.
+
 ## 5. User Role Interfaces
 
-The system provides specialized views based on the user's role in the Disaster Relief Body.
+### A. Presenter (AI Orchestrator View)
+- UEB Real-Time Stream (full event log)
+- Commander Chat with S.C.L.I.D M2.5
+- Memory Bank artifact display
+- Agent Pipeline Status badges (idle/processing/complete)
+- Frame navigation (Next/Prev)
 
-### A. Strategic Commander (EOC View)
-- **Goal:** Synthesis and Decision Authority.
-- **Key Features:**
-  - **Macro-Risk Heatmap:** Visualizes output from `EarlyWarningAgent`.
-  - **Executive Summary:** MLLM-generated briefing from the `MemoryBank`.
-  - **Approval Queue:** One-click authorization for high-impact resource plans.
+### B. Strategic Commander (EOC)
+- 2D SVG Heatmap of Krypton City with labeled locations
+- Commander Chat (same as Presenter)
+- Mini UEB log
+- Deployment Authorization panel (Human-in-the-Loop)
 
-### B. Field Responder (Tactical View)
-- **Goal:** Localized Awareness and Safety.
-- **Key Features:**
-  - **Offline Navigation:** Cached routes from `ResourceAllocationAgent`.
-  - **Local Hazards:** Alerts geofenced to the responder's current GPS.
-  - **Direct Incident Reporting:** Multi-modal (voice/photo) upload to `SituationalAwarenessAgent`.
+### C. Field Responder (Dark Mode)
+- CRT-style terminal with scanline effects
+- AX.25 Packet Radio stream
+- AI Directives panel (receives chat broadcasts)
+- AR Compass navigation with rescue routing
+- SOS decode at Frame 6
 
-### C. Logistics Manager (Supply View)
-- **Goal:** Inventory and Distribution Optimization.
-- **Key Features:**
-  - **Bottleneck Analysis:** Identifies transport disruptions (e.g., blocked bridges).
-  - **Inventory Live-Feed:** Tracks supply levels at various shelters.
-  - **Route Optimization:** Visualizes the "Traveler's Path" generated by the sub-agent.
+### D. Logistics Manager
+- A* Route Graph with labeled nodes
+- Supply inventory with progress bars + sandbag depletion
+- AI Directives from chat broadcasts
+- Route analytics (time saved, distance, risk score)
 
-## 6. Coding Standards (SOUL-compliant)
-- **Strict Typing:** No `any` except in raw data ingestion. Use generic types for Artifacts.
-- **Immutability:** Memory artifacts should be frozen once stored.
-- **Logging:** Every agent transition must be logged to the `CHECKPOINT.md`.
-
-## 7. Build & Test Commands
-- **Build:** `tsc`
-- **Test:** `jest`
-- **Lint:** `eslint . --ext .ts`
-artifacts should be frozen once stored.
-- **Logging:** Every agent transition must be logged to the `CHECKPOINT.md`.
+## 6. Coding Standards
+- **Strict Typing:** `unknown` over `any` for data payloads.
+- **Immutability:** Memory artifacts frozen on store.
+- **Logging:** Every agent transition logged to UEB.
+- **Fallback Safety:** All LLM calls gracefully degrade to heuristics.
 
 ## 7. Build & Test Commands
-- **Build:** `tsc`
-- **Test:** `jest`
-- **Lint:** `eslint . --ext .ts`
+```bash
+npm run build         # tsc
+npm run start         # tsc && node dist/server.js
+npm test              # jest (44 tests)
+npm run test:browser  # playwright
+```

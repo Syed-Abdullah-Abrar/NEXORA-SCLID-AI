@@ -210,7 +210,7 @@ export class ResourceAllocationAgent extends BaseAgent {
   formatForHAM(plan: MemoryArtifact): string {
     const data = plan.data as { plan?: string; actions?: Array<{ type: string; target?: string }> };
     const lines = [
-      `NEXORA RESOURCE PLAN: ${data.plan}`,
+      `S.C.L.I.D RESOURCE PLAN: ${data.plan}`,
       ...(data.actions || []).slice(0, 3).map(a =>
         `${a.type}${a.target ? ` - ${a.target}` : ''}`
       ),

@@ -66,7 +66,7 @@ export class HAMBridgeService {
   async broadcast(artifact: MemoryArtifact): Promise<string> {
     const data = artifact.data as { plan?: string; actions?: string[] };
     const lines = [
-      `NEXORA: ${data.plan || 'Resource Update'}`,
+      `S.C.L.I.D: ${data.plan || 'Resource Update'}`,
       ...(data.actions || []).map((a: string) => `- ${a}`),
       `TS: ${new Date(artifact.timestamp).toISOString()}`,
     ];
