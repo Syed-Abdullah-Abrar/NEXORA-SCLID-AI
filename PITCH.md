@@ -41,14 +41,13 @@ To create a "wow" moment, you will use your actual smartphone as the Field Marsh
 
 **Presenter:** "How do we make this possible? We built S.C.L.I.D using a highly specialized, lightweight tech stack designed for speed and reliability:
 - **Core Orchestration:** Node.js backend acting as a LangGraph-style agent orchestrator via a Unified Event Bus.
-- **Front-End Visualization:** Vanilla JS, TailwindCSS, and dynamic SVG rendering for zero-latency, highly dense map interfaces.
 - **LLM Intelligence:** Powered by **MiniMax M2.5**, parsing unstructured data into military-grade `[SITREP]` structures.
-- **Connectivity:** Real-time WebSockets with **Pinggy** SSH tunneling, enabling seamless multi-device synchronization over cellular networks.
+- **The HAM Radio Bridge (Offline Fallback):** This is our defining innovation. When 5G and Wi-Fi grids collapse, internet-based apps die. S.C.L.I.D doesn't. Our architecture is designed to ingest **Packet Radio (APRS)**. A field responder uses a portable VHF/UHF HAM radio tethered to their phone. The phone compresses their text SOS into an audio burst. The EOC base station demodulates that radio burst back into raw text and pipes it directly into our Unified Event Bus (`ham.burst.received`). Then, our MiniMax LLM intelligently parses that messy radio string into precise, actionable map coordinates.
 
 **The Impact on Disaster Relief Bodies:**
 1. **De-siloing Agencies:** The Unified Event Bus means fire, police, and logistics EOCs share a single Common Operating Picture instantly.
 2. **Saving Hours in Logistics:** Real-time A* pathfinding calculates safe supply routes in milliseconds, saving crucial hours of transport time.
-3. **Zero-Connectivity Operations:** Through our simulated HAM Radio Bridge, field units can transmit SOS packets even when the 5G grid collapses."
+3. **Zero-Connectivity Operations:** Thanks to the HAM bridge, no one is ever truly offline."
 
 ---
 
@@ -94,7 +93,11 @@ To create a "wow" moment, you will use your actual smartphone as the Field Marsh
 ### Act 6: Dark Mode (Frame 6)
 *[Press NEXT to reach Frame 6. Pull out your smartphone and hold it up for the judges to see.]*
 
-"Final mile. Cell towers are dead. Our Field Marshall is in total blackout. But S.C.L.I.D's HAM Radio Bridge just decoded an SOS — **15 survivors trapped at Krypton Library**. The AI projects an AR-style navigation path directly to their terminal. Offline. Decentralized. Life-saving."
+"Final mile. Cell towers are dead. Our Field Marshall is in total blackout. But S.C.L.I.D's HAM Radio Bridge just saved them. 
+
+Watch closely. Our field responder types an SOS into their offline app. The app compresses this text and GPS coordinates into an **APRS packet radio burst**, transmitting it over VHF hardware. 
+
+The EOC base station receives the audio, demodulates it, and pipes it straight into S.C.L.I.D. The AI parses the messy radio string and projects an AR-style navigation path directly to their terminal. Offline. Decentralized. Life-saving."
 
 *(Bonus ⭐: Type "15 civilians trapped, need extract" on your phone's TX input and hit SEND to show two-way field reporting!)*
 
