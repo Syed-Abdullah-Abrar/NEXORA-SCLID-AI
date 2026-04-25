@@ -59,6 +59,14 @@ export class MemoryBank {
       .map(r => r.artifact);
   }
 
+  getAll(): MemoryArtifact[] {
+    return [
+      ...Array.from(this.current.values()),
+      ...Array.from(this.shortTerm.values()),
+      ...Array.from(this.longTerm.values()),
+    ];
+  }
+
   private cosineSimilarity(a: number[], b: number[]): number {
     let dot = 0, magA = 0, magB = 0;
     for (let i = 0; i < a.length; i++) {

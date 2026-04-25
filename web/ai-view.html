@@ -71,46 +71,48 @@
        <p id="presenterScript" class="text-white/80 text-base italic leading-relaxed">...</p>
     </div>
     <div class="flex items-center gap-6">
-       <button onclick="controller.prevFrame()" id="prevBtn" class="px-6 py-3 bg-nexora-surface border border-nexora-border rounded-lg hover:bg-slate-700 font-bold transition-all disabled:opacity-30">← PREV</button>
+       <button id="prevBtn" class="px-6 py-3 bg-nexora-surface border border-nexora-border rounded-lg hover:bg-slate-700 font-bold transition-all disabled:opacity-30">← PREV</button>
        <div id="frameIndicator" class="text-3xl font-black font-mono w-24 text-center">00/00</div>
-       <button onclick="controller.nextFrame()" id="nextBtn" class="px-10 py-4 bg-nexora-agent text-white rounded-xl hover:bg-blue-600 font-black shadow-[0_0_40px_rgba(59,130,246,0.3)] transform hover:scale-105 active:scale-95 transition-all">NEXT STEP →</button>
+       <button id="nextBtn" class="px-10 py-4 bg-nexora-agent text-white rounded-xl hover:bg-blue-600 font-black shadow-[0_0_40px_rgba(59,130,246,0.3)] transform hover:scale-105 active:scale-95 transition-all">NEXT STEP →</button>
     </div>
   </div>
 
-  <script src="story.js"></script>
-  <script src="story-controller.js"></script>
+  <script src="story-client.js"></script>
   <script>
-    const controller = new StoryController(window.THE_STORY);
+    const client = new StoryClient('ws://localhost:8080');
 
-    controller.onFrameChange = (frameIndex) => {
-      const frame = window.THE_STORY[frameIndex];
-      const state = frame.ui_state;
+    client.onStateChange = (state) => {
+      const uiState = state.ui_state;
 
       // Header & Navigation
-      document.getElementById('frame-title').textContent = frame.title;
-      document.getElementById('presenterScript').textContent = frame.presenter_script;
-      document.getElementById('frameIndicator').textContent = \`\${(frameIndex + 1).toString().padStart(2, '0')}/\${window.THE_STORY.length.toString().padStart(2, '0')}\`;
-      document.getElementById('prevBtn').disabled = frameIndex === 0;
-      document.getElementById('nextBtn').disabled = frameIndex === window.THE_STORY.length - 1;
+      document.getElementById('frame-title').textContent = state.title;
+      document.getElementById('presenterScript').textContent = state.presenter_script;
+      document.getElementById('frameIndicator').textContent = \`\${(state.frameIndex + 1).toString().padStart(2, '0')}/\${state.totalFrames.toString().padStart(2, '0')}\`;
+      document.getElementById('prevBtn').disabled = state.frameIndex === 0;
+      document.getElementById('nextBtn').disabled = state.frameIndex === state.totalFrames - 1;
 
       // UEB Log
       const uebLog = document.getElementById('uebLog');
-      const logEntry = document.createElement('div');
-      logEntry.className = 'p-3 bg-slate-900/80 border-l-2 border-nexora-agent rounded-r animate-in fade-in slide-in-from-left-4 duration-500';
-      logEntry.innerHTML = \`<span class="text-nexora-muted text-xs mr-2">[\${new Date().toLocaleTimeString()}]</span> \${state.ueb_log}\`;
-      uebLog.appendChild(logEntry);
+      uebLog.innerHTML = '';
+      if (uiState.ueb_log) {
+        const logEntry = document.createElement('div');
+        logEntry.className = 'p-3 bg-slate-900/80 border-l-2 border-nexora-agent rounded-r animate-in fade-in slide-in-from-left-4 duration-500';
+        logEntry.innerHTML = \`<span class="text-nexora-muted text-xs mr-2">[\${new Date().toLocaleTimeString()}]</span> \${uiState.ueb_log}\`;
+        uebLog.appendChild(logEntry);
+      }
       uebLog.scrollTop = uebLog.scrollHeight;
 
       // LLM Thought
       const llmBox = document.getElementById('llm-process');
-      if (frameIndex === 1) llmBox.textContent = "QUERY: Analyze Silver River spike... RESULT: 92% match to 1998 Flood Pattern. ACTION: Issue Critical Warning.";
-      else if (frameIndex === 4) llmBox.textContent = "REROUTING: A* Search initiated. OBSTACLE: Highland Pass. RESULT: Mountain Trail optimized. Time Saved: 180m.";
-      else if (frameIndex === 0) llmBox.textContent = "IDLE. Awaiting mission objectives.";
+      if (state.frameIndex === 1) llmBox.textContent = "QUERY: Analyze Silver River spike... RESULT: 92% match to 1998 Flood Pattern. ACTION: Issue Critical Warning.";
+      else if (state.frameIndex === 4) llmBox.textContent = "REROUTING: A* Search initiated. OBSTACLE: Highland Pass. RESULT: Mountain Trail optimized. Time Saved: 180m.";
+      else if (state.frameIndex === 0) llmBox.textContent = "IDLE. Awaiting mission objectives.";
+      else llmBox.textContent = "PROCESSING SYSTEM STATE...";
 
       // Agent Status
-      updateAgent('ew', state.agent_statuses.early_warning);
-      updateAgent('sa', state.agent_statuses.situational);
-      updateAgent('ra', state.agent_statuses.resource);
+      updateAgent('ew', uiState.agent_statuses.early_warning);
+      updateAgent('sa', uiState.agent_statuses.situational);
+      updateAgent('ra', uiState.agent_statuses.resource);
     };
 
     function updateAgent(id, status) {
@@ -119,8 +121,10 @@
       el.textContent = status.replace('_', ' ');
     }
 
-    // Initialize UI
-    controller.goToFrame(controller.currentFrame);
+    document.getElementById('nextBtn').addEventListener('click', () => client.nextFrame());
+    document.getElementById('prevBtn').addEventListener('click', () => client.prevFrame());
+
+    client.connect();
   </script>
 </body>
 </html>

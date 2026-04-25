@@ -81,20 +81,18 @@
     </div>
   </div>
 
-  <script src="story.js"></script>
+  
   <script src="story-client.js"></script>
   <script>
     const client = new StoryClient('ws://localhost:8080');
-    client.loadStory(THE_STORY);
     
-    client.onFrameChange = (frameIndex) => {
-      const frame = THE_STORY[frameIndex];
+    client.onStateChange = (state) => {
       const optStatus = document.getElementById('optimizer-status');
       const pathMeta = document.getElementById('path-metadata');
       
       // Update Map
-      const isLandslide = frameIndex >= 2;
-      const isOptimal = frameIndex >= 4;
+      const isLandslide = state.frameIndex >= 2;
+      const isOptimal = state.frameIndex >= 4;
       
       document.getElementById('landslide-marker').classList.toggle('hidden', !isLandslide);
       document.getElementById('path-main').className = isLandslide ? 'route-blocked' : 'route-active';
@@ -109,7 +107,7 @@
         pathMeta.innerHTML = 'Route: Old Mine Trail<br>Distance: 12.4km<br>Risk Score: 14/100<br>ETA: 18m';
       }
     };
-    
+
     client.onConnect = () => document.getElementById('statusDot').classList.add('bg-nexora-success');
     client.connect();
   </script>

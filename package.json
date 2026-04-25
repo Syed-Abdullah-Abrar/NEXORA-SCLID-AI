@@ -5,6 +5,7 @@
   "description": "Multi-agent disaster management pipeline",
   "main": "dist/index.js",
   "scripts": {
+    "start": "tsc && node dist/server.js",
     "build": "tsc",
     "test": "jest",
     "test:browser": "playwright test",
@@ -13,12 +14,15 @@
   "devDependencies": {
     "@playwright/test": "^1.59.1",
     "@types/jest": "^29.5.12",
+    "@types/ws": "^8.18.1",
     "jest": "^29.7.0",
     "playwright": "^1.59.1",
     "ts-jest": "^29.1.2",
     "typescript": "^5.4.5"
   },
   "dependencies": {
+    "dotenv": "^17.4.2",
+    "node-fetch": "^3.3.2",
     "ws": "^8.20.0"
   }
 }
