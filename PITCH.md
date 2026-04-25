@@ -9,6 +9,8 @@
 
 To create a "wow" moment, you will use your actual smartphone as the Field Marshall's device. We use **Pinggy** to tunnel through the venue's Wi-Fi firewall instantly.
 
+> ⚠️ **CRITICAL PINGGY WARNING:** The free Pinggy tunnel expires exactly 60 minutes after you run the SSH command. Do not start the tunnel too early! Generate a fresh link 15 minutes before the pitch, and click "Visit Site" on the phone to bypass the warning screen before walking on stage.
+
 1. Run `npm run start` in your first terminal.
 2. Open a second terminal and run: `ssh -p 443 -R0:localhost:8080 a.pinggy.io`
 3. Scan the QR code or copy the URL it prints (e.g., `https://something.a.pinggy.link`).
@@ -103,9 +105,14 @@ The EOC base station receives the audio, demodulates it, and pipes it straight i
 
 ---
 
-## The Future (4:00 – 5:00)
+## The Future & UN SDG Alignment (4:00 – 5:00)
 
-**Presenter:** "What you just saw was a **live AI brain** orchestrating a complex, multi-screen disaster response in real-time."
+**Presenter:** "What you just saw was a **live AI brain** orchestrating a complex, multi-screen disaster response in real-time. But S.C.L.I.D is more than just a software tool. It is deeply aligned with the **Sendai Framework** to protect the UN's Sustainable Development Goals (SDGs):
+- We directly support **SDG 11 (Sustainable Cities)** by mitigating economic loss and promoting holistic urban risk management.
+- We support **SDG 13 (Climate Action)** by creating massive adaptive resilience against sudden climate-related floods and fires.
+- We protect **SDG 9 (Resilient Infrastructure)** by dynamically routing around collapsed supply chains.
+
+Disasters can destroy decades of progress in minutes. We don't build dashboards. We build **the future of resilience**."
 
 "We're moving S.C.L.I.D to:
 - **On-device SLMs** for true edge deployment

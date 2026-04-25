@@ -13,7 +13,7 @@ const THE_STORY = [
       active_page: '/eoc.html',
       eoc_map: { risk_visible: false, routes: [] },
       agent_statuses: { early_warning: 'idle', situational: 'idle', resource: 'idle' },
-      ueb_log: "S.C.L.I.D AI SYSTEM ONLINE — Monitoring Silver River Basin",
+      ueb_log: "🟢 UEB [sys.init]: S.C.L.I.D SYSTEM ONLINE — Ingesting [IoT Water Sensors], [Twitter/X API], and [911 Dispatch] feeds",
       memory_bank: []
     }
   },
@@ -26,7 +26,7 @@ const THE_STORY = [
       active_page: '/ai-view.html',
       eoc_map: { risk_visible: true, routes: [] },
       agent_statuses: { early_warning: 'processing', situational: 'idle', resource: 'idle' },
-      ueb_log: "🧠 MLLM: Querying MiniMax M2.5 — Analyzing 1998 Flood Pattern parity...",
+      ueb_log: "🧠 MLLM [data.ingest]: Querying MiniMax M2.5 — Analyzing [IoT_Sensor_Array_4] 400mm spike vs 1998 Flood Pattern...",
       memory_bank: [{ id: 'hist-1', source: 'LongTermMemory', data: '1998 Flood: 400mm rainfall in 6h resulted in Silver River breach. Substation 4 vulnerable.' }]
     }
   },
@@ -39,7 +39,7 @@ const THE_STORY = [
       active_page: '/eoc.html',
       eoc_map: { risk_visible: true, heatmap: 'critical' },
       agent_statuses: { early_warning: 'complete', situational: 'idle', resource: 'idle' },
-      ueb_log: "🔴 UEB [hazard.detected]: CRITICAL Flood Imminent — Sector 4 Grid Offline",
+      ueb_log: "🔴 UEB [hazard.detected]: [IoT_Grid_Monitor] CRITICAL Flood Imminent — Sector 4 Power Grid Offline",
       memory_bank: [{ id: 'ew-1', source: 'EarlyWarningAgent', data: '{ "match": 0.92, "severity": "CRITICAL", "hazard": "flood", "water_level": "4.2m", "threat_danger": "EXTREME", "flow_rate": "1200_cfs" }' }]
     }
   },
@@ -52,7 +52,7 @@ const THE_STORY = [
       active_page: '/logistics.html',
       eoc_map: { risk_visible: true, routes: [{ id: 'route-main', status: 'blocked' }] },
       agent_statuses: { early_warning: 'complete', situational: 'processing', resource: 'idle' },
-      ueb_log: "🟡 UEB [situational.fusion]: Drone Feed 04 confirms Highland Pass BLOCKED — Secondary fires detected",
+      ueb_log: "🟡 UEB [situational.fusion]: Fusing [Drone_Video_04] + [Twitter_Distress_Tags] — Highland Pass BLOCKED, fires confirmed",
       memory_bank: [
         { id: 'ew-1', source: 'EarlyWarningAgent', data: '...' },
         { id: 'sa-1', source: 'SituationalAwarenessAgent', data: '{ "landslide": "confirmed", "route": "blocked", "fires": "Sector 4", "fire_class": "Class C Electrical", "threat_danger": "EXTREME", "affected": 12500 }' }

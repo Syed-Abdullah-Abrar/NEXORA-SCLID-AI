@@ -11,6 +11,16 @@
 <body class="bg-[#070B14] text-nexora-text min-h-screen grid-bg">
   <div class="h-full flex flex-col p-5">
 
+    <!-- Alarm Popup -->
+    <div id="alarm-popup" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-red-900/80 backdrop-blur-sm">
+      <div class="bg-[#070B14] border-2 border-red-500 rounded-2xl p-8 text-center shadow-[0_0_100px_rgba(239,68,68,0.6)] animate-pulse max-w-lg">
+        <div class="text-6xl mb-4">⚠️</div>
+        <h1 class="text-4xl font-black text-red-500 mb-2">CRITICAL ALERT</h1>
+        <p class="text-white text-xl mb-6">Early Warning Agent confirms 92% flood match in Sector 4. Inundation is imminent.</p>
+        <button onclick="document.getElementById('alarm-popup').classList.add('hidden')" class="px-8 py-3 bg-red-600 text-white font-black rounded-lg hover:bg-red-700 transition-all uppercase tracking-widest text-sm shadow-[0_0_20px_rgba(220,38,38,0.4)]">Acknowledge</button>
+      </div>
+    </div>
+
     <!-- Header -->
     <header class="flex justify-between items-center mb-5">
       <div class="flex items-center gap-3">
@@ -62,12 +72,12 @@
             <path d="M 0 120 Q 150 160 300 110 Q 450 60 600 130 Q 700 160 800 140" stroke="#3B82F6" fill="none" stroke-width="3" stroke-linecap="round" opacity="0.3"/>
 
             <!-- City Labels -->
-            <text x="50" y="200" fill="#64748B" font-size="9" font-family="Inter" font-weight="600">DEPOT</text>
-            <text x="280" y="45" fill="#64748B" font-size="9" font-family="Inter" font-weight="600">HIGHLAND PASS</text>
-            <text x="550" y="200" fill="#64748B" font-size="9" font-family="Inter" font-weight="600">SECTOR 4</text>
-            <text x="280" y="350" fill="#64748B" font-size="9" font-family="Inter" font-weight="600">OLD MINE TRAIL</text>
-            <text x="580" y="380" fill="#64748B" font-size="9" font-family="Inter" font-weight="600">KRYPTON LIBRARY</text>
-            <text x="350" y="160" fill="#1E3A5F" font-size="8" font-family="Inter">Silver River</text>
+            <text x="50" y="200" fill="#CBD5E1" font-size="14" font-family="Inter" font-weight="900" letter-spacing="1">DEPOT</text>
+            <text x="280" y="45" fill="#CBD5E1" font-size="14" font-family="Inter" font-weight="900" letter-spacing="1">HIGHLAND PASS</text>
+            <text x="550" y="200" fill="#CBD5E1" font-size="14" font-family="Inter" font-weight="900" letter-spacing="1">SECTOR 4</text>
+            <text x="280" y="350" fill="#CBD5E1" font-size="14" font-family="Inter" font-weight="900" letter-spacing="1">OLD MINE TRAIL</text>
+            <text x="580" y="380" fill="#CBD5E1" font-size="14" font-family="Inter" font-weight="900" letter-spacing="1">KRYPTON LIBRARY</text>
+            <text x="350" y="160" fill="#3B82F6" font-size="12" font-family="Inter" font-weight="bold" font-style="italic">Silver River</text>
 
             <!-- Location Markers -->
             <circle cx="70" cy="210" r="6" fill="#3B82F6" opacity="0.8"/>
@@ -168,10 +178,19 @@
       if (e.key === 'Enter') document.getElementById('send-chat-btn').click();
     });
 
+    // ── Alarm Logic ──
+    let alarmPlayed = false;
+
     // ── State Updates ──
     client.onStateChange = (state) => {
       const ui = state.ui_state;
       document.getElementById('connection-status').textContent = 'LIVE — Frame ' + (state.frameIndex + 1);
+
+      // Trigger Alarm Popup on Frame 2
+      if (state.frameIndex === 2 && !alarmPlayed) {
+        alarmPlayed = true;
+        document.getElementById('alarm-popup').classList.remove('hidden');
+      }
 
       // Hazard Analytics
       const isCritical = ui.eoc_map && ui.eoc_map.risk_visible;

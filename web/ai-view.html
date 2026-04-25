@@ -89,17 +89,19 @@
     </div>
   </div>
 
-  <!-- Presenter Control Bar -->
-  <div class="fixed bottom-0 left-0 right-0 m-5">
-    <div class="glass-box p-5 flex justify-between items-center border border-white/5 shadow-2xl">
-      <div class="max-w-lg">
-        <h2 id="frame-title" class="text-blue-400 font-bold text-[11px] mb-1 uppercase tracking-[0.15em]">Krypton Response</h2>
-        <p id="presenterScript" class="text-white/70 text-sm italic leading-relaxed">System ready. Press NEXT to begin the story.</p>
-      </div>
-      <div class="flex items-center gap-5">
-        <button id="prevBtn" class="px-5 py-2.5 bg-slate-800 border border-slate-700 rounded-lg hover:bg-slate-700 font-bold text-sm transition-all disabled:opacity-20" disabled>← PREV</button>
-        <div id="frameIndicator" class="text-2xl font-black font-mono w-20 text-center tracking-tight">01/07</div>
-        <button id="nextBtn" class="px-8 py-3.5 bg-blue-500 text-white rounded-xl hover:bg-blue-600 font-black text-sm shadow-[0_0_30px_rgba(59,130,246,0.25)] transform hover:scale-[1.03] active:scale-95 transition-all">NEXT →</button>
+      <!-- Presenter Control & Script -->
+      <div class="mt-8 border-t border-slate-800 pt-5">
+        <div class="section-label text-blue-400 mb-2">Demo Control & Presenter Script</div>
+        <div class="bg-slate-900/60 border border-blue-500/30 rounded-xl p-4 shadow-[0_0_20px_rgba(59,130,246,0.1)]">
+          <h2 id="frame-title" class="text-white font-black text-[12px] mb-2 uppercase tracking-[0.15em]">Krypton Response</h2>
+          <p id="presenterScript" class="text-slate-300 text-[13px] italic leading-relaxed mb-5">System ready. Press NEXT to begin the story.</p>
+          
+          <div class="flex items-center justify-between gap-3">
+            <button id="prevBtn" class="flex-1 py-2 bg-slate-800 border border-slate-700 rounded-lg hover:bg-slate-700 font-bold text-xs transition-all disabled:opacity-20" disabled>← PREV</button>
+            <div id="frameIndicator" class="text-lg font-black font-mono text-center tracking-tight text-white px-2">01/07</div>
+            <button id="nextBtn" class="flex-1 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 font-black text-xs shadow-[0_0_15px_rgba(59,130,246,0.3)] transition-all">NEXT →</button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -108,6 +110,28 @@
   <script>
     const wsProtocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
     const client = new StoryClient(wsProtocol + window.location.host);
+
+    // ── Alarm Logic ──
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    const audioCtx = new AudioContext();
+    let alarmPlayed = false;
+
+    function playAlarm() {
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      for (let i = 0; i < 3; i++) {
+        setTimeout(() => {
+          const osc = audioCtx.createOscillator();
+          const gainNode = audioCtx.createGain();
+          osc.type = 'square';
+          osc.frequency.setValueAtTime(880, audioCtx.currentTime); // A5 note
+          gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+          osc.connect(gainNode);
+          gainNode.connect(audioCtx.destination);
+          osc.start();
+          osc.stop(audioCtx.currentTime + 0.3);
+        }, i * 500);
+      }
+    }
 
     // ── Chat ──
     function appendChat(role, text) {
@@ -162,6 +186,11 @@
       document.getElementById('prevBtn').disabled = state.frameIndex === 0;
       document.getElementById('nextBtn').disabled = state.frameIndex === state.totalFrames - 1;
 
+      if (state.frameIndex === 2 && !alarmPlayed) {
+        alarmPlayed = true;
+        playAlarm();
+      }
+
       // UEB Log — append full log
       if (ui.ueb_log_full) {
         const uebLog = document.getElementById('uebLog');
@@ -181,9 +210,9 @@
 
       // LLM Thought
       const llmBox = document.getElementById('llm-process');
-      if (state.frameIndex === 0) llmBox.textContent = "IDLE. Monitoring Krypton sensor arrays.";
-      else if (state.frameIndex === 1) llmBox.textContent = "QUERY: Analyze Silver River precipitation spike...\nRESULT: 92% match to 1998 Flood Pattern.\nACTION: Issue CRITICAL warning to EOC.";
-      else if (state.frameIndex === 4) llmBox.textContent = "REROUTING: A* Search initiated.\nOBSTACLE: Highland Pass blocked.\nSOLUTION: Old Mine Trail — saves 180 min.\nNODES ANALYZED: 2,450";
+      if (state.frameIndex === 0) llmBox.textContent = "IDLE. Monitoring [IoT_Water_Sensors], [Social_Media_API], and [911_Transcripts] across Krypton.";
+      else if (state.frameIndex === 1) llmBox.textContent = "QUERY: Analyze [IoT_Sensor_Array_4] precipitation spike...\nRESULT: 92% match to 1998 Flood Pattern.\nACTION: Issue CRITICAL warning to EOC.";
+      else if (state.frameIndex === 4) llmBox.textContent = "REROUTING: A* Search initiated.\nOBSTACLE: Highland Pass blocked (via Drone_Feed_04).\nSOLUTION: Old Mine Trail — saves 180 min.\nNODES ANALYZED: 2,450";
       else llmBox.textContent = "MLLM: Orchestrating agent cascade for \"" + state.title + "\"...";
 
       // Agent Status
@@ -216,7 +245,10 @@
       }
     }
 
-    document.getElementById('nextBtn').addEventListener('click', () => client.nextFrame());
+    document.getElementById('nextBtn').addEventListener('click', () => {
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      client.nextFrame();
+    });
     document.getElementById('prevBtn').addEventListener('click', () => client.prevFrame());
 
     client.connect();
