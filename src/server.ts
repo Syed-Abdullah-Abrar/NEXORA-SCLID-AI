@@ -1,7 +1,7 @@
 import { WebSocketServer, WebSocket } from 'ws';
 import * as dotenv from 'dotenv';
-import { NexoraPipeline, MemoryArtifact } from './index.js';
-import { MinimaxClient } from './llm/MinimaxClient.js';
+import { NexoraPipeline, MemoryArtifact } from './index';
+import { MinimaxClient } from './llm/MinimaxClient';
 import fs from 'fs';
 import path from 'path';
 

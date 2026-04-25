@@ -69,20 +69,18 @@
     </div>
   </div>
 
-  
   <script src="story-client.js"></script>
   <script>
-    const controller = new StoryController(window.THE_STORY);
+    const client = new StoryClient('ws://localhost:8080');
     
-    controller.onFrameChange = (frameIndex) => {
-      const frame = window.THE_STORY[frameIndex];
-      const state = frame.ui_state;
+    client.onStateChange = (state) => {
+      const uiState = state.ui_state;
       
       // Header Status
-      document.getElementById('connection-status').textContent = 'Live Frame: ' + (frameIndex + 1);
+      document.getElementById('connection-status').textContent = 'Live Frame: ' + (state.frameIndex + 1);
 
       // Prediction Stats
-      const isCritical = state.eoc_map.risk_visible;
+      const isCritical = uiState.eoc_map.risk_visible;
       document.getElementById('prediction-level').textContent = isCritical ? 'CRITICAL' : 'STABLE';
       document.getElementById('prediction-level').className = 'text-4xl font-black mb-1 ' + (isCritical ? 'text-nexora-critical' : 'text-nexora-agent');
       document.getElementById('risk-bar').style.width = isCritical ? '92%' : '5%';
@@ -92,11 +90,11 @@
       const log = document.getElementById('mission-log');
       log.innerHTML = `<div class="p-3 bg-black/40 rounded border-l-2 border-nexora-agent animate-in fade-in slide-in-from-top-2">
         <div class="text-[10px] font-bold text-nexora-agent mb-1 uppercase tracking-widest">Active Insight</div>
-        <div class="text-xs text-white/90 leading-relaxed font-medium">\${state.ueb_log}</div>
+        <div class="text-xs text-white/90 leading-relaxed font-medium">${uiState.ueb_log}</div>
       </div>`;
       
       // Authorization
-      const needsAuth = state.agent_statuses.resource === 'pending_approval';
+      const needsAuth = uiState.agent_statuses.resource === 'pending_approval';
       document.getElementById('auth-panel').classList.toggle('hidden', !needsAuth);
       document.getElementById('auth-idle').classList.toggle('hidden', needsAuth);
 
@@ -114,8 +112,8 @@
       
       const routes = document.getElementById('route-overlays');
       routes.innerHTML = '';
-      if (state.eoc_map.routes) {
-        state.eoc_map.routes.forEach(r => {
+      if (uiState.eoc_map.routes) {
+        uiState.eoc_map.routes.forEach(r => {
            const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
            path.setAttribute("d", r.id === 'route-main' ? "M 50 150 L 200 50 L 350 150" : "M 50 150 L 200 250 L 350 150");
            path.setAttribute("class", r.status === 'blocked' ? 'route-blocked' : 'route-active');
@@ -125,8 +123,7 @@
       }
     };
     
-    // Initial Render
-    controller.goToFrame(controller.currentFrame);
+    client.connect();
   </script>
 </body>
 </html>

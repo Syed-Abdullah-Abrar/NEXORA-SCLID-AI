@@ -73,38 +73,36 @@
     </div>
   </div>
 
-  
   <script src="story-client.js"></script>
   <script>
-    const controller = new StoryController(window.THE_STORY);
+    const client = new StoryClient('ws://localhost:8080');
     
-    controller.onFrameChange = (frameIndex) => {
-      const frame = window.THE_STORY[frameIndex];
-      const state = frame.ui_state;
+    client.onStateChange = (state) => {
+      const uiState = state.ui_state;
       const terminal = document.getElementById('terminal-content');
       
       // Update Terminal Log
-      if(frameIndex > 0) {
+      if(state.frameIndex > 0 && uiState.ueb_log) {
         const entry = document.createElement('div');
         entry.className = 'animate-in fade-in slide-in-from-bottom-2 duration-300';
-        entry.innerHTML = `<span class="text-[8px] text-nexora-muted mr-2">${new Date().toLocaleTimeString()}</span> <span class="text-white/80">></span> \${state.ueb_log}`;
+        entry.innerHTML = `<span class="text-[8px] text-nexora-muted mr-2">${new Date().toLocaleTimeString()}</span> <span class="text-white/80">></span> ${uiState.ueb_log}`;
         terminal.appendChild(entry);
         terminal.scrollTop = terminal.scrollHeight;
-      } else {
+      } else if (state.frameIndex === 0) {
         terminal.innerHTML = '<div class="text-nexora-muted opacity-50 italic">Awaiting radio burst...</div>';
       }
       
       // Update AR View / Compass
-      const isRescueActive = frameIndex >= 5;
+      const isRescueActive = state.frameIndex >= 5;
       const arView = document.getElementById('ar-view');
       const arrow = document.getElementById('compass-arrow');
       const label = document.getElementById('compass-label');
       
       arView.style.opacity = isRescueActive ? '1' : '0.2';
       arView.style.filter = isRescueActive ? 'none' : 'grayscale(1)';
-      arView.className = \`h-48 border rounded-xl relative overflow-hidden flex flex-col items-center justify-center transition-all duration-1000 \${isRescueActive ? 'bg-green-500/5 border-nexora-success shadow-[inset_0_0_20px_rgba(16,185,129,0.1)]' : 'bg-slate-900/40 border-nexora-border'}\`;
+      arView.className = `h-48 border rounded-xl relative overflow-hidden flex flex-col items-center justify-center transition-all duration-1000 ${isRescueActive ? 'bg-green-500/5 border-nexora-success shadow-[inset_0_0_20px_rgba(16,185,129,0.1)]' : 'bg-slate-900/40 border-nexora-border'}`;
       
-      if (frameIndex === 6) {
+      if (state.frameIndex === 6) {
         arrow.setAttribute('transform', 'rotate(-45 50 50)');
         arrow.style.color = '#3B82F6'; // Agent Blue for Final Path
         label.textContent = 'FINAL MILE: KRYPTON LIBRARY';
@@ -119,9 +117,8 @@
         label.textContent = 'Awaiting Navigation Data';
       }
     };
-    
-    // Initial State
-    controller.goToFrame(controller.currentFrame);
+
+    client.connect();
   </script>
 </body>
 </html>
