@@ -84,9 +84,9 @@ httpServer.listen(PORT, '0.0.0.0', () => {
 });
 
 const THE_STORY = loadStory();
+let dynamicFrames = [...THE_STORY];
 console.log(`\n🛡️  S.C.L.I.D AI ORCHESTRATOR ONLINE`);
-console.log(`📍 ${THE_STORY.length} Frames loaded.`);
-console.log(`🤖 MLLM: ${process.env.MINIMAX_API_KEY ? 'MiniMax M2.5 Active' : 'Heuristic Fallback'}`);
+console.log(`📍 Initial Scenario Loaded. Mode: DYNAMIC GENERATION`);
 
 const wss = new WebSocketServer({ server: httpServer });
 const pipeline = new NexoraPipeline();
@@ -125,56 +125,109 @@ bus.subscribe('resource.plan.generated', (data: unknown) => {
 
 const clients = new Set<WebSocket>();
 
+async function advanceFrame() {
+  // If we are at the end of currently known frames, generate a new one
+  if (currentFrameIndex >= dynamicFrames.length - 1) {
+    console.log("🔮 Generating next step via MiniMax M2.5...");
+    
+    // Get context
+    const currentFrame = dynamicFrames[currentFrameIndex];
+    const rawData = THE_STORY[0].raw_data;
+    const memoryContext = pipeline.getMemoryBank().getAll().slice(-5).map((a: MemoryArtifact) => JSON.stringify(a.data)).join('\n');
+    
+    const next = await llm.generateNextStep(
+      currentFrameIndex,
+      rawData,
+      memoryContext,
+      currentFrame.ui_state
+    );
+
+    const newFrame = {
+      frame: currentFrameIndex + 1,
+      title: next.title,
+      presenter_script: next.script,
+      ui_state: {
+        ...currentFrame.ui_state,
+        ...next.ui_update
+      }
+    };
+
+    dynamicFrames.push(newFrame);
+  }
+
+  currentFrameIndex++;
+  const frame = dynamicFrames[currentFrameIndex];
+  console.log(`➡️  Frame ${currentFrameIndex}: ${frame.title}`);
+
+  // Update global agent statuses based on the dynamic frame's ui_update
+  if (frame.ui_state.agent_statuses) {
+    agentStatuses = { ...agentStatuses, ...frame.ui_state.agent_statuses };
+  }
+
+  // Immediately broadcast the new frame
+  broadcastState();
+
+  // Async LLM decision (for tool use / events)
+  uebLogs.push(`🧠 MLLM: Orchestrating — "${frame.title}"...`);
+  if (frame.ui_state.ueb_log) uebLogs.push(frame.ui_state.ueb_log);
+  broadcastState();
+
+  const contextStr = pipeline.getMemoryBank().getAll().slice(-3).map((a: MemoryArtifact) => JSON.stringify(a.data)).join(' | ');
+  const decision = await llm.decideAction(frame.presenter_script, contextStr);
+
+  if (decision.topic && decision.topic !== 'none') {
+    uebLogs.push(`🧠 MLLM: Decision → ${decision.topic}`);
+    // Update statuses based on decision too
+    if (decision.topic.includes('hazard')) agentStatuses.early_warning = 'processing';
+    if (decision.topic.includes('situational')) agentStatuses.situational = 'processing';
+    if (decision.topic.includes('resource')) agentStatuses.resource = 'processing';
+    broadcastState();
+
+    const artifact: MemoryArtifact = {
+      id: `llm-${Date.now()}`,
+      timestamp: new Date().toISOString(),
+      source: 'MLLM_Orchestrator',
+      data: decision.payload,
+      tags: ['llm_decision', decision.topic]
+    };
+    await pipeline.getMemoryBank().store(artifact, 'current');
+    bus.publish(decision.topic as string, { artifact });
+  }
+  broadcastState();
+  return true;
+}
+
+let autoLoopRunning = false;
+async function autoAdvanceLoop(limit = 3) {
+  if (autoLoopRunning) return;
+  autoLoopRunning = true;
+  
+  // Advance up to the limit (e.g. 3 frames for early warning, 7 for full story)
+  while (currentFrameIndex < limit - 1) {
+    await new Promise(resolve => setTimeout(resolve, 8000));
+    const moved = await advanceFrame();
+    if (!moved) break;
+  }
+  autoLoopRunning = false;
+}
+
 wss.on('connection', (ws: WebSocket) => {
   console.log('📡 Dashboard connected.');
   clients.add(ws);
   sendState(ws);
 
-  ws.on('message', async (message: unknown) => {
+  ws.on('message', async (message: Buffer) => {
     try {
-      const msg = JSON.parse((message as Buffer).toString());
+      const msg = JSON.parse(message.toString());
 
       if (msg.type === 'ADVANCE') {
-        if (currentFrameIndex < THE_STORY.length - 1) {
-          currentFrameIndex++;
-          const frame = THE_STORY[currentFrameIndex];
-          console.log(`➡️  Frame ${currentFrameIndex}: ${frame.title}`);
-
-          // Immediately broadcast the new frame
-          broadcastState();
-
-          // Async LLM decision
-          uebLogs.push(`🧠 MLLM: Analyzing scenario — "${frame.title}"...`);
-          broadcastState();
-
-          const contextStr = pipeline.getMemoryBank().getAll().slice(-3).map((a: MemoryArtifact) => JSON.stringify(a.data)).join(' | ');
-          const decision = await llm.decideAction(frame.presenter_script, contextStr);
-
-          if (decision.topic && decision.topic !== 'none') {
-            uebLogs.push(`🧠 MLLM: Decision → ${decision.topic}`);
-
-            if (decision.topic.includes('hazard')) agentStatuses.early_warning = 'processing';
-            if (decision.topic.includes('situational')) agentStatuses.situational = 'processing';
-            if (decision.topic.includes('resource')) agentStatuses.resource = 'processing';
-            broadcastState();
-
-            const artifact: MemoryArtifact = {
-              id: `llm-${Date.now()}`,
-              timestamp: new Date().toISOString(),
-              source: 'MLLM_Orchestrator',
-              data: decision.payload,
-              tags: ['llm_decision', decision.topic]
-            };
-            await pipeline.getMemoryBank().store(artifact, 'current');
-            bus.publish(decision.topic as string, { artifact });
-          }
-          broadcastState();
-        }
-
+        advanceFrame();
+      } else if (msg.type === 'AUTO_START') {
+        console.log("🚀 Automated Intelligence Flow Triggered.");
+        autoAdvanceLoop();
       } else if (msg.type === 'PREV') {
         if (currentFrameIndex > 0) currentFrameIndex--;
         broadcastState();
-
       } else if (msg.type === 'CHAT_MESSAGE') {
         const userText = msg.text as string;
         console.log(`💬 Commander: "${userText}"`);
@@ -187,11 +240,15 @@ wss.on('connection', (ws: WebSocket) => {
         });
 
         // Build context for the LLM
-        const frame = THE_STORY[currentFrameIndex];
+        const frame = dynamicFrames[currentFrameIndex] || THE_STORY[0];
         const memoryArtifacts = pipeline.getMemoryBank().getAll().slice(-5);
-        const contextStr = memoryArtifacts.map((a: MemoryArtifact) =>
+        let contextStr = memoryArtifacts.map((a: MemoryArtifact) =>
           `[${a.source}]: ${JSON.stringify(a.data).substring(0, 200)}`
         ).join('\n');
+
+        if (currentFrameIndex === 0 && THE_STORY[0].raw_data) {
+          contextStr += `\n[LIVE_RAW_FEEDS]: ${JSON.stringify(THE_STORY[0].raw_data)}`;
+        }
 
         const reply = await llm.chatWithContext(
           userText,
@@ -212,11 +269,14 @@ wss.on('connection', (ws: WebSocket) => {
 
         // Check if the message should trigger the agent pipeline
         if (llm.shouldTriggerPipeline(userText)) {
-          console.log(`🚀 Chat triggered full agent cascade!`);
+          console.log(`🚀 Chat triggered full agent cascade and resumed simulation!`);
           uebLogs.push(`🚀 PIPELINE ACTIVATED by Commander directive`);
           broadcastState();
 
-          // Run the full 3-agent cascade with real-time status updates
+          // Resume the visual simulation to generate the remaining frames (up to 7)
+          autoAdvanceLoop(7);
+
+          // Run the backend agent cascade
           await pipeline.runAgentCascade(undefined, undefined, (statuses) => {
             agentStatuses = { ...statuses };
             broadcastState();
@@ -235,10 +295,10 @@ wss.on('connection', (ws: WebSocket) => {
 });
 
 function getState() {
-  const frame = THE_STORY[currentFrameIndex];
+  const frame = dynamicFrames[currentFrameIndex] || THE_STORY[0];
   return {
     frameIndex: currentFrameIndex,
-    totalFrames: THE_STORY.length,
+    totalFrames: 7, // Fixed visual total for the hackathon progress bar
     title: frame.title,
     presenter_script: frame.presenter_script,
     ui_state: {

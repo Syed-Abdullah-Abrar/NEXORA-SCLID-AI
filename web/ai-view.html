@@ -95,11 +95,13 @@
         <div class="bg-slate-900/60 border border-blue-500/30 rounded-xl p-4 shadow-[0_0_20px_rgba(59,130,246,0.1)]">
           <h2 id="frame-title" class="text-white font-black text-[12px] mb-2 uppercase tracking-[0.15em]">Krypton Response</h2>
           <p id="presenterScript" class="text-slate-300 text-[13px] italic leading-relaxed mb-5">System ready. Press NEXT to begin the story.</p>
-          
-          <div class="flex items-center justify-between gap-3">
-            <button id="prevBtn" class="flex-1 py-2 bg-slate-800 border border-slate-700 rounded-lg hover:bg-slate-700 font-bold text-xs transition-all disabled:opacity-20" disabled>← PREV</button>
-            <div id="frameIndicator" class="text-lg font-black font-mono text-center tracking-tight text-white px-2">01/07</div>
-            <button id="nextBtn" class="flex-1 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 font-black text-xs shadow-[0_0_15px_rgba(59,130,246,0.3)] transition-all">NEXT →</button>
+          <div class="flex flex-col gap-3">
+            <button id="triggerBtn" class="w-full py-4 bg-emerald-500 text-white rounded-xl hover:bg-emerald-600 font-black text-sm shadow-[0_0_30px_rgba(16,185,129,0.25)] transform hover:scale-[1.02] active:scale-95 transition-all uppercase tracking-widest">
+              🚀 Trigger Intelligence Flow
+            </button>
+            <div class="flex items-center justify-center gap-4 opacity-50">
+               <div id="frameIndicator" class="text-xs font-mono text-white px-2">AUTO-SYNC ACTIVE</div>
+            </div>
           </div>
         </div>
       </div>
@@ -183,8 +185,7 @@
       document.getElementById('presenterScript').textContent = state.presenter_script;
       document.getElementById('frameIndicator').textContent =
         (state.frameIndex + 1).toString().padStart(2, '0') + '/' + state.totalFrames.toString().padStart(2, '0');
-      document.getElementById('prevBtn').disabled = state.frameIndex === 0;
-      document.getElementById('nextBtn').disabled = state.frameIndex === state.totalFrames - 1;
+
 
       if (state.frameIndex === 2 && !alarmPlayed) {
         alarmPlayed = true;
@@ -245,11 +246,13 @@
       }
     }
 
-    document.getElementById('nextBtn').addEventListener('click', () => {
+    document.getElementById('triggerBtn').addEventListener('click', () => {
       if (audioCtx.state === 'suspended') audioCtx.resume();
-      client.nextFrame();
+      document.getElementById('triggerBtn').disabled = true;
+      document.getElementById('triggerBtn').textContent = "🛰️ SIMULATION RUNNING";
+      document.getElementById('triggerBtn').classList.replace('bg-emerald-500', 'bg-slate-800');
+      client.triggerAuto();
     });
-    document.getElementById('prevBtn').addEventListener('click', () => client.prevFrame());
 
     client.connect();
   </script>

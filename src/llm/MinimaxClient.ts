@@ -112,6 +112,83 @@ Commander's Input: "${message}"`;
     return triggers.some(t => lower.includes(t));
   }
 
+  async generateNextStep(
+    currentFrame: number, 
+    rawData: any, 
+    memory: string,
+    currentUiState: any
+  ): Promise<{ title: string; script: string; ui_update: any }> {
+    if (!this.apiKey) {
+      // Fallback logic if API key is missing
+      return this.fallbackDynamicStep(currentFrame);
+    }
+
+    const prompt = `You are the S.C.L.I.D AI Orchestrator. We are running a dynamic disaster simulation.
+Based on the INITIAL RAW DATA and the PREVIOUS STATE, generate the NEXT LOGICAL STEP in the disaster.
+
+INITIAL RAW DATA:
+${JSON.stringify(rawData, null, 2)}
+
+CURRENT SIMULATION STATE (Frame ${currentFrame}):
+${JSON.stringify(currentUiState, null, 2)}
+
+RECENT MEMORY:
+${memory}
+
+You must progress the disaster. 
+Frame 1: Early Warning Agent should process IoT data.
+Frame 2: Confirm flood and trigger alarm.
+Frame 3: Situational Awareness finds new hazards (fires, landslides).
+Frame 4: Resource Allocation optimizes routes.
+Frame 5: Await Commander authorization.
+Frame 6: Field SOS via HAM Radio.
+
+Return a JSON object:
+{
+  "title": "Short dramatic title",
+  "script": "The presenter script (concise, analytical)",
+  "ui_update": {
+    "active_page": "/eoc.html" or "/ai-view.html" or "/logistics.html" or "/field.html",
+    "agent_statuses": { "early_warning": "...", "situational": "...", "resource": "..." },
+    "eoc_map": { "risk_visible": true/false, "heatmap": "stable/critical" },
+    "ueb_log": "A dramatic log message for the Event Bus"
+  }
+}
+
+OUTPUT ONLY VALID JSON:`;
+
+    try {
+      const response = await fetch(this.baseUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${this.apiKey}`
+        },
+        body: JSON.stringify({
+          model: 'MiniMax-M2.5',
+          messages: [{ role: 'user', content: prompt }],
+          temperature: 0.7
+        })
+      });
+      const data = await response.json() as any;
+      let content = this.cleanContent(data.choices[0].message.content);
+      content = content.replace(/```json/g, '').replace(/```/g, '').trim();
+      return JSON.parse(content);
+    } catch (e) {
+      console.error("Minimax dynamic error:", e);
+      return this.fallbackDynamicStep(currentFrame);
+    }
+  }
+
+  private fallbackDynamicStep(frame: number): any {
+    const steps = [
+      { title: "IoT Spike Detected", script: "Early Warning Agent is parsing the IoT sensors...", ui_update: { active_page: "/ai-view.html", agent_statuses: { early_warning: "processing" }, ueb_log: "🧠 MLLM: Analyzing IoT data..." } },
+      { title: "Flood Confirmed", script: "Confirming 92% match to 1998 flood. Triggering alarm.", ui_update: { active_page: "/eoc.html", eoc_map: { risk_visible: true, heatmap: "critical" }, ueb_log: "🔴 CRITICAL: Flood breach confirmed." } },
+      { title: "Infrastructure Failure", script: "Highland Pass is blocked by landslide.", ui_update: { active_page: "/logistics.html", eoc_map: { risk_visible: true }, ueb_log: "🟡 WARNING: Highland Pass BLOCKED." } }
+    ];
+    return steps[frame % steps.length] || steps[0];
+  }
+
   async decideAction(script: string, context: string): Promise<{ topic: string; payload: Record<string, unknown> }> {
     if (!this.apiKey) {
       console.warn("MINIMAX_API_KEY missing. Using heuristic fallback.");

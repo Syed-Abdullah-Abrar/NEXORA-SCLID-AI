@@ -65,6 +65,12 @@ class StoryClient {
       this.ws.send(JSON.stringify({ type: 'PREV' }));
     }
   }
+
+  triggerAuto() {
+    if (this.connected && this.ws && this.ws.readyState === WebSocket.OPEN) {
+      this.ws.send(JSON.stringify({ type: 'AUTO_START' }));
+    }
+  }
 }
 
 window.StoryClient = StoryClient;

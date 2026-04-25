@@ -9,129 +9,64 @@
 
 To create a "wow" moment, you will use your actual smartphone as the Field Marshall's device. We use **Pinggy** to tunnel through the venue's Wi-Fi firewall instantly.
 
-> ⚠️ **CRITICAL PINGGY WARNING:** The free Pinggy tunnel expires exactly 60 minutes after you run the SSH command. Do not start the tunnel too early! Generate a fresh link 15 minutes before the pitch, and click "Visit Site" on the phone to bypass the warning screen before walking on stage.
-
 1. Run `npm run start` in your first terminal.
 2. Open a second terminal and run: `ssh -p 443 -R0:localhost:8080 a.pinggy.io`
-3. Scan the QR code or copy the URL it prints (e.g., `https://something.a.pinggy.link`).
+3. Scan the QR code or copy the URL (e.g., `https://something.a.pinggy.link`).
 4. On your smartphone, open that URL and add `/field.html` to the end.
-5. Leave the phone screen on, face down or in your pocket until Act 6.
+5. Bypass the "Visitor Warning" on the phone before walking on stage.
 
 ---
 
-## The Hook (0:00 – 0:45)
+## The Hook (0:00 – 1:00)
 
-**Presenter:** "When disaster strikes, the first casualty is communication. In the critical first 72 hours, the cloud goes down. EOCs are left blind. Agencies are siloed. People die waiting for coordination that never comes."
+**Presenter:** "When disaster strikes, communication is the first casualty. In the critical first 72 hours, the cloud goes down, EOCs are left blind, and people die waiting for coordination that never comes."
 
-*[Pause. Landing page visible — shield icon, 4 role cards.]*
-
-"This is **S.C.L.I.D AI** — an autonomous, multi-agent AI orchestration framework that thinks, adapts, and routes resources in real-time. Powered by the MiniMax M2.5 frontier model. Even when the internet is gone."
+"This is **S.C.L.I.D AI** — an autonomous, multi-agent orchestration framework powered by **MiniMax M2.5**. Unlike static dashboards, S.C.L.I.D runs a dynamic simulation where the AI predicts and generates the disaster narrative in real-time from raw sensor data. No hardcoded scripts. Pure intelligence."
 
 ---
 
-## The Architecture (0:45 – 1:30)
+## Act 1: The Trigger (Autonomous Flow) (1:00 – 3:00)
 
-**Presenter:** "S.C.L.I.D uses a live LangGraph-style orchestrator. Three specialized AI agents — Early Warning, Situational Awareness, and Resource Allocation — communicate over a Unified Event Bus. Every decision is stored in a 3-tier Memory Bank. Every output is traceable."
+**Presenter:** "S.C.L.I.D is event-driven. I'm going to simulate a massive data burst from our Krypton City IoT sensor array and social media feeds. Watch how the AI orchestrator takes over."
 
-*[Click into AI Orchestrator view — show UEB Log, Agent Pipeline, Memory Bank]*
+*[Click the green **🚀 TRIGGER INTELLIGENCE FLOW** button on the AI Orchestrator view.]*
 
-"And crucially — the Commander can speak directly to the AI brain. Watch."
+**Presenter:** "The system is now in **Autonomous Mode**. It's ingesting data from IoT water sensors and distress calls. Watch the log."
 
----
-
-## Why S.C.L.I.D? (The Tech & The Impact) (1:30 – 2:00)
-
-**Presenter:** "How do we make this possible? We built S.C.L.I.D using a highly specialized, lightweight tech stack designed for speed and reliability:
-- **Core Orchestration:** Node.js backend acting as a LangGraph-style agent orchestrator via a Unified Event Bus.
-- **LLM Intelligence:** Powered by **MiniMax M2.5**, parsing unstructured data into military-grade `[SITREP]` structures.
-- **The HAM Radio Bridge (Offline Fallback):** This is our defining innovation. When 5G and Wi-Fi grids collapse, internet-based apps die. S.C.L.I.D doesn't. Our architecture is designed to ingest **Packet Radio (APRS)**. A field responder uses a portable VHF/UHF HAM radio tethered to their phone. The phone compresses their text SOS into an audio burst. The EOC base station demodulates that radio burst back into raw text and pipes it directly into our Unified Event Bus (`ham.burst.received`). Then, our MiniMax LLM intelligently parses that messy radio string into precise, actionable map coordinates.
-
-**The Impact on Disaster Relief Bodies:**
-1. **De-siloing Agencies:** The Unified Event Bus means fire, police, and logistics EOCs share a single Common Operating Picture instantly.
-2. **Saving Hours in Logistics:** Real-time A* pathfinding calculates safe supply routes in milliseconds, saving crucial hours of transport time.
-3. **Zero-Connectivity Operations:** Thanks to the HAM bridge, no one is ever truly offline."
+1. **Detection:** "The Early Warning Agent detects a 400mm rainfall spike. It immediately queries MiniMax against historical data. We have a 92% match to the 1998 flood."
+2. **The Alarm:** *[The CRITICAL alarm sounds automatically.]* "The city is moving to emergency status. Sector 4's power grid is failing."
+3. **Cascading Failure:** "The situational awareness agent fuses drone video with social media. Highland Pass is blocked. Secondary fires are breaking out. The city is paralyzed."
+4. **The Solution:** "The Resource Allocation agent automatically calculates the new optimal A* route. It found the Old Mine Trail, saving 180 minutes of critical response time."
 
 ---
 
-## The Live Demo: City of Krypton (2:00 – 4:00)
+## Act 2: Human-in-the-Loop (3:00 – 4:00)
 
-### Act 1: The Warning (Frame 1-2)
-*[Press NEXT twice to reach Frame 2]*
+**Presenter:** "Autonomous intelligence doesn't mean zero control. S.C.L.I.D has the rescue plan, but it is **[PENDING_APPROVAL]**. It respects the Commander."
 
-"Krypton City. 45,000 people. Silver River is rising fast. Our Early Warning Agent just detected a 400mm rainfall spike and queried MiniMax against the 1998 flood data. It's a 92% match. The EOC map instantly highlights the predicted inundation zone. Substation 4 just went offline."
-
-*[Switch to EOC Command — show red heatmap and flood warnings pulsing]*
-
-### Act 2: The Commander Speaks ⭐
-*[Type in chat: "Analyze Sector 4 flood risk"]*
-
-"I'm going to ask S.C.L.I.D directly. Watch the AI respond with tactical intelligence, formatting a strict SITREP using real data from our sensor network."
-
-*[Wait for M2.5 response in the strict [SITREP] format.]*
-
-### Act 3: Cascading Failure (Frame 3)
-*[Press NEXT to reach Frame 3]*
-
-"It's cascading. Situational Awareness fuses drone video with social media distress tags. A landslide has hit Highland Pass — our primary supply route. Secondary electrical fires are breaking out across Sector 4. The city's primary logistics network is paralyzed."
-
-*[Switch to Logistics — show BLOCKED marker on Highland Pass and background hazards]*
-
-### Act 4: Chat Triggers the Pipeline ⭐
-*[Type in chat: "Generate alternate resource plan for Sector 4"]*
-
-"S.C.L.I.D doesn't just report problems. When I give a direct command, it activates the entire agent pipeline. Watch the status badges cascade."
-
-*[All 3 agent badges visibly cascade. Press NEXT to reach Frame 4.]*
-
-"Our Resource Allocation Agent just ran an **A-star pathfinding algorithm** through the dense, hazardous city network. It flawlessly routed around the floods and fires, finding the Old Mine Trail. Saving **3 hours** of transport time."
-
-*[Show green optimal route glowing on map.]*
-
-### Act 5: Authorization (Frame 5)
-*[Press NEXT to reach Frame 5]*
-
-"The system is autonomous, but the Commander has final say. S.C.L.I.D awaits my authorization to deploy 45 rescue personnel via this new route."
-
-### Act 6: Dark Mode (Frame 6)
-*[Press NEXT to reach Frame 6. Pull out your smartphone and hold it up for the judges to see.]*
-
-"Final mile. Cell towers are dead. Our Field Marshall is in total blackout. But S.C.L.I.D's HAM Radio Bridge just saved them. 
-
-Watch closely. Our field responder types an SOS into their offline app. The app compresses this text and GPS coordinates into an **APRS packet radio burst**, transmitting it over VHF hardware. 
-
-The EOC base station receives the audio, demodulates it, and pipes it straight into S.C.L.I.D. The AI parses the messy radio string and projects an AR-style navigation path directly to their terminal. Offline. Decentralized. Life-saving."
-
-*(Bonus ⭐: Type "15 civilians trapped, need extract" on your phone's TX input and hit SEND to show two-way field reporting!)*
+*[Go to the chat input]*
+**Type:** `Authorize deployment of rescue teams to Sector 4`
+**Visual:** S.C.L.I.D parses the command and flips the status badges to green.
 
 ---
 
-## The Future & UN SDG Alignment (4:00 – 5:00)
+## Act 3: Dark Mode Rescue — HAM Radio Bridge (4:00 – 5:00)
 
-**Presenter:** "What you just saw was a **live AI brain** orchestrating a complex, multi-screen disaster response in real-time. But S.C.L.I.D is more than just a software tool. It is deeply aligned with the **Sendai Framework** to protect the UN's Sustainable Development Goals (SDGs):
-- We directly support **SDG 11 (Sustainable Cities)** by mitigating economic loss and promoting holistic urban risk management.
-- We support **SDG 13 (Climate Action)** by creating massive adaptive resilience against sudden climate-related floods and fires.
-- We protect **SDG 9 (Resilient Infrastructure)** by dynamically routing around collapsed supply chains.
+**Presenter:** "Connectivity is gone. Cell towers are dead. But our Field Marshall isn't blind."
 
-Disasters can destroy decades of progress in minutes. We don't build dashboards. We build **the future of resilience**."
+*[Pick up your smartphone]*
+**Presenter:** "Using our **HAM Radio Bridge**, we receive an SOS from 15 survivors. Watch the logs."
 
-"We're moving S.C.L.I.D to:
-- **On-device SLMs** for true edge deployment
-- **Reinforcement Learning** for dynamic evacuation routes
-- **Misinformation filtering** for HAM radio intercepts"
-
-"We don't build dashboards. We build **the future of resilience**."
-
-"Thank you."
+*[On phone's Field UI, type: `SOS: 15 TRAPPED AT LIBRARY`]*
+**Visual:** The message appears on the main screen. The AI projects the final-mile rescue route directly to the phone.
+**Presenter:** "Compressed audio bursts over radio, demodulated in real-time. Decentralized. Life-saving."
 
 ---
 
-## Chat Demo Cheat Sheet
+## Conclusion & UN SDG Alignment (5:00 – 6:00)
 
-| Frame | Suggested Chat Input | Expected Response |
-|-------|---------------------|-------------------|
-| 0 | "System status report" | [SITREP] All agents idle. |
-| 1 | "Analyze Silver River flood risk" | [SITREP] Flood analysis with 1998 data points. |
-| 2 | "What areas are at highest risk?" | [SITREP] Sector 4 grid offline. |
-| 3 | "Generate alternate resource plan for Sector 4" | ⭐ **Triggers Resource pipeline.** |
-| 5 | "Authorize deployment of rescue team" | [ACTION] Deployment confirmed. |
-| 6 | *(On Phone)* "Need immediate medevac at Library" | [ACTION] SCLID broadcasts medevac priority. |
+**Presenter:** "Disasters destroy decades of progress in minutes. S.C.L.I.D AI aligns with **UN SDG 11 (Sustainable Cities)** and **SDG 13 (Climate Action)** to ensure that when the lights go out, the intelligence stays on."
+
+"We don't build dashboards. We build the future of resilience. Thank you."
+
+*[End]*
