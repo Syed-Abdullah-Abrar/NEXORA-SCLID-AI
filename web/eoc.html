@@ -51,9 +51,13 @@
         </div>
 
         <div class="card flex-1 flex flex-col overflow-hidden border-white/5">
-          <h2 class="text-[10px] font-black text-nexora-muted uppercase tracking-widest mb-4">Mission Status</h2>
-          <div class="space-y-4 flex-1 overflow-y-auto pr-2" id="mission-log">
+          <h2 class="text-[10px] font-black text-nexora-muted uppercase tracking-widest mb-4">Commander AI Chat (NEXORA M2.5)</h2>
+          <div class="space-y-4 flex-1 overflow-y-auto pr-2" id="chat-log">
              <div class="text-xs italic text-nexora-muted">Awaiting system initialization...</div>
+          </div>
+          <div class="mt-4 flex gap-2">
+            <input type="text" id="chat-input" class="flex-1 bg-slate-950 border border-nexora-border rounded px-3 py-2 text-xs focus:outline-none focus:border-nexora-agent" placeholder="E.g., Start disaster response workflow...">
+            <button id="send-chat-btn" class="bg-nexora-agent text-white px-4 py-2 rounded text-xs font-bold hover:bg-blue-600 transition-colors">SEND</button>
           </div>
         </div>
 
@@ -73,6 +77,57 @@
   <script>
     const client = new StoryClient('ws://localhost:8080');
     
+    // Add chat to the log
+    function appendChat(role, text) {
+      const chatLog = document.getElementById('chat-log');
+      // Remove placeholder
+      if (chatLog.innerHTML.includes('Awaiting system initialization...')) {
+        chatLog.innerHTML = '';
+      }
+      const entry = document.createElement('div');
+      
+      if (role === 'user') {
+        entry.className = 'p-3 bg-slate-800 rounded border-r-2 border-nexora-text ml-8 animate-in fade-in slide-in-from-bottom-2';
+        entry.innerHTML = `<div class="text-[10px] font-bold text-white mb-1 uppercase tracking-widest text-right">EOC Commander</div><div class="text-xs text-white/90 leading-relaxed font-medium text-right">${text}</div>`;
+      } else if (role === 'loading') {
+        entry.id = 'chat-loading';
+        entry.className = 'p-3 bg-black/40 rounded border-l-2 border-nexora-agent mr-8 animate-in fade-in slide-in-from-top-2';
+        entry.innerHTML = `<div class="text-[10px] font-bold text-nexora-agent mb-1 uppercase tracking-widest">NEXORA M2.5</div><div class="text-xs text-nexora-agent leading-relaxed font-medium animate-pulse">Generating workflow...</div>`;
+      } else {
+        const loadingEl = document.getElementById('chat-loading');
+        if (loadingEl) loadingEl.remove();
+        
+        entry.className = 'p-3 bg-black/40 rounded border-l-2 border-nexora-agent mr-8 animate-in fade-in slide-in-from-top-2';
+        entry.innerHTML = `<div class="text-[10px] font-bold text-nexora-agent mb-1 uppercase tracking-widest">NEXORA M2.5</div><div class="text-xs text-white/90 leading-relaxed font-medium whitespace-pre-wrap">${text}</div>`;
+      }
+      chatLog.appendChild(entry);
+      chatLog.scrollTop = chatLog.scrollHeight;
+    }
+
+    client.onChatLoading = () => {
+      appendChat('loading');
+    };
+
+    client.onChatResponse = (response) => {
+      appendChat('ai', response);
+    };
+
+    document.getElementById('send-chat-btn').addEventListener('click', () => {
+      const input = document.getElementById('chat-input');
+      const text = input.value.trim();
+      if (text) {
+        appendChat('user', text);
+        client.sendChat(text);
+        input.value = '';
+      }
+    });
+
+    document.getElementById('chat-input').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        document.getElementById('send-chat-btn').click();
+      }
+    });
+
     client.onStateChange = (state) => {
       const uiState = state.ui_state;
       
@@ -86,12 +141,7 @@
       document.getElementById('risk-bar').style.width = isCritical ? '92%' : '5%';
       document.getElementById('risk-bar').className = 'h-full transition-all duration-1000 ' + (isCritical ? 'bg-nexora-critical shadow-[0_0_10px_#EF4444]' : 'bg-nexora-agent');
       
-      // Mission Log
-      const log = document.getElementById('mission-log');
-      log.innerHTML = `<div class="p-3 bg-black/40 rounded border-l-2 border-nexora-agent animate-in fade-in slide-in-from-top-2">
-        <div class="text-[10px] font-bold text-nexora-agent mb-1 uppercase tracking-widest">Active Insight</div>
-        <div class="text-xs text-white/90 leading-relaxed font-medium">${uiState.ueb_log}</div>
-      </div>`;
+      // We removed the mission-log overwrite from onStateChange since chat handles it now
       
       // Authorization
       const needsAuth = uiState.agent_statuses.resource === 'pending_approval';

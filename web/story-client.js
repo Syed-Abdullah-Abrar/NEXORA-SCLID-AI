@@ -5,6 +5,8 @@ class StoryClient {
     this.onStateChange = null;
     this.onConnect = null;
     this.onError = null;
+    this.onChatLoading = null;
+    this.onChatResponse = null;
     this.connected = false;
   }
 
@@ -20,6 +22,10 @@ class StoryClient {
           const data = JSON.parse(event.data);
           if (data.type === 'STATE_UPDATE') {
             if (this.onStateChange) this.onStateChange(data.state);
+          } else if (data.type === 'CHAT_LOADING') {
+            if (this.onChatLoading) this.onChatLoading();
+          } else if (data.type === 'CHAT_RESPONSE') {
+            if (this.onChatResponse) this.onChatResponse(data.response);
           }
         } catch (e) {
           console.error('Error parsing WS message:', e);
@@ -35,6 +41,14 @@ class StoryClient {
       };
     } catch (e) {
       console.error('WebSocket connection failed:', e);
+    }
+  }
+
+  sendChat(message) {
+    if (this.connected && this.ws && this.ws.readyState === WebSocket.OPEN) {
+      this.ws.send(JSON.stringify({ type: 'CHAT_MESSAGE', text: message }));
+    } else {
+      console.warn("Cannot send chat, WebSocket not connected.");
     }
   }
 

@@ -66,19 +66,19 @@ wss.on('connection', (ws: WebSocket) => {
           currentFrameIndex++;
           const frame = THE_STORY[currentFrameIndex];
           console.log(`➡️  Advancing to Frame ${currentFrameIndex}: ${frame.title}`);
-          
+
           uebLogs.push(`LLM: Parsing Scenario...`);
           broadcastState();
 
           const contextStr = pipeline.getMemoryBank().getAll().slice(-3).map(a => JSON.stringify(a.data)).join(' | ');
           const decision = await llm.decideAction(frame.presenter_script, contextStr);
-          
+
           if (decision.topic && decision.topic !== 'none') {
              uebLogs.push(`LLM: Action determined -> ${decision.topic}`);
              if (decision.topic.includes('hazard')) agentStatuses.early_warning = 'processing';
              if (decision.topic.includes('situational')) agentStatuses.situational = 'processing';
              if (decision.topic.includes('resource')) agentStatuses.resource = 'processing';
-             
+
              broadcastState();
              const artifact: MemoryArtifact = {
                id: `llm-${Date.now()}`,
@@ -95,8 +95,19 @@ wss.on('connection', (ws: WebSocket) => {
       } else if (msg.type === 'PREV') {
          if (currentFrameIndex > 0) currentFrameIndex--;
          broadcastState();
-      }
-    } catch (e) {
+      } else if (msg.type === 'CHAT_MESSAGE') {
+         // Broadcast a loading event to all clients
+         clients.forEach(client => {
+           if (client.readyState === WebSocket.OPEN) client.send(JSON.stringify({ type: 'CHAT_LOADING' }));
+         });
+
+         const reply = await llm.chat(msg.text);
+
+         // Broadcast the final reply to all clients
+         clients.forEach(client => {
+           if (client.readyState === WebSocket.OPEN) client.send(JSON.stringify({ type: 'CHAT_RESPONSE', response: reply }));
+         });
+      }    } catch (e) {
       console.error("WS Error:", e);
     }
   });

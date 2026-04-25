@@ -8,6 +8,48 @@ export class MinimaxClient {
     this.apiKey = process.env.MINIMAX_API_KEY || '';
   }
 
+  async chat(message: string): Promise<string> {
+    if (!this.apiKey) {
+      return "MINIMAX_API_KEY is not set. Simulation fallback: Agents working: Early Warning Agent -> Situational Awareness Agent -> Resource Allocation Agent.";
+    }
+    
+    const prompt = `You are the Head Commander's AI Assistant for NEXORA (Model: Minimax M2.5), a multi-modal disaster response system.
+The Commander is asking you to start the disaster response workflow based on the disaster event.
+Respond quickly, confirming the initiation. Outline the workflow of agents that will be working to handle this.
+The agents are: 
+1. Early Warning Agent (Sensor data, predicting hazards)
+2. Situational Awareness Agent (Fusing drone/social media feeds)
+3. Resource Allocation Agent (Optimizing supply routes and evacuation)
+
+User message: "${message}"
+
+Give a concise, professional, and confident response.`;
+
+    try {
+      const response = await fetch(this.baseUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${this.apiKey}`
+        },
+        body: JSON.stringify({
+          model: 'abab6.5s-chat',
+          messages: [{ role: 'user', content: prompt }],
+          temperature: 0.7
+        })
+      });
+      const data = await response.json() as any;
+      if (!data.choices || !data.choices[0]) {
+        console.error("Minimax API Error:", data);
+        return "Error reaching Minimax M2.5 API.";
+      }
+      return data.choices[0].message.content;
+    } catch (e) {
+      console.error("Minimax chat error:", e);
+      return "Error reaching Minimax M2.5 API.";
+    }
+  }
+
   async decideAction(script: string, context: string): Promise<{ topic: string, payload: any }> {
     if (!this.apiKey) {
       console.warn("MINIMAX_API_KEY missing. Falling back to simple heuristic.");
