@@ -1,46 +1,10 @@
-// NEXORA Omni-View Demo
-// Multi-screen disaster response visualization
+// NEXORA Omni-View Demo - Pre-Scripted Data Story
+// Refactored for hackathon pitch control
 
-const memoryBank = {
-  current: new Map(),
-  shortTerm: new Map(),
-  longTerm: new Map(),
-};
+import { THE_STORY } from './story.js';
 
+let currentFrame = 0;
 let eventLog = [];
-let pipelineReady = false;
-let currentScreen = 1;
-
-// Simulated pipeline classes
-class SimulatedTaskPlanner {
-  async generatePlan(query) {
-    const normalizedQuery = query.toLowerCase();
-    if (normalizedQuery.includes('flood') || normalizedQuery.includes('warning')) {
-      return {
-        tasks: [
-          { id: 'ew_1', agentId: 'early_warning', dependencies: [], input: { hazard: 'flood' } },
-          { id: 'sa_1', agentId: 'situational_awareness', dependencies: ['ew_1'], input: {} },
-          { id: 'ra_1', agentId: 'resource_allocation', dependencies: ['ew_1', 'sa_1'], input: {} },
-        ],
-      };
-    }
-    return { tasks: [] };
-  }
-}
-
-class SimulatedAgent {
-  constructor(id) { this.id = id; }
-  async ingest(input) {
-    return { id: `${this.id}-${Date.now()}`, source: this.id, data: input, timestamp: new Date().toISOString(), tags: [] };
-  }
-}
-
-const planner = new SimulatedTaskPlanner();
-const agents = {
-  early_warning: new SimulatedAgent('early_warning'),
-  situational_awareness: new SimulatedAgent('situational_awareness'),
-  resource_allocation: new SimulatedAgent('resource_allocation'),
-};
 
 // Logging
 function log(message, type = 'system') {
@@ -58,115 +22,103 @@ function renderEventLog() {
   logEl.scrollTop = 0;
 }
 
-function renderMemoryBank() {
-  const grid = document.getElementById('memoryGrid');
-  if (!grid) return;
-
-  const allArtifacts = [
-    ...Array.from(memoryBank.current.values()),
-    ...Array.from(memoryBank.shortTerm.values()),
-    ...Array.from(memoryBank.longTerm.values()),
-  ];
-
-  if (allArtifacts.length === 0) {
-    grid.innerHTML = '<div class="memory-card">No artifacts stored</div>';
+// Core render function - updates entire UI from story frame
+function renderFrame(frameIndex) {
+  if (frameIndex < 0 || frameIndex >= THE_STORY.length) {
+    console.warn('Frame index out of bounds');
     return;
   }
 
-  grid.innerHTML = allArtifacts.map(a => `
-    <div class="memory-card">
-      <div class="source">${a.source}</div>
-      <div>${typeof a.data === 'object' ? JSON.stringify(a.data).substring(0, 80) : a.data}</div>
-      <div class="tags">${a.tags?.join(', ') || ''}</div>
-    </div>
-  `).join('');
-}
+  const frame = THE_STORY[frameIndex];
+  currentFrame = frameIndex;
 
-// Pipeline execution
-async function runPipeline() {
-  const queryInput = document.getElementById('queryInput');
-  const query = queryInput?.value || 'Flood Response';
+  // Stop any auto-advance from app.js - we're in story mode now
+  if (window.Nexora3D && window.Nexora3D.stopAutoAdvance) {
+    window.Nexora3D.stopAutoAdvance();
+  }
 
-  log(`Starting pipeline: "${query}"`, 'system');
+  // Log the presenter script
+  if (frame.presenter_script) {
+    eventLog = [];
+    log(frame.presenter_script, 'system');
+  }
 
-  const plan = await planner.generatePlan(query);
-  log(`Generated ${plan.tasks.length} tasks`, 'system');
-  renderTaskGraph(plan.tasks);
+  // Update 3D state
+  if (window.Nexora3D) {
+    window.Nexora3D.updateDisasterProgress(frame.timeline_progress || 0);
+    window.Nexora3D.setRole(frame.camera_role || 'commander');
+  }
 
-  const outputs = {
-    'ew-output': null,
-    'sa-output': null,
-    'ra-output': null,
-  };
+  // Update camera role buttons
+  document.querySelectorAll('.role-btn').forEach(btn => {
+    if (btn.dataset.role === frame.camera_role) {
+      btn.classList.add('bg-nexora-agent', 'text-white');
+      btn.classList.remove('bg-nexora-surface', 'text-nexora-muted');
+    } else {
+      btn.classList.remove('bg-nexora-agent', 'text-white');
+      btn.classList.add('bg-nexora-surface', 'text-nexora-muted');
+    }
+  });
 
-  // Early Warning
-  updateAgentStatus('ew-status', 'Processing...');
-  await sleep(600);
+  // Update timeline
+  const timelineValue = document.getElementById('timeline-value');
+  if (timelineValue) timelineValue.textContent = (frame.timeline_progress || 0) + '%';
+  const timelineSlider = document.getElementById('timeline-slider');
+  if (timelineSlider) timelineSlider.value = frame.timeline_progress || 0;
 
-  const ewData = {
-    hazard: 'flood',
-    severity: 'HIGH',
-    confidence: 0.92,
-    affectedArea: 'Zone A - Low lying residential',
-    alertLevel: 'EVACUATE',
-  };
+  // Update risk level and water level
+  const riskLevel = document.getElementById('risk-level');
+  if (riskLevel) {
+    riskLevel.textContent = frame.risk_level || 'LOW';
+    riskLevel.className = 'font-bold ' +
+      (frame.risk_level === 'CRITICAL' ? 'text-nexora-critical' :
+       frame.risk_level === 'HIGH' ? 'text-nexora-warning' :
+       frame.risk_level === 'MODERATE' ? 'text-nexora-warning' : '');
+  }
 
-  const ewArtifact = { id: `ew-${Date.now()}`, source: 'early_warning', data: ewData, timestamp: new Date().toISOString(), tags: ['early_warning', 'hazard', 'flood'] };
-  memoryBank.current.set(ewArtifact.id, ewArtifact);
+  const riskIndicator = document.getElementById('risk-indicator');
+  if (riskIndicator) riskIndicator.textContent = frame.risk_indicator || 'FLOOD RISK: LOW';
 
-  updateAgentOutput('ew-output', ewData);
-  updateAgentStatus('ew-status', 'Complete');
-  log(`Early Warning: ${ewData.hazard} detected - ${ewData.alertLevel}`, 'hazard');
-  outputs['ew-output'] = ewData;
+  const waterLevel = document.getElementById('water-level');
+  if (waterLevel) waterLevel.textContent = frame.water_level || '0.0m';
 
-  // Situational Awareness
-  updateAgentStatus('sa-status', 'Processing...');
-  await sleep(800);
+  // Update agent status
+  updateAgentStatus('ew-status', frame.agent_status?.early_warning || 'STANDBY');
+  updateAgentStatus('sa-status', frame.agent_status?.situational || 'STANDBY');
+  updateAgentStatus('ra-status', frame.agent_status?.resource || 'STANDBY');
 
-  const saData = {
-    unifiedPicture: `${ewData.severity} ${ewData.hazard} warning for ${ewData.affectedArea}. 12500 people in affected zone.`,
-    riskLevel: 73,
-    affectedPopulation: 12500,
-    criticalInfrastructure: ['General Hospital', 'Elementary School'],
-    shelterLocations: ['Community Center', 'High School'],
-    recommendedActions: ['Evacuate flood-prone zones', 'Open shelters', 'Deploy sandbags'],
-  };
+  // Update screen
+  if (typeof frame.screen === 'number') {
+    showScreen(frame.screen);
+  }
 
-  const saArtifact = { id: `sa-${Date.now()}`, source: 'situational_awareness', data: saData, timestamp: new Date().toISOString(), tags: ['situational', 'flood', 'geo-data'] };
-  memoryBank.shortTerm.set(saArtifact.id, saArtifact);
+  // Update HAM terminal log
+  const hamTerminal = document.getElementById('ham-terminal-log');
+  if (hamTerminal && frame.ham_terminal_log) {
+    hamTerminal.innerHTML = frame.ham_terminal_log.split('\n').map(line =>
+      `<div class="text-sm text-nexora-text/80">${line}</div>`
+    ).join('');
+  } else if (hamTerminal) {
+    hamTerminal.innerHTML = '<div class="text-nexora-muted">AWAITING TRANSMISSION...</div>';
+  }
 
-  updateAgentOutput('sa-output', saData);
-  updateAgentStatus('sa-status', 'Complete');
-  log(`Situational: ${saData.affectedPopulation} people affected`, 'situational');
-  outputs['sa-output'] = saData;
+  // Update presenter script display
+  const presenterScript = document.getElementById('presenter-script');
+  if (presenterScript) {
+    presenterScript.textContent = frame.presenter_script || '';
+  }
 
-  // Resource Allocation
-  updateAgentStatus('ra-status', 'Processing...');
-  await sleep(700);
+  // Update frame counter
+  const frameCounter = document.getElementById('frame-counter');
+  if (frameCounter) {
+    frameCounter.textContent = `${frameIndex + 1} / ${THE_STORY.length}`;
+  }
 
-  const raData = {
-    plan: 'FLOOD_HIGH_' + Date.now().toString(36).toUpperCase(),
-    personnelRequired: 45,
-    actions: [
-      { type: 'EVACUATE', target: 'Zone A', priority: 1, personnel: 20 },
-      { type: 'SETUP_SHELTER', target: 'Community Center', priority: 2, personnel: 10 },
-      { type: 'DISTRIBUTE_SUPPLIES', target: 'All shelters', priority: 3, personnel: 15 },
-    ],
-    supplyList: ['water', 'food', 'medical kits', 'sandbags', 'boats'],
-    estimatedDuration: '6-12 hours',
-  };
-
-  const raArtifact = { id: `ra-${Date.now()}`, source: 'resource_allocation', data: raData, timestamp: new Date().toISOString(), tags: ['resource', 'allocation'] };
-  memoryBank.longTerm.set(raArtifact.id, raArtifact);
-
-  updateAgentOutput('ra-output', raData);
-  updateAgentStatus('ra-status', 'Complete');
-  log(`Resource Allocation: Plan ${raData.plan} - ${raData.personnelRequired} personnel`, 'resource');
-  outputs['ra-output'] = raData;
-
-  renderMemoryBank();
-  log('Pipeline complete', 'system');
-  pipelineReady = true;
+  // Update next/prev button states
+  const prevBtn = document.getElementById('prev-btn');
+  const nextBtn = document.getElementById('next-btn');
+  if (prevBtn) prevBtn.disabled = frameIndex === 0;
+  if (nextBtn) nextBtn.disabled = frameIndex === THE_STORY.length - 1;
 }
 
 function updateAgentStatus(id, text) {
@@ -174,91 +126,25 @@ function updateAgentStatus(id, text) {
   if (el) el.textContent = text;
 }
 
-function updateAgentOutput(id, data) {
-  const el = document.getElementById(id);
-  if (el) el.textContent = JSON.stringify(data, null, 2);
-}
-
-function renderTaskGraph(tasks) {
-  const graphEl = document.getElementById('taskGraph');
-  if (!graphEl) return;
-
-  graphEl.innerHTML = tasks.map((t, i) => {
-    const deps = t.dependencies.length ? `← ${t.dependencies.join(', ')}` : '';
-    return `<div class="task-node ${t.agentId}">Task ${i + 1}: ${t.agentId} ${deps}</div>`;
-  }).join('');
-}
-
-function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-// HAM Bridge simulation
-let hamOnline = false;
-
-function toggleHAM() {
-  hamOnline = !hamOnline;
-  const statusEl = document.getElementById('hamStatus');
-  if (statusEl) {
-    statusEl.className = 'ham-status' + (hamOnline ? ' online' : '');
+// Navigation functions
+function nextFrame() {
+  if (currentFrame < THE_STORY.length - 1) {
+    renderFrame(currentFrame + 1);
   }
 }
 
-async function simulateHAM() {
-  const hamLog = document.getElementById('hamLog');
-  const statusEl = document.getElementById('hamStatus');
-
-  if (statusEl) statusEl.className = 'ham-status online';
-  hamOnline = true;
-
-  const hamInput = {
-    id: `ham-${Date.now()}`,
-    timestamp: new Date().toISOString(),
-    source: 'HAM_RADIO_KB1ABC',
-    data: {
-      type: 'APRS',
-      callsign: 'KB1ABC',
-      position: '4236.00N/07103.60W',
-      message: 'Flooding at Main St and Route 9 - water rising rapidly',
-      priority: 'critical',
-    },
-    tags: ['ham', 'aprs', 'field-report'],
-  };
-
-  memoryBank.current.set(hamInput.id, hamInput);
-
-  if (hamLog) {
-    const entry = document.createElement('div');
-    entry.className = 'log-entry hazard';
-    entry.textContent = `[HAM] ${hamInput.data.callsign}: ${hamInput.data.message}`;
-    hamLog.appendChild(entry);
+function prevFrame() {
+  if (currentFrame > 0) {
+    renderFrame(currentFrame - 1);
   }
-
-  renderMemoryBank();
-  log(`HAM Input: ${hamInput.data.message}`, 'hazard');
 }
 
-async function sendHAMMessage() {
-  if (!pipelineReady) {
-    alert('Run pipeline first');
-    return;
-  }
-
-  const hamLog = document.getElementById('hamLog');
-  const raData = memoryBank.longTerm.values().next().value?.data;
-
-  if (hamLog) {
-    const entry = document.createElement('div');
-    entry.className = 'log-entry resource';
-    entry.textContent = `[HAM OUT] Resource plan ${raData?.plan || 'UNKNOWN'} broadcast - ${raData?.personnelRequired || '?'} personnel`;
-    hamLog.appendChild(entry);
-  }
-  log('Resource plan broadcast via HAM radio', 'resource');
+function goToFrame(frameIndex) {
+  renderFrame(frameIndex);
 }
 
 // Screen navigation (called from HTML)
 function showScreen(n) {
-  currentScreen = n;
   document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
   const target = document.getElementById(`screen-${n}`);
   if (target) target.classList.remove('hidden');
@@ -274,24 +160,32 @@ function showScreen(n) {
   });
 }
 
-// Push to Talk simulation for Dark Mode screen
-function pushToTalk() {
-  log('Push-to-talk activated - voice captured', 'system');
-  // Simulate voice synthesis
-  setTimeout(() => {
-    log('VoiceSynth: Broadcasting alert to UEB', 'system');
-  }, 500);
+// HAM simulation
+async function simulateHAM() {
+  log('HAM Input: APRS packet received from KB1ABC', 'hazard');
 }
 
-// Init
+async function sendHAMMessage() {
+  log('Resource plan broadcast via HAM radio', 'resource');
+}
+
+// Push to Talk for dark mode screen
+function pushToTalk() {
+  log('Push-to-talk activated - voice broadcast', 'system');
+}
+
+// Scenario triggers (kept for backward compat but disabled in story mode)
+function triggerScenario(type) {
+  log(`Scenario trigger: ${type}`, 'system');
+}
+
+// Init - start at frame 0
 function init() {
-  // Try init functions that exist
-  if (document.getElementById('hamStatus')) toggleHAM();
-  if (document.getElementById('memoryGrid')) renderMemoryBank();
-  log('NEXORA Omni-View Demo initialized', 'system');
+  renderFrame(0);
+  log('NEXORA Omni-View Demo initialized - Story Mode', 'system');
 }
 
 // Export for testing
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { SimulatedTaskPlanner, SimulatedAgent, memoryBank, log, showScreen, pushToTalk };
+  module.exports = { renderFrame, nextFrame, prevFrame, goToFrame, showScreen, currentFrame: () => currentFrame };
 }

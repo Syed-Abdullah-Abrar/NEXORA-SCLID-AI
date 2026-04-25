@@ -50,9 +50,11 @@ The system uses a **Central Orchestrator (MLLM)** to manage a federated network 
 - **SC-2:** The `ResourceAllocationAgent` produces a supply plan based on `SituationalAwareness` geodata.
 - **SC-3:** Memory persists across agent transitions, allowing the Resource agent to "remember" Early Warning signals.
 - **SC-4:** All agent I/O follows the registered schema without data loss.
+- **SC-5:** The `ResourceAllocationAgent` correctly implements a pathfinding algorithm (e.g., A*) to calculate an optimal route when an obstacle is introduced.
 
-## User Interfaces (Omni-View Demo)
-Per `docs/design/FIGMA_SPEC.md`, three views for different disaster response layers:
-- **EOC Dashboard** (Command): Task graph visualization for Head Commander
-- **Siloed Organizations** (Logistics/Medical): Split-screen for cross-agency coordination
-- **Dark Mode Rescue** (Field): Mobile HAM radio interface for frontline responders
+## User Interfaces (The Data Story)
+The demo is a multi-page web application, with each page representing a distinct user role. State is synchronized across all pages via a WebSocket server and driven by the `web/story.js` narrative file.
+- **/ai-view.html**: The presenter's "Glass Box" view, showing the UEB Log and Memory Bank.
+- **/eoc.html**: The Commander's 2D SVG-based map with risk heatmaps.
+- **/field.html**: The frontliner's "Dark Mode" HAM radio and AR route terminal.
+- **/logistics.html**: The organization's supply chain and inventory dashboard.

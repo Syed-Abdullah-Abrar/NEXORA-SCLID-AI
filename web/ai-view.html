@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NEXORA AI Orchestrator</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+    .main-content {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 320px;
+      gap: 1.5rem;
+      padding: 1.5rem;
+      max-width: 1400px;
+      margin: 0 auto;
+      width: 100%;
+    }
+    .panel-header {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--nexora-muted);
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--nexora-border);
+    }
+    /* UEB Log Panel */
+    .ueb-log-panel {
+      display: flex;
+      flex-direction: column;
+    }
+    .ueb-log {
+      flex: 1;
+      background: #050505;
+      border: 1px solid var(--nexora-border);
+      border-radius: 0.5rem;
+      padding: 1rem;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.875rem;
+      overflow-y: auto;
+      min-height: 400px;
+    }
+    .ueb-entry {
+      margin-bottom: 0.5rem;
+      padding: 0.5rem;
+      border-radius: 0.25rem;
+      background: var(--nexora-surface);
+    }
+    .ueb-entry.event {
+      border-left: 3px solid var(--nexora-agent);
+    }
+    .ueb-entry.warning {
+      border-left: 3px solid var(--nexora-warning);
+    }
+    .ueb-entry.critical {
+      border-left: 3px solid var(--nexora-critical);
+    }
+    .ueb-entry.success {
+      border-left: 3px solid var(--nexora-success);
+    }
+    /* Memory Bank Panel */
+    .memory-panel {
+      display: flex;
+      flex-direction: column;
+    }
+    .memory-bank {
+      flex: 1;
+      overflow-y: auto;
+      max-height: 400px;
+    }
+    .memory-artifact {
+      background: var(--nexora-surface);
+      border: 1px solid var(--nexora-border);
+      border-radius: 0.5rem;
+      padding: 0.75rem;
+      margin-bottom: 0.5rem;
+    }
+    .artifact-source {
+      font-size: 0.75rem;
+      color: var(--nexora-agent);
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+    }
+    .artifact-data {
+      font-family: 'Fira Code', monospace;
+      font-size: 0.75rem;
+      color: var(--nexora-muted);
+    }
+    /* Navigation Controls */
+    .nav-controls {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      padding: 1.5rem;
+      background: var(--nexora-surface);
+      border-top: 1px solid var(--nexora-border);
+    }
+    .nav-btn {
+      padding: 0.75rem 1.5rem;
+      border-radius: 0.5rem;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    .nav-btn.prev {
+      background: var(--nexora-surface);
+      border: 1px solid var(--nexora-border);
+      color: var(--nexora-text);
+    }
+    .nav-btn.prev:hover:not(:disabled) {
+      background: var(--nexora-border);
+    }
+    .nav-btn.next {
+      background: var(--nexora-agent);
+      color: white;
+    }
+    .nav-btn.next:hover:not(:disabled) {
+      background: rgba(59, 130, 246, 0.8);
+    }
+    .nav-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    .frame-indicator {
+      font-family: 'Fira Code', monospace;
+      font-size: 1rem;
+      color: var(--nexora-muted);
+      min-width: 80px;
+      text-align: center;
+    }
+    /* Presenter Script */
+    .presenter-script {
+      background: var(--nexora-surface);
+      border: 1px solid var(--nexora-border);
+      border-radius: 0.5rem;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      font-style: italic;
+      color: var(--nexora-text);
+      line-height: 1.6;
+    }
+    /* Connection Status */
+    .connection-status {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: var(--nexora-surface);
+      border-radius: 2rem;
+      font-size: 0.75rem;
+    }
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--nexora-muted);
+    }
+    .status-dot.connected {
+      background: var(--nexora-success);
+    }
+    .status-dot.error {
+      background: var(--nexora-critical);
+    }
+  </style>
+</head>
+<body>
+  <!-- Connection Status -->
+  <div class="connection-status">
+    <div class="status-dot" id="statusDot"></div>
+    <span id="statusText">Connecting...</span>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <!-- Left: UEB Log -->
+    <div class="ueb-log-panel glass-box">
+      <div class="panel-header">Unified Event Bus (UEB) Log</div>
+      <div class="ueb-log" id="uebLog">
+        <div class="ueb-entry">System initializing...</div>
+      </div>
+    </div>
+
+    <!-- Right: Memory Bank + Script -->
+    <div class="memory-panel">
+      <div class="panel-header">Memory Bank</div>
+      <div class="memory-bank" id="memoryBank">
+        <div class="text-muted" style="font-size: 0.875rem;">No artifacts stored</div>
+      </div>
+
+      <div class="panel-header" style="margin-top: 1.5rem;">Presenter Script</div>
+      <div class="presenter-script" id="presenterScript">
+        Loading...
+      </div>
+
+      <div class="panel-header" style="margin-top: 1.5rem;">Agent Status</div>
+      <div class="card" id="agentStatuses">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+          <span>Early Warning</span>
+          <span class="status-badge status-idle" id="ew-status">IDLE</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+          <span>Situational</span>
+          <span class="status-badge status-idle" id="sa-status">IDLE</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <span>Resource</span>
+          <span class="status-badge status-idle" id="ra-status">IDLE</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Navigation Controls -->
+  <div class="nav-controls">
+    <button class="nav-btn prev" id="prevBtn" onclick="prevFrame()">← Prev</button>
+    <span class="frame-indicator" id="frameIndicator">Frame 1/7</span>
+    <button class="nav-btn next" id="nextBtn" onclick="nextFrame()">Next →</button>
+  </div>
+
+  <script src="story.js"></script>
+  <script src="story-client.js"></script>
+  <script>
+    // Initialize story client
+    const client = new StoryClient('ws://localhost:8080');
+    let currentFrame = 0;
+    let connected = false;
+
+    // Load story data
+    client.loadStory(THE_STORY);
+
+    // Connection status
+    client.onConnect = () => {
+      connected = true;
+      document.getElementById('statusDot').classList.add('connected');
+      document.getElementById('statusText').textContent = 'Connected';
+    };
+
+    client.onError = () => {
+      document.getElementById('statusDot').classList.add('error');
+      document.getElementById('statusText').textContent = 'Offline';
+    };
+
+    // Frame change handler
+    client.onFrameChange = (frameIndex) => {
+      currentFrame = frameIndex;
+      renderFrame(frameIndex);
+    };
+
+    // Render frame UI
+    function renderFrame(frameIndex) {
+      const frame = THE_STORY[frameIndex];
+      if (!frame) return;
+
+      const uiState = frame.ui_state;
+
+      // Update presenter script
+      document.getElementById('presenterScript').textContent = frame.presenter_script;
+
+      // Update UEB log
+      const uebLog = document.getElementById('uebLog');
+      uebLog.innerHTML = `<div class="ueb-entry event">${uiState.ueb_log}</div>`;
+
+      // Update memory bank
+      const memoryBank = document.getElementById('memoryBank');
+      if (uiState.memory_bank && uiState.memory_bank.length > 0) {
+        memoryBank.innerHTML = uiState.memory_bank.map(artifact => `
+          <div class="memory-artifact">
+            <div class="artifact-source">${artifact.source}</div>
+            <div class="artifact-data">${artifact.data}</div>
+          </div>
+        `).join('');
+      } else {
+        memoryBank.innerHTML = '<div class="text-muted" style="font-size: 0.875rem;">No artifacts stored</div>';
+      }
+
+      // Update agent statuses
+      updateAgentStatus('ew-status', uiState.agent_statuses.early_warning);
+      updateAgentStatus('sa-status', uiState.agent_statuses.situational);
+      updateAgentStatus('ra-status', uiState.agent_statuses.resource);
+
+      // Update navigation
+      document.getElementById('frameIndicator').textContent = `Frame ${frameIndex + 1}/${THE_STORY.length}`;
+      document.getElementById('prevBtn').disabled = frameIndex === 0;
+      document.getElementById('nextBtn').disabled = frameIndex === THE_STORY.length - 1;
+    }
+
+    function updateAgentStatus(elementId, status) {
+      const el = document.getElementById(elementId);
+      if (!el) return;
+
+      el.className = 'status-badge';
+      switch(status) {
+        case 'idle':
+          el.classList.add('status-idle');
+          el.textContent = 'IDLE';
+          break;
+        case 'processing':
+          el.classList.add('status-processing');
+          el.textContent = 'PROCESSING';
+          break;
+        case 'complete':
+          el.classList.add('status-complete');
+          el.textContent = 'COMPLETE';
+          break;
+        case 'pending_approval':
+          el.classList.add('status-pending_approval');
+          el.textContent = 'PENDING';
+          break;
+        default:
+          el.classList.add('status-idle');
+          el.textContent = status.toUpperCase();
+      }
+    }
+
+    function nextFrame() {
+      if (currentFrame < THE_STORY.length - 1) {
+        client.goToFrame(currentFrame + 1);
+      }
+    }
+
+    function prevFrame() {
+      if (currentFrame > 0) {
+        client.goToFrame(currentFrame - 1);
+      }
+    }
+
+    // Initial render
+    renderFrame(0);
+
+    // Connect to server (optional - works offline too)
+    // client.connect();
+  </script>
+</body>
+</html>

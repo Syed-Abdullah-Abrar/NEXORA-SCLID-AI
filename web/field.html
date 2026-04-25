@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NEXORA Field Ops</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    body {
+      background: #000;
+      color: #f8fafc;
+      font-family: 'Inter', system-ui, sans-serif;
+    }
+    .container {
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 1rem;
+    }
+    /* Signal Header */
+    .signal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.75rem 1rem;
+      background: #0a0a0a;
+      border: 1px solid #1a1a1a;
+      border-radius: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    .signal-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.75rem;
+    }
+    .signal-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+    .signal-dot.offline { background: #ef4444; }
+    .signal-dot.online { background: #10b981; animation: pulse 2s infinite; }
+
+    /* Terminal */
+    .terminal {
+      background: #050505;
+      border: 1px solid #1a1a1a;
+      border-radius: 0.5rem;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      min-height: 280px;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.8rem;
+      line-height: 1.6;
+    }
+    .terminal-line {
+      margin-bottom: 0.5rem;
+    }
+    .terminal-line.system { color: #94a3b8; }
+    .terminal-line.event { color: #3b82f6; }
+    .terminal-line.warning { color: #f59e0b; }
+    .terminal-line.critical { color: #ef4444; }
+    .terminal-line.success { color: #10b981; text-shadow: 0 0 4px rgba(16, 185, 129, 0.5); }
+
+    /* Compass / AR Navigation */
+    .compass-container {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 1rem;
+    }
+    .compass {
+      width: 120px;
+      height: 120px;
+      border: 2px solid #1a1a1a;
+      border-radius: 50%;
+      background: #0a0a0a;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .compass::before {
+      content: '';
+      position: absolute;
+      inset: 8px;
+      border: 1px solid #1a1a1a;
+      border-radius: 50%;
+    }
+    .compass-arrow {
+      width: 0;
+      height: 0;
+      border-left: 8px solid transparent;
+      border-right: 8px solid transparent;
+      border-bottom: 40px solid #10b981;
+      filter: drop-shadow(0 0 6px rgba(16, 185, 129, 0.6));
+      transform: rotate(-45deg);
+    }
+    .compass-label {
+      position: absolute;
+      bottom: -25px;
+      font-size: 0.625rem;
+      color: #10b981;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    /* Push to Talk Button */
+    .ptt-btn {
+      width: 100%;
+      padding: 1.5rem;
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      border: none;
+      border-radius: 1rem;
+      font-size: 1rem;
+      font-weight: 700;
+      color: white;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      cursor: pointer;
+      box-shadow: 0 0 30px rgba(16, 185, 129, 0.3);
+      transition: all 0.2s;
+      margin-bottom: 1rem;
+    }
+    .ptt-btn:hover {
+      transform: scale(1.02);
+      box-shadow: 0 0 40px rgba(16, 185, 129, 0.5);
+    }
+    .ptt-btn:active {
+      transform: scale(0.98);
+    }
+    .ptt-btn.active {
+      background: linear-gradient(135deg, #059669 0%, #047857 100%);
+      box-shadow: 0 0 50px rgba(16, 185, 129, 0.7);
+    }
+
+    /* Quick Actions */
+    .quick-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+    }
+    .quick-btn {
+      padding: 1rem;
+      background: #0a0a0a;
+      border: 1px solid #1a1a1a;
+      border-radius: 0.5rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #94a3b8;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .quick-btn:hover {
+      background: #1a1a1a;
+      border-color: #334155;
+    }
+    .quick-btn.sos {
+      color: #ef4444;
+      border-color: rgba(239, 68, 68, 0.3);
+    }
+
+    /* Status Bar */
+    .status-bar {
+      margin-top: 1rem;
+      padding: 0.75rem;
+      background: #0a0a0a;
+      border: 1px solid #1a1a1a;
+      border-radius: 0.5rem;
+    }
+    .status-label {
+      font-size: 0.625rem;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.5rem;
+    }
+    .status-text {
+      font-family: 'Fira Code', monospace;
+      font-size: 0.75rem;
+      color: #10b981;
+    }
+
+    /* Narrative Script */
+    .narrative-script {
+      padding: 1rem;
+      background: #0a0a0a;
+      border: 1px solid #1a1a1a;
+      border-left: 3px solid #3b82f6;
+      border-radius: 0.5rem;
+      margin-bottom: 1rem;
+      font-size: 0.875rem;
+      font-style: italic;
+      line-height: 1.5;
+      color: #f8fafc;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Signal Header -->
+    <div class="signal-header">
+      <div class="signal-item">
+        <div class="signal-dot offline" id="cloudDot"></div>
+        <span>Cloud</span>
+      </div>
+      <div class="signal-item">
+        <div class="signal-dot online" id="hamDot"></div>
+        <span>HAM/APRS</span>
+      </div>
+    </div>
+
+    <!-- Narrative Script -->
+    <div class="narrative-script" id="presenterScript">
+      Loading field operations...
+    </div>
+
+    <!-- Terminal -->
+    <div class="terminal">
+      <div class="terminal-line system">NEXORA HAM Radio v2.4.1</div>
+      <div class="terminal-line system">AX.25 Packet Decoder Ready</div>
+      <div class="terminal-line" style="border-bottom: 1px solid #1a1a1a; margin: 0.5rem 0;"></div>
+      <div id="terminalLog">
+        <div class="terminal-line system">AWAITING PACKET...</div>
+      </div>
+    </div>
+
+    <!-- AR Compass Navigation -->
+    <div class="compass-container">
+      <div class="compass">
+        <div class="compass-arrow"></div>
+        <div class="compass-label">SAFE: 2.4km NE</div>
+      </div>
+    </div>
+
+    <!-- Push to Talk -->
+    <button class="ptt-btn" id="pttBtn" onmousedown="pttDown()" onmouseup="pttUp()" ontouchstart="pttDown()" ontouchend="pttUp()">
+      Push to Talk
+    </button>
+
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+      <button class="quick-btn sos" onclick="sendSOS()">Send SOS</button>
+      <button class="quick-btn" onclick="sendStatus()">Status Report</button>
+    </div>
+
+    <!-- Status Bar -->
+    <div class="status-bar">
+      <div class="status-label">Field Notes</div>
+      <div class="status-text" id="fieldNotes">
+        > Ready for operations
+      </div>
+    </div>
+  </div>
+
+  <script src="story.js"></script>
+  <script src="story-client.js"></script>
+  <script>
+    const client = new StoryClient('ws://localhost:8080');
+    let currentFrame = 0;
+    let pttActive = false;
+
+    client.loadStory(THE_STORY);
+
+    client.onFrameChange = (frameIndex) => {
+      currentFrame = frameIndex;
+      renderFrame(frameIndex);
+    };
+
+    function renderFrame(frameIndex) {
+      const frame = THE_STORY[frameIndex];
+      if (!frame) return;
+
+      const uiState = frame.ui_state;
+
+      // Update presenter script
+      document.getElementById('presenterScript').textContent = frame.presenter_script;
+
+      // Update terminal log based on frame
+      updateTerminalLog(frameIndex);
+
+      // Update field notes
+      updateFieldNotes(frameIndex);
+
+      // Update cloud status
+      const cloudDot = document.getElementById('cloudDot');
+      if (frameIndex >= 5) {
+        cloudDot.classList.remove('offline');
+        cloudDot.classList.add('online');
+      }
+    }
+
+    function updateTerminalLog(frameIndex) {
+      const logEntries = [
+        ['system', 'AWAITING PACKET...'],
+        ['event', 'INCOMING: K1ABC-1>APNX01,WIDE1-1:'],
+        ['event', ':FLOOD ZONE A - EVAC STATUS 3'],
+        ['warning', 'DECODED: APRS Telemetry Packet'],
+        ['success', 'WATER LEVEL: 4.5m | FLOW: 2400 m³/s'],
+        ['event', 'INCOMING: W1ABC-5>APNX02:'],
+        ['event', ':SAFE_ROUTE: HEADING 045° 2.4KM'],
+        ['success', 'VOICE SYNTH: Proceed to shelter Delta...'],
+        ['event', 'HAM BURST: Distress call Zone C'],
+        ['success', 'FINAL MILE: Route calculated to civilian'],
+      ];
+
+      const terminalLog = document.getElementById('terminalLog');
+      let html = '<div class="terminal-line system">NEXORA HAM Radio v2.4.1</div>';
+      html += '<div class="terminal-line system">AX.25 Packet Decoder Ready</div>';
+      html += '<div class="terminal-line" style="border-bottom: 1px solid #1a1a1a; margin: 0.5rem 0;"></div>';
+
+      for (let i = 0; i <= frameIndex; i++) {
+        if (logEntries[i]) {
+          html += `<div class="terminal-line ${logEntries[i][0]}">${logEntries[i][1]}</div>`;
+        }
+      }
+
+      terminalLog.innerHTML = html;
+    }
+
+    function updateFieldNotes(frameIndex) {
+      const notes = [
+        '> Ready for operations',
+        '> Monitoring Zone A sensors',
+        '> Bridge 7B collapse reported',
+        '> Awaiting commander approval',
+        '> Route 14 Alt deployed',
+        '> Civilian distress call received',
+        '> Mission complete - civilian safe',
+      ];
+
+      const fieldNotes = document.getElementById('fieldNotes');
+      if (fieldNotes && notes[frameIndex]) {
+        fieldNotes.textContent = notes[frameIndex];
+      }
+    }
+
+    function pttDown() {
+      pttActive = true;
+      document.getElementById('pttBtn').classList.add('active');
+      document.getElementById('pttBtn').textContent = 'TRANSMITTING...';
+
+      // Log the transmission
+      const terminalLog = document.getElementById('terminalLog');
+      const newLine = document.createElement('div');
+      newLine.className = 'terminal-line success';
+      newLine.textContent = 'OUTGOING: "All units, this is NEXORA Field Ops..."';
+      terminalLog.appendChild(newLine);
+    }
+
+    function pttUp() {
+      pttActive = false;
+      document.getElementById('pttBtn').classList.remove('active');
+      document.getElementById('pttBtn').textContent = 'Push to Talk';
+    }
+
+    function sendSOS() {
+      const terminalLog = document.getElementById('terminalLog');
+      const newLine = document.createElement('div');
+      newLine.className = 'terminal-line critical';
+      newLine.textContent = 'OUTGOING: SOS - IMMEDIATE ASSISTANCE REQUIRED';
+      terminalLog.appendChild(newLine);
+      terminalLog.scrollTop = terminalLog.scrollHeight;
+    }
+
+    function sendStatus() {
+      const terminalLog = document.getElementById('terminalLog');
+      const newLine = document.createElement('div');
+      newLine.className = 'terminal-line success';
+      newLine.textContent = 'OUTGOING: Status report - all systems nominal';
+      terminalLog.appendChild(newLine);
+      terminalLog.scrollTop = terminalLog.scrollHeight;
+    }
+
+    // Initial render
+    renderFrame(0);
+  </script>
+</body>
+</html>

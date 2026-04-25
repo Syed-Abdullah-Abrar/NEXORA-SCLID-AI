@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NEXORA Logistics</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    body {
+      background: var(--nexora-bg);
+      color: var(--nexora-text);
+    }
+    .dashboard-header {
+      padding: 1rem 1.5rem;
+      background: var(--nexora-surface);
+      border-bottom: 1px solid var(--nexora-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .dashboard-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--nexora-warning);
+    }
+    .header-badge {
+      font-size: 0.625rem;
+      font-weight: 600;
+      padding: 0.25rem 0.75rem;
+      border-radius: 1rem;
+      background: rgba(245, 158, 11, 0.2);
+      color: var(--nexora-warning);
+    }
+
+    .main-content {
+      padding: 1.5rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* Route Map */
+    .route-map-container {
+      background: var(--nexora-surface);
+      border: 1px solid var(--nexora-border);
+      border-radius: 0.75rem;
+      overflow: hidden;
+      margin-bottom: 1.5rem;
+    }
+    .route-map-header {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--nexora-border);
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--nexora-muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .route-map {
+      height: 200px;
+      background: #0a0f1a;
+      position: relative;
+    }
+    .route-map svg {
+      width: 100%;
+      height: 100%;
+    }
+    .route-normal {
+      stroke: var(--nexora-success);
+      stroke-width: 3;
+      fill: none;
+    }
+    .route-blocked {
+      stroke: var(--nexora-critical);
+      stroke-width: 3;
+      stroke-dasharray: 8 4;
+      fill: none;
+    }
+    .route-optimal {
+      stroke: var(--nexora-agent);
+      stroke-width: 4;
+      fill: none;
+      filter: drop-shadow(0 0 8px var(--nexora-agent));
+    }
+    .waypoint {
+      fill: var(--nexora-agent);
+    }
+    .waypoint-blocked {
+      fill: var(--nexora-critical);
+    }
+    .waypoint-optimal {
+      fill: var(--nexora-success);
+    }
+
+    /* Inventory Grid */
+    .inventory-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .inventory-card {
+      background: var(--nexora-surface);
+      border: 1px solid var(--nexora-border);
+      border-radius: 0.75rem;
+      padding: 1rem;
+    }
+    .inventory-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
+    }
+    .inventory-name {
+      font-weight: 600;
+      font-size: 0.875rem;
+    }
+    .inventory-status {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+    .inventory-status.ok { background: var(--nexora-success); }
+    .inventory-status.warning { background: var(--nexora-warning); }
+    .inventory-status.critical { background: var(--nexora-critical); animation: pulse 2s infinite; }
+
+    .inventory-bar {
+      height: 6px;
+      background: var(--nexora-bg);
+      border-radius: 3px;
+      overflow: hidden;
+      margin-bottom: 0.5rem;
+    }
+    .inventory-fill {
+      height: 100%;
+      border-radius: 3px;
+      transition: width 0.3s;
+    }
+    .inventory-fill.ok { background: var(--nexora-success); }
+    .inventory-fill.warning { background: var(--nexora-warning); }
+    .inventory-fill.critical { background: var(--nexora-critical); }
+
+    .inventory-stats {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      color: var(--nexora-muted);
+    }
+
+    /* Bottleneck Alert */
+    .bottleneck-alert {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid var(--nexora-critical);
+      border-radius: 0.75rem;
+      padding: 1rem;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .bottleneck-alert.hidden {
+      display: none;
+    }
+    .bottleneck-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 0.5rem;
+      background: rgba(239, 68, 68, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--nexora-critical);
+    }
+    .bottleneck-content {
+      flex: 1;
+    }
+    .bottleneck-title {
+      font-weight: 600;
+      color: var(--nexora-critical);
+      margin-bottom: 0.25rem;
+    }
+    .bottleneck-desc {
+      font-size: 0.875rem;
+      color: var(--nexora-muted);
+    }
+
+    /* Agent Status */
+    .agent-panel {
+      background: var(--nexora-surface);
+      border: 1px solid var(--nexora-border);
+      border-radius: 0.75rem;
+      padding: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .agent-panel-header {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--nexora-muted);
+      margin-bottom: 1rem;
+    }
+    .agent-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid var(--nexora-border);
+    }
+    .agent-row:last-child {
+      border-bottom: none;
+    }
+    .agent-name {
+      font-weight: 500;
+    }
+    .agent-badge {
+      font-size: 0.625rem;
+      font-weight: 600;
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.25rem;
+    }
+    .badge-idle { background: var(--nexora-surface); color: var(--nexora-muted); }
+    .badge-processing { background: rgba(59, 130, 246, 0.2); color: var(--nexora-agent); }
+    .badge-complete { background: rgba(16, 185, 129, 0.2); color: var(--nexora-success); }
+    .badge-warning { background: rgba(245, 158, 11, 0.2); color: var(--nexora-warning); }
+
+    /* Narrative */
+    .narrative {
+      background: var(--nexora-surface);
+      border: 1px solid var(--nexora-border);
+      border-left: 3px solid var(--nexora-warning);
+      border-radius: 0.75rem;
+      padding: 1rem;
+      font-style: italic;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <div class="dashboard-header">
+    <div class="dashboard-title">Logistics Command</div>
+    <span class="header-badge">ACTIVE</span>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <!-- Bottleneck Alert -->
+    <div class="bottleneck-alert" id="bottleneckAlert">
+      <div class="bottleneck-icon">
+        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+        </svg>
+      </div>
+      <div class="bottleneck-content">
+        <div class="bottleneck-title">Supply Bottleneck Detected</div>
+        <div class="bottleneck-desc">Route 12 flooded. Rerouting via alternate corridors. +45 min ETA.</div>
+      </div>
+    </div>
+
+    <!-- Route Map -->
+    <div class="route-map-container">
+      <div class="route-map-header">
+        <span>Supply Route Network</span>
+        <span id="routeStatus" style="color: var(--nexora-success);">ALL ROUTES OPERATIONAL</span>
+      </div>
+      <div class="route-map">
+        <svg viewBox="0 0 400 150" id="routeSvg">
+          <!-- Background grid -->
+          <defs>
+            <pattern id="smallGrid" width="10" height="10" patternUnits="userSpaceOnUse">
+              <path d="M 10 0 L 0 0 0 10" fill="none" stroke="#1e293b" stroke-width="0.5"/>
+            </pattern>
+          </defs>
+          <rect width="400" height="150" fill="url(#smallGrid)"/>
+
+          <!-- Routes -->
+          <g id="routes">
+            <!-- Route 12 (depot to shelter) -->
+            <path id="route-12-main" d="M 30 75 L 100 60 L 180 75" class="route-normal"/>
+            <!-- Route 12 alternative -->
+            <path id="route-12-alt" d="M 180 75 L 250 55 L 320 75" class="route-normal"/>
+            <!-- Route 14 Alt (optimal) -->
+            <path id="route-14-alt" d="M 30 75 L 80 100 L 150 110 L 220 100 L 280 85 L 320 75" class="route-optimal" style="display: none;"/>
+          </g>
+
+          <!-- Waypoints -->
+          <g id="waypoints">
+            <!-- Depot A -->
+            <circle cx="30" cy="75" r="5" class="waypoint-optimal"/>
+            <text x="40" y="78" fill="#94a3b8" font-size="8" font-family="Fira Code">Depot A</text>
+
+            <!-- Waypoint 1 -->
+            <circle id="wp-1" cx="100" cy="60" r="4" class="waypoint"/>
+            <circle id="wp-2" cx="180" cy="75" r="4" class="waypoint"/>
+
+            <!-- Bridge (blocked marker) -->
+            <rect id="bridge-marker" x="185" y="68" width="20" height="14" fill="#ef4444" rx="2" style="display: none;"/>
+            <text id="bridge-label" x="195" y="95" text-anchor="middle" fill="#ef4444" font-size="7" font-family="Fira Code" style="display: none;">BRIDGE 7B</text>
+
+            <!-- Shelter 4 -->
+            <circle cx="320" cy="75" r="5" class="waypoint-optimal"/>
+            <text x="330" y="78" fill="#10b981" font-size="8" font-family="Fira Code">Shelter 4</text>
+          </g>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Inventory Grid -->
+    <div class="inventory-grid">
+      <div class="inventory-card">
+        <div class="inventory-header">
+          <span class="inventory-name">Water Purification</span>
+          <div class="inventory-status ok"></div>
+        </div>
+        <div class="inventory-bar">
+          <div class="inventory-fill ok" style="width: 85%;"></div>
+        </div>
+        <div class="inventory-stats">
+          <span>12,400 units</span>
+          <span>85%</span>
+        </div>
+      </div>
+
+      <div class="inventory-card">
+        <div class="inventory-header">
+          <span class="inventory-name">Sandbags</span>
+          <div class="inventory-status warning"></div>
+        </div>
+        <div class="inventory-bar">
+          <div class="inventory-fill warning" style="width: 32%;"></div>
+        </div>
+        <div class="inventory-stats">
+          <span>3,200 / 10,000</span>
+          <span>32%</span>
+        </div>
+      </div>
+
+      <div class="inventory-card">
+        <div class="inventory-header">
+          <span class="inventory-name">Medical Kits</span>
+          <div class="inventory-status ok"></div>
+        </div>
+        <div class="inventory-bar">
+          <div class="inventory-fill ok" style="width: 78%;"></div>
+        </div>
+        <div class="inventory-stats">
+          <span>890 units</span>
+          <span>78%</span>
+        </div>
+      </div>
+
+      <div class="inventory-card">
+        <div class="inventory-header">
+          <span class="inventory-name">Diesel Fuel</span>
+          <div class="inventory-status critical"></div>
+        </div>
+        <div class="inventory-bar">
+          <div class="inventory-fill critical" style="width: 12%;"></div>
+        </div>
+        <div class="inventory-stats">
+          <span>240 / 2000L</span>
+          <span>12%</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Agent Panel -->
+    <div class="agent-panel">
+      <div class="agent-panel-header">Resource Allocation Agent</div>
+      <div class="agent-row">
+        <span class="agent-name">A* Pathfinding</span>
+        <span class="agent-badge badge-complete" id="astar-badge">COMPLETE</span>
+      </div>
+      <div class="agent-row">
+        <span class="agent-name">Route Optimization</span>
+        <span class="agent-badge badge-complete" id="route-badge">COMPLETE</span>
+      </div>
+      <div class="agent-row">
+        <span class="agent-name">Supply Assignment</span>
+        <span class="agent-badge badge-processing" id="supply-badge">ACTIVE</span>
+      </div>
+    </div>
+
+    <!-- Narrative -->
+    <div class="narrative" id="presenterScript">
+      Loading logistics data...
+    </div>
+  </div>
+
+  <script src="story.js"></script>
+  <script src="story-client.js"></script>
+  <script>
+    const client = new StoryClient('ws://localhost:8080');
+    let currentFrame = 0;
+
+    client.loadStory(THE_STORY);
+
+    client.onFrameChange = (frameIndex) => {
+      currentFrame = frameIndex;
+      renderFrame(frameIndex);
+    };
+
+    function renderFrame(frameIndex) {
+      const frame = THE_STORY[frameIndex];
+      if (!frame) return;
+
+      const uiState = frame.ui_state;
+
+      // Update presenter script
+      document.getElementById('presenterScript').textContent = frame.presenter_script;
+
+      // Update based on frame state
+      updateRoutes(frameIndex);
+      updateBottleneck(frameIndex);
+      updateAgentBadges(uiState.agent_statuses.resource);
+    }
+
+    function updateRoutes(frameIndex) {
+      const route12Main = document.getElementById('route-12-main');
+      const route14Alt = document.getElementById('route-14-alt');
+      const bridgeMarker = document.getElementById('bridge-marker');
+      const bridgeLabel = document.getElementById('bridge-label');
+      const routeStatus = document.getElementById('routeStatus');
+
+      if (frameIndex >= 2) {
+        // Show blocked bridge
+        bridgeMarker.style.display = 'block';
+        bridgeLabel.style.display = 'block';
+        route12Main.classList.remove('route-normal');
+        route12Main.classList.add('route-blocked');
+        routeStatus.textContent = 'ROUTE 12: BLOCKED';
+        routeStatus.style.color = '#ef4444';
+      }
+
+      if (frameIndex >= 4) {
+        // Show optimal route
+        route14Alt.style.display = 'block';
+        routeStatus.textContent = 'ROUTE 14 ALT: OPTIMAL';
+        routeStatus.style.color = '#10b981';
+      }
+    }
+
+    function updateBottleneck(frameIndex) {
+      const alert = document.getElementById('bottleneckAlert');
+      if (frameIndex >= 2 && frameIndex < 4) {
+        alert.classList.remove('hidden');
+      } else {
+        alert.classList.add('hidden');
+      }
+    }
+
+    function updateAgentBadges(resourceStatus) {
+      const supplyBadge = document.getElementById('supply-badge');
+      if (resourceStatus === 'complete') {
+        supplyBadge.className = 'agent-badge badge-complete';
+        supplyBadge.textContent = 'COMPLETE';
+      } else if (resourceStatus === 'processing') {
+        supplyBadge.className = 'agent-badge badge-processing';
+        supplyBadge.textContent = 'ACTIVE';
+      } else if (resourceStatus === 'pending_approval') {
+        supplyBadge.className = 'agent-badge badge-warning';
+        supplyBadge.textContent = 'PENDING';
+      }
+    }
+
+    // Initial render
+    renderFrame(0);
+  </script>
+</body>
+</html>

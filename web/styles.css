@@ -1,0 +1,149 @@
+/* NEXORA EOC Dashboard - Shared Styles */
+
+/* Design Tokens */
+:root {
+  --nexora-bg: #0F172A;
+  --nexora-surface: #1E293B;
+  --nexora-border: #334155;
+  --nexora-text: #F8FAFC;
+  --nexora-muted: #94A3B8;
+  --nexora-agent: #3B82F6;
+  --nexora-warning: #F59E0B;
+  --nexora-critical: #EF4444;
+  --nexora-success: #10B981;
+}
+
+/* Base Reset */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: var(--nexora-bg);
+  color: var(--nexora-text);
+  min-height: 100vh;
+  overflow-y: auto;
+}
+
+/* Glass Box Component */
+.glass-box {
+  background: rgba(30, 41, 59, 0.7);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.75rem;
+}
+
+/* Agent Status Badges */
+.status-idle {
+  background: var(--nexora-surface);
+  color: var(--nexora-muted);
+}
+.status-processing {
+  background: rgba(59, 130, 246, 0.2);
+  color: var(--nexora-agent);
+}
+.status-complete {
+  background: rgba(16, 185, 129, 0.2);
+  color: var(--nexora-success);
+}
+.status-pending_approval {
+  background: rgba(245, 158, 11, 0.2);
+  color: var(--nexora-warning);
+}
+
+/* Pulse Animation */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+.pulse-dot {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+/* Route Status Indicators */
+.route-blocked {
+  stroke: var(--nexora-critical);
+  stroke-dasharray: 4 2;
+}
+.route-active {
+  stroke: var(--nexora-success);
+  stroke-width: 3;
+}
+.route-optimal {
+  stroke: var(--nexora-agent);
+  stroke-width: 4;
+  filter: drop-shadow(0 0 6px var(--nexora-agent));
+}
+
+/* Risk Heatmap */
+.heatmap-zone {
+  fill: rgba(239, 68, 68, 0.3);
+  animation: heatmap-pulse 3s ease-in-out infinite;
+}
+@keyframes heatmap-pulse {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.6; }
+}
+
+/* Terminal Style */
+.terminal-bg {
+  background: #050505;
+  border: 1px solid #1a1a1a;
+  font-family: 'Fira Code', monospace;
+}
+
+/* Progress Bar */
+.progress-bar {
+  background: linear-gradient(to right, var(--nexora-agent), var(--nexora-success));
+}
+
+/* Button Styles */
+.btn-primary {
+  background: var(--nexora-agent);
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+.btn-primary:hover {
+  background: rgba(59, 130, 246, 0.8);
+}
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Card Component */
+.card {
+  background: var(--nexora-surface);
+  border: 1px solid var(--nexora-border);
+  border-radius: 0.75rem;
+  padding: 1rem;
+}
+
+/* Typography */
+.text-agent { color: var(--nexora-agent); }
+.text-warning { color: var(--nexora-warning); }
+.text-critical { color: var(--nexora-critical); }
+.text-success { color: var(--nexora-success); }
+.text-muted { color: var(--nexora-muted); }
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--nexora-bg);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--nexora-border);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--nexora-muted);
+}

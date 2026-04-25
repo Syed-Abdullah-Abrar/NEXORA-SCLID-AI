@@ -41,14 +41,16 @@
 **(Action: Presenter clicks the 'Trigger Flood Warning' scenario button. The UI is in the EOC Commander layout.)**
 **Presenter:** "Here at the EOC, the Commander is looking at predictive risk. We just received a severe weather alert. On our Neural Map, you can see the Early Warning Agent instantly highlighting vulnerable infrastructure nodes in red. It is predicting the flood path before a single drop of rain hits the ground."
 
-### Step 2: The Siloed Organizations (The Event Bus)
-**(Action: Presenter clicks 'Simulate Bridge Collapse'. The UI switches to the Logistics layout.)**
-**Presenter:** "Fast forward. The storm hits. Down at Logistics, they are trying to manage supply routes. A bridge just collapsed on Route 12."
-**(On the 3D map, a central node goes dark. Instantly, a web of green neural links recalculates and redraws a new path around the dead node.)**
-**Presenter:** "Thanks to our Unified Event Bus, the Situational Awareness Agent processes that collapse and instantly updates the Resource Allocation Agent. The supply trucks are dynamically rerouted. The Logistics dashboard updates simultaneously with the Hospital command—perfect synchronization, without a single human phone call."
+**(Presenter clicks the 'Next ->' button. The view switches to the Logistics Dashboard. On the 2D map, a supply route is highlighted, but a key bridge node is now red and marked "BLOCKED".)**
+
+**Presenter:** "As the storm hits, our Situational Awareness agent processes a new field report: a key bridge has collapsed. The old supply route is now impassable."
+
+**(Presenter clicks 'Next ->'. The red "BLOCKED" node remains, but a new, glowing green route instantly appears on the map, bypassing the obstacle.)**
+
+**Presenter:** "But this is where NEXORA shines. The moment the bridge collapse was logged to the Memory Bank, our Resource Allocation Agent ran an **A-star pathfinding algorithm** against a graph of the city's infrastructure. It has instantly calculated and broadcast a new, optimal supply route. This isn't just data visualization; it's autonomous, real-time problem-solving."
 
 ### Step 3: The Dark Mode Rescue (The "Wow" Moment)
-**(Action: Presenter switches to the Field Marshall UI. The screen shifts to a high-contrast Dark Mode. The 3D map tilts to a ground-level perspective.)**
+**(Presenter clicks 'Next ->'. The screen switches to the high-contrast "Dark Mode" Field Ops view.)**
 **Presenter:** "Now, let's go to the front lines. The cell towers are down. The Field Marshall has no internet. They are operating in total 'Dark Mode'."
 
 **(Presenter clicks 'Trigger HAM Distress Call'.)**
