@@ -1,38 +1,56 @@
-# NEXORA-SCLID-AI: Disaster Copilot
+# NEXORA-SCLID-AI: Disaster Copilot (Hackathon Final State)
 
-NEXORA-SCLID-AI is a multi-agent orchestration framework designed for augmented resilience in disaster management. Inspired by the "Disaster Copilot" vision (arXiv:2510.16034v2), it leverages agentic AI to unify fragmented data streams and automate complex coordination during high-pressure crises.
+NEXORA-SCLID-AI is a multi-agent orchestration framework for disaster management. It implements the "Disaster Copilot" vision (arXiv:2510.16034v2) using a Live LangGraph-style orchestrator powered by the MiniMax MLLM.
 
-## Core Architecture
-- **MLLM Orchestrator**: A central Task Planner that decomposes objectives into actionable sub-tasks (`TaskGraph`). Currently utilizing a decoupled adapter pattern for local SLM integration.
-- **Unified Event Bus (UEB)**: A true `EventEmitter`-based Publish/Subscribe protocol (pending refactor). Agents subscribe to topics (e.g., `hazard.detected`) and act asynchronously, ensuring the system remains highly decoupled and resilient to node failures.
-- **3-Tier Memory Bank**: Vectorized storage system. 
-  - *Current*: Active session memory.
-  - *Short-Term*: Recent events and anomaly logs.
-  - *Long-Term*: Historical semantic retrieval used by RAG Guardrails.
-- **HAM Radio Bridge**: Dedicated offline transport (APRS, Voice, Packet AX.25) ensuring absolute operational resilience in disconnected, "Dark Mode" environments.
+## 🚀 Live Demo Architecture
+The project features a real-time, synchronized multi-screen simulation of a disaster in the city of **Krypton**.
 
-## Specialized Pipeline
-1. **Early Warning Agent**: Predicts hazards via sensor and weather data.
-2. **Situational Awareness Agent**: Fuses multi-modal data for a common operating picture.
-3. **Resource Allocation Agent**: Optimizes supply and personnel deployment. Validates all generated plans against the Long-Term memory vector store using **RAG Guardrails** for safety compliance.
+### 1. The AI Brain (LangGraph Orchestrator)
+- **Engine:** Node.js + WebSocket Server (`src/server.ts`)
+- **Intelligence:** MiniMax 6.5 MLLM (`src/llm/MinimaxClient.ts`)
+- **Logic:** The server takes the disaster narrative, feeds it to the MLLM, and dynamically decides which agent to trigger via the **Unified Event Bus (UEB)**.
+- **Sync:** Broadcasts live state updates to all connected dashboards simultaneously.
 
-## Operational Modes
-- **Command Mode**: High-bandwidth coordination for EOC commanders.
-- **Dark Mode**: Quantized, offline orchestration for field responders using the HAM Radio Bridge for decentralized intelligence.
+### 2. Specialized Agent Pipeline
+- **Early Warning Agent:** Ingests sensor data and predicts hazards.
+- **Situational Awareness Agent:** Fuses multi-modal telemetry to update the common operating picture.
+- **Resource Allocation Agent:** Calculates optimal rescue routes using the **A* Search Algorithm**.
 
-## Omni-View Hackathon Demo (3D Digital Twin)
-A synchronized, responsive 3D WebGL visualization of the disaster response pipeline. Designed to provide tailored visual intelligence to all layers of the disaster relief body without heavy API dependencies:
-1. **EOC Command Dashboard (Macro)** - Top-down 3D city view with time-travel slider and predictive risk heatmap overlays.
-2. **Siloed Organizations (Tactical)** - Split-screen logistics/medical command demonstrating real-time UEB data syncing.
-3. **Dark Mode Rescue (Street-Level AR)** - Mobile interface showing a street-level perspective with AR-style safe route projections and a functioning HAM radio terminal.
+### 3. Professional Command Dashboards
+- **Presenter View (`/ai-view.html`):** Controls the narrative; shows LLM thought process and UEB logs.
+- **EOC Dashboard (`/eoc.html`):** Macro city view with dynamic risk heatmaps.
+- **Logistics Command (`/logistics.html`):** Live supply network with real-time A* path optimization.
+- **Tactical Field View (`/field.html`):** High-contrast "Dark Mode" terminal with HAM Radio integration and AR compass.
 
-```bash
-cd web && python3 -m http.server 8080
-# Open http://localhost:8080
-```
+## 🛠️ Installation & Setup
 
-## Upcoming Roadmap (Tomorrow's Sprint)
-- **Decentralized Edge Deployment:** Moving the core orchestrator to an on-device Small Language Model (SLM) for true offline autonomy.
-- **Misinformation Control Agent:** Implementing an NLP filter to parse genuine HAM distress calls from anomalous noise.
-- **Reinforcement Learning Evacuation:** Dynamic, real-time recalculation of safe routes based on live `HAMBridge` obstacle reports.
+1. **Environment:**
+   Create a `.env` file in the root directory:
+   ```text
+   MINIMAX_API_KEY=your_key_here
+   ```
 
+2. **Install Dependencies:**
+   ```bash
+   npm install
+   ```
+
+3. **Start the LangGraph Brain:**
+   ```bash
+   npm start
+   ```
+
+4. **Serve the Web Dashboards:**
+   ```bash
+   cd web && python3 -m http.server 8000
+   ```
+
+## 📜 The "City of Krypton" Script
+The demo follows a high-stakes narrative defined in `web/story.js`:
+- **Silver River Breach:** Predictive flooding detected by the EW Agent.
+- **Highland Pass Landslide:** Infrastructure failure detected by Situational Awareness.
+- **A* Optimization:** Resource Allocation Agent reroutes convoys via "Old Mine Trail."
+- **HAM Rescue:** Decoding an SOS from "Krypton Library" in total blackout conditions.
+
+## 🏁 Hackathon Pitch Info
+Refer to `PITCH.md` for the minute-by-frame presentation script and the technical "Wow" moments.
