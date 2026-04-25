@@ -2,10 +2,17 @@ import fetch from 'node-fetch';
 
 export class MinimaxClient {
   private apiKey: string;
-  private baseUrl = 'https://api.minimax.chat/v1/chat/completions';
+  private baseUrl: string;
 
   constructor() {
     this.apiKey = process.env.MINIMAX_API_KEY || '';
+    this.baseUrl = (process.env.OPENAI_BASE_URL || 'https://api.minimax.io/v1') + '/chat/completions';
+  }
+
+  private cleanContent(content: string): string {
+    // Strip <think>...</think> blocks from MiniMax M2.5 response
+    let cleaned = content.replace(/<think>[\s\S]*?<\/think>\n*/g, '');
+    return cleaned.trim();
   }
 
   async chat(message: string): Promise<string> {
@@ -33,7 +40,7 @@ Give a concise, professional, and confident response.`;
           'Authorization': `Bearer ${this.apiKey}`
         },
         body: JSON.stringify({
-          model: 'abab6.5s-chat',
+          model: 'MiniMax-M2.5',
           messages: [{ role: 'user', content: prompt }],
           temperature: 0.7
         })
@@ -43,7 +50,7 @@ Give a concise, professional, and confident response.`;
         console.error("Minimax API Error:", data);
         return "Error reaching Minimax M2.5 API.";
       }
-      return data.choices[0].message.content;
+      return this.cleanContent(data.choices[0].message.content);
     } catch (e) {
       console.error("Minimax chat error:", e);
       return "Error reaching Minimax M2.5 API.";
@@ -84,7 +91,7 @@ OUTPUT ONLY VALID JSON:
           'Authorization': `Bearer ${this.apiKey}`
         },
         body: JSON.stringify({
-          model: 'abab6.5s-chat',
+          model: 'MiniMax-M2.5',
           messages: [{ role: 'user', content: prompt }],
           temperature: 0.1
         })
@@ -95,7 +102,7 @@ OUTPUT ONLY VALID JSON:
         return { topic: 'none', payload: {} };
       }
       
-      let content = data.choices[0].message.content;
+      let content = this.cleanContent(data.choices[0].message.content);
       content = content.replace(/```json/g, '').replace(/```/g, '').trim();
       return JSON.parse(content);
     } catch (e) {

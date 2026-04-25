@@ -82,6 +82,7 @@ Agents do not call each other directly. They interact via a **Unified Event Bus 
 ### Message Pattern: Publish/Subscribe
 - **Publish:** When an agent completes a task, it publishes a `DisasterEvent`.
 - **Subscribe:** The `TaskPlanner` and `MemoryBank` subscribe to all events. The `ResourceAllocationAgent` specifically subscribes to `situational.fusion.completed` events.
+- **WebSocket Signals:** The server broadcasts `STATE_UPDATE`, `CHAT_LOADING`, and `CHAT_RESPONSE` to the connected HTML dashboards. The Commander EOC dashboard can send `CHAT_MESSAGE` over WS to query the Minimax M2.5 model.
 
 ```typescript
 export interface DisasterEvent {
@@ -123,6 +124,13 @@ The system provides specialized views based on the user's role in the Disaster R
 ## 6. Coding Standards (SOUL-compliant)
 - **Strict Typing:** No `any` except in raw data ingestion. Use generic types for Artifacts.
 - **Immutability:** Memory artifacts should be frozen once stored.
+- **Logging:** Every agent transition must be logged to the `CHECKPOINT.md`.
+
+## 7. Build & Test Commands
+- **Build:** `tsc`
+- **Test:** `jest`
+- **Lint:** `eslint . --ext .ts`
+artifacts should be frozen once stored.
 - **Logging:** Every agent transition must be logged to the `CHECKPOINT.md`.
 
 ## 7. Build & Test Commands
