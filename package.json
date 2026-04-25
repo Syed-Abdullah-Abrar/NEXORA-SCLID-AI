@@ -1,6 +1,7 @@
 {
   "name": "nexora-sclid-ai",
   "version": "0.1.0",
+  "type": "module",
   "description": "Multi-agent disaster management pipeline",
   "main": "dist/index.js",
   "scripts": {

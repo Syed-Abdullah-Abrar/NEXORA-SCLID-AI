@@ -1,111 +1,96 @@
-// The Cinematic Data Story for the NEXORA-SCLID-AI Hackathon Demo
+// The Cinematic Data Story for the NEXORA-SCLID-AI Hackathon Demo: City of Krypton
+// Optimized with LLM Thought process and detailed agent integration
 
-export const THE_STORY = [
-  // Frame 0: The Calm Before
+const THE_STORY = [
   {
     frame: 0,
-    title: "Normal Operations",
-    presenter_script: "It's a normal day at the EOC. The system is monitoring, but all is calm.",
+    title: "Project NEXORA: Initializing",
+    presenter_script: "Welcome to Project NEXORA. We are looking at Krypton, a city at risk. Our agents are currently idling, monitoring global sensor feeds.",
     ui_state: {
       active_page: '/eoc.html',
       eoc_map: { risk_visible: false, routes: [] },
       agent_statuses: { early_warning: 'idle', situational: 'idle', resource: 'idle' },
-      ueb_log: "System Nominal. Awaiting Data...",
+      ueb_log: "SYSTEM: NEXORA V2.0 ONLINE. Monitoring Silver River...",
       memory_bank: []
     }
   },
-  // Frame 1: The Initial Warning
   {
     frame: 1,
-    title: "The Initial Warning",
-    presenter_script: "Suddenly, the Early Warning Agent detects anomalous sensor data. It predicts a severe flood event and flags high-risk zones on the EOC map.",
+    title: "Anomalous Feed Detected",
+    presenter_script: "The Early Warning Agent detects a massive spike in precipitation. It's querying the MiniMax MLLM to analyze the pattern against historical Krypton flood data from 1998.",
     ui_state: {
-      active_page: '/eoc.html',
+      active_page: '/ai-view.html',
       eoc_map: { risk_visible: true, routes: [] },
       agent_statuses: { early_warning: 'processing', situational: 'idle', resource: 'idle' },
-      ueb_log: "EVENT: hazard.detected - Flood risk elevated in Zone A.",
-      memory_bank: [{ id: 'ew-1', source: 'EarlyWarningAgent', data: '{ "hazard": "flood" }' }]
+      ueb_log: "LLM: Querying MiniMax-6.5... Analyzing 1998 Flood Pattern parity...",
+      memory_bank: [{ id: 'hist-1', source: 'LongTermMemory', data: '1998 Flood: 400mm rainfall in 6h resulted in Silver River breach.' }]
     }
   },
-  // Frame 2: The Cascading Failure
   {
     frame: 2,
-    title: "Cascading Failure",
-    presenter_script: "As the flood hits, a key bridge collapses. The Situational Awareness Agent processes this, updating the central map. The old supply route is now impassable.",
-    ui_state: {
-      active_page: '/logistics.html',
-      eoc_map: { risk_visible: true, routes: [{ id: 'route-12', status: 'blocked' }] },
-      agent_statuses: { early_warning: 'complete', situational: 'processing', resource: 'idle' },
-      ueb_log: "EVENT: infrastructure.failure - Bridge at grid 7B collapsed.",
-      memory_bank: [
-        { id: 'ew-1', source: 'EarlyWarningAgent', data: '{ "hazard": "flood" }' },
-        { id: 'sa-1', source: 'SituationalAwarenessAgent', data: '{ "bridge_7B": "collapsed" }' }
-      ]
-    }
-  },
-  // Frame 3: The Human in the Loop
-  {
-    frame: 3,
-    title: "Human in the Loop",
-    presenter_script: "The system has a plan, but for high-stakes decisions, it requires human approval. The EOC Commander sees the full picture and gives the go-ahead.",
+    title: "Predictive Intelligence",
+    presenter_script: "MiniMax confirms a 92% match. The Early Warning Agent issues a CRITICAL alert. The City's EOC map instantly highlights the predicted inundation zone.",
     ui_state: {
       active_page: '/eoc.html',
-      eoc_map: { risk_visible: true, routes: [{ id: 'route-12', status: 'blocked' }] },
-      agent_statuses: { early_warning: 'complete', situational: 'complete', resource: 'pending_approval' },
-      ueb_log: "AWAITING HUMAN_IN_LOOP: Approve AI-generated resource plan?",
-      memory_bank: [
-        { id: 'ew-1', source: 'EarlyWarningAgent', data: '{ "hazard": "flood" }' },
-        { id: 'sa-1', source: 'SituationalAwarenessAgent', data: '{ "bridge_7B": "collapsed" }' }
-      ]
+      eoc_map: { risk_visible: true, heatmap: 'critical' },
+      agent_statuses: { early_warning: 'complete', situational: 'idle', resource: 'idle' },
+      ueb_log: "EVENT: hazard.detected - Critical Flood Imminent in Sector 4.",
+      memory_bank: [{ id: 'ew-1', source: 'EarlyWarningAgent', data: '{ "match": 0.92, "severity": "CRITICAL" }' }]
     }
   },
-  // Frame 4: The Optimal Path (The "Wow" Moment)
   {
-    frame: 4,
-    title: "Optimal Path Recalculation",
-    presenter_script: "With approval, the Resource Allocation Agent runs its A* pathfinding algorithm. It instantly calculates a new, optimal supply route that bypasses the collapsed bridge, saving critical time.",
+    frame: 3,
+    title: "Multi-Modal Fusion: The Landslide",
+    presenter_script: "It's not just water. Situational Awareness fuzes drone video with social media distress tags. A landslide has just hit Highland Pass. The Unified Event Bus broadcasts the failure to all agencies.",
     ui_state: {
       active_page: '/logistics.html',
-      eoc_map: { risk_visible: true, routes: [{ id: 'route-12', status: 'blocked' }, { id: 'route-14-alt', status: 'active', is_optimal: true }] },
-      agent_statuses: { early_warning: 'complete', situational: 'complete', resource: 'processing' },
-      ueb_log: "EVENT: resource.plan.generated - Optimal route calculated via A*.",
+      eoc_map: { risk_visible: true, routes: [{ id: 'route-main', status: 'blocked' }] },
+      agent_statuses: { early_warning: 'complete', situational: 'processing', resource: 'idle' },
+      ueb_log: "UEB: [situational.fusion] Drone feed 04 confirms Highland Pass Blockage.",
       memory_bank: [
-        { id: 'ew-1', source: 'EarlyWarningAgent', data: '{ "hazard": "flood" }' },
-        { id: 'sa-1', source: 'SituationalAwarenessAgent', data: '{ "bridge_7B": "collapsed" }' },
-        { id: 'ra-1', source: 'ResourceAllocationAgent', data: '{ "plan": "FLOOD_HIGH_XYZ", "optimal_route": "route-14-alt" }' }
+        { id: 'ew-1', source: 'EarlyWarningAgent', data: '...' },
+        { id: 'sa-1', source: 'SituationalAwarenessAgent', data: '{ "landslide": "confirmed", "route": "blocked" }' }
       ]
     }
   },
-  // Frame 5: The Dark Mode Rescue
+  {
+    frame: 4,
+    title: "Resource Optimization: A* Recalculation",
+    presenter_script: "The old supply route is gone. The Resource Allocation Agent runs A* pathfinding. It calculates an optimal path through the Old Mine Trail—saving 3 hours of transport time.",
+    ui_state: {
+      active_page: '/logistics.html',
+      eoc_map: { risk_visible: true, routes: [{ id: 'route-main', status: 'blocked' }, { id: 'route-optimal', status: 'active', is_optimal: true }] },
+      agent_statuses: { early_warning: 'complete', situational: 'complete', resource: 'processing' },
+      ueb_log: "LLM: Running A* Optimization... Optimal Path found via Old Mine Trail.",
+      memory_bank: [
+        { id: 'ra-1', source: 'ResourceAllocationAgent', data: '{ "optimal_path": "Old Mine Trail", "time_saved": "180m" }' }
+      ]
+    }
+  },
   {
     frame: 5,
-    title: "Dark Mode Rescue",
-    presenter_script: "Meanwhile, a field marshall in a total communication blackout zone receives a distress call via HAM radio. They switch to the Dark Mode Field Ops view.",
+    title: "Human-in-the-Loop Approval",
+    presenter_script: "The system is autonomous, but the Commander has final say. One click approves the deployment of 45 rescue personnel via the new route.",
     ui_state: {
-      active_page: '/field.html',
-      eoc_map: {}, // Map is not the focus here
-      agent_statuses: { early_warning: 'complete', situational: 'complete', resource: 'complete' },
-      ueb_log: "EVENT: ham.burst.received - Civilian distress call, Zone C.",
-      memory_bank: [
-        /* previous artifacts */
-        { id: 'ham-1', source: 'HAMBridgeService', data: '{ "distress_call": "true" }' }
-      ]
+      active_page: '/eoc.html',
+      eoc_map: { risk_visible: true },
+      agent_statuses: { early_warning: 'complete', situational: 'complete', resource: 'pending_approval' },
+      ueb_log: "WAITING: Commander approval required for Deployment Alpha.",
+      memory_bank: []
     }
   },
-  // Frame 6: The Final Mile
   {
     frame: 6,
-    title: "The Final Mile",
-    presenter_script: "The AI calculates the final-mile safe route from the marshall's position to the civilian, displayed as a simple AR overlay. Mission complete.",
+    title: "Dark Mode Rescue: HAM Bridge",
+    presenter_script: "Connectivity is lost. The Field Marshall operates in Dark Mode. NEXORA's HAM Radio Bridge decodes an SOS. The AI projects the final-mile rescue route directly to their terminal.",
     ui_state: {
       active_page: '/field.html',
       eoc_map: {},
       agent_statuses: { early_warning: 'complete', situational: 'complete', resource: 'complete' },
-      ueb_log: "EVENT: field.route.generated - Final mile rescue path sent.",
-      memory_bank: [
-        /* all artifacts */
-        { id: 'field-route-1', source: 'ResourceAllocationAgent', data: '{ "target": "civilian_xyz", "path": "[...]" }' }
-      ]
+      ueb_log: "HAM: DECODED SOS - KB1ABC: '15 trapped at library'.",
+      memory_bank: [{ id: 'ham-1', source: 'HAMBridge', data: 'Location: 42.36, -71.05' }]
     }
   }
 ];
+
+window.THE_STORY = THE_STORY;

@@ -3,470 +3,130 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NEXORA EOC Dashboard</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+  <title>NEXORA EOC Commander</title>
+  <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="styles.css">
-  <style>
-    body {
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-    }
-    .dashboard-header {
-      padding: 1rem 1.5rem;
-      background: var(--nexora-surface);
-      border-bottom: 1px solid var(--nexora-border);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .dashboard-title {
-      font-size: 1.25rem;
-      font-weight: 700;
-      color: var(--nexora-agent);
-    }
-    .connection-status {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      font-size: 0.75rem;
-      color: var(--nexora-muted);
-    }
-    .status-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--nexora-muted);
-    }
-    .status-dot.connected { background: var(--nexora-success); }
-
-    .main-content {
-      flex: 1;
-      display: grid;
-      grid-template-columns: 1fr 320px;
-      gap: 1.5rem;
-      padding: 1.5rem;
-    }
-
-    /* EOC Map */
-    .map-container {
-      background: var(--nexora-surface);
-      border: 1px solid var(--nexora-border);
-      border-radius: 0.75rem;
-      overflow: hidden;
-      position: relative;
-    }
-    .map-header {
-      padding: 0.75rem 1rem;
-      border-bottom: 1px solid var(--nexora-border);
-      font-size: 0.75rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: var(--nexora-muted);
-    }
-    .map-svg {
-      width: 100%;
-      height: 400px;
-      background: #0a0f1a;
-    }
-    /* City Grid */
-    .city-grid {
-      stroke: var(--nexora-border);
-      stroke-width: 0.5;
-    }
-    .zone-label {
-      fill: var(--nexora-muted);
-      font-size: 10px;
-      font-family: 'Fira Code', monospace;
-    }
-    /* Risk Zones */
-    .zone {
-      transition: all 0.3s;
-    }
-    .zone-risk {
-      fill: rgba(239, 68, 68, 0.3);
-    }
-    .zone-risk.active {
-      fill: rgba(239, 68, 68, 0.6);
-      animation: zone-pulse 2s ease-in-out infinite;
-    }
-    @keyframes zone-pulse {
-      0%, 100% { opacity: 0.6; }
-      50% { opacity: 1; }
-    }
-    /* Routes */
-    .route {
-      fill: none;
-      stroke-width: 3;
-      stroke-linecap: round;
-    }
-    .route-normal {
-      stroke: var(--nexora-success);
-    }
-    .route-blocked {
-      stroke: var(--nexora-critical);
-      stroke-dasharray: 8 4;
-    }
-    .route-optimal {
-      stroke: var(--nexora-agent);
-      stroke-width: 4;
-      filter: drop-shadow(0 0 8px var(--nexora-agent));
-    }
-    /* Markers */
-    .marker {
-      fill: var(--nexora-agent);
-    }
-    .marker-hospital {
-      fill: var(--nexora-critical);
-    }
-    .marker-shelter {
-      fill: var(--nexora-success);
-    }
-
-    /* Stats Panel */
-    .stats-panel {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-    }
-    .stat-card {
-      background: var(--nexora-surface);
-      border: 1px solid var(--nexora-border);
-      border-radius: 0.75rem;
-      padding: 1rem;
-    }
-    .stat-label {
-      font-size: 0.75rem;
-      color: var(--nexora-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-    .stat-value {
-      font-size: 2rem;
-      font-weight: 700;
-      margin-top: 0.25rem;
-    }
-    .stat-value.critical { color: var(--nexora-critical); }
-    .stat-value.warning { color: var(--nexora-warning); }
-    .stat-value.success { color: var(--nexora-success); }
-
-    /* Agent Status */
-    .agent-status-grid {
-      display: grid;
-      gap: 0.5rem;
-    }
-    .agent-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 0.5rem 0.75rem;
-      background: var(--nexora-bg);
-      border-radius: 0.5rem;
-    }
-    .agent-name {
-      font-size: 0.875rem;
-      font-weight: 500;
-    }
-    .agent-badge {
-      font-size: 0.625rem;
-      font-weight: 600;
-      padding: 0.25rem 0.5rem;
-      border-radius: 0.25rem;
-    }
-    .badge-idle { background: var(--nexora-surface); color: var(--nexora-muted); }
-    .badge-processing { background: rgba(59, 130, 246, 0.2); color: var(--nexora-agent); }
-    .badge-complete { background: rgba(16, 185, 129, 0.2); color: var(--nexora-success); }
-    .badge-warning { background: rgba(245, 158, 11, 0.2); color: var(--nexora-warning); }
-
-    /* Risk Legend */
-    .risk-legend {
-      display: flex;
-      gap: 1rem;
-      padding: 0.75rem;
-      background: var(--nexora-bg);
-      border-radius: 0.5rem;
-    }
-    .legend-item {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      font-size: 0.75rem;
-    }
-    .legend-color {
-      width: 12px;
-      height: 12px;
-      border-radius: 2px;
-    }
-  </style>
 </head>
-<body>
-  <!-- Header -->
-  <div class="dashboard-header">
-    <div class="dashboard-title">EOC Command Dashboard</div>
-    <div class="connection-status">
-      <div class="status-dot" id="statusDot"></div>
-      <span id="statusText">Connecting...</span>
-    </div>
-  </div>
+<body class="bg-nexora-bg text-nexora-text h-screen overflow-hidden">
+  <div class="h-full flex flex-col p-6">
+    <header class="flex justify-between items-center mb-6">
+      <div>
+        <h1 class="text-2xl font-bold text-nexora-agent tracking-tighter">EOC COMMAND CENTER</h1>
+        <p class="text-nexora-muted text-[10px] tracking-[0.4em] uppercase">Krypton Metropolitan Response</p>
+      </div>
+      <div class="flex items-center gap-4">
+        <div id="connection-status" class="text-[10px] font-bold text-nexora-success uppercase px-2 py-1 glass-box border border-nexora-success/20">Sync Active</div>
+      </div>
+    </header>
 
-  <!-- Main Content -->
-  <div class="main-content">
-    <!-- Left: EOC Map -->
-    <div class="map-container">
-      <div class="map-header">Boston Metro Area - Risk Overview</div>
-      <svg class="map-svg" viewBox="0 0 400 300" id="eocMap">
-        <!-- City Grid -->
-        <defs>
-          <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
-            <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#1e293b" stroke-width="0.5"/>
-          </pattern>
-        </defs>
-        <rect width="400" height="300" fill="url(#grid)"/>
-
-        <!-- Zone A (High Risk) -->
-        <rect id="zone-a" x="40" y="40" width="80" height="80" class="zone zone-risk" rx="4"/>
-        <text x="80" y="85" text-anchor="middle" class="zone-label">ZONE A</text>
-
-        <!-- Zone B -->
-        <rect id="zone-b" x="140" y="40" width="80" height="80" class="zone" fill="transparent" stroke="#334155" stroke-width="1" rx="4"/>
-        <text x="180" y="85" text-anchor="middle" class="zone-label">ZONE B</text>
-
-        <!-- Zone C -->
-        <rect id="zone-c" x="240" y="40" width="80" height="80" class="zone" fill="transparent" stroke="#334155" stroke-width="1" rx="4"/>
-        <text x="280" y="85" text-anchor="middle" class="zone-label">ZONE C</text>
-
-        <!-- Routes -->
-        <g id="routes">
-          <!-- Route 12 (blocked) -->
-          <path id="route-12" d="M 20 120 L 100 100 L 180 120" class="route route-normal"/>
-          <!-- Route 14 Alt (optimal) -->
-          <path id="route-14-alt" d="M 180 120 L 220 140 L 300 120" class="route route-normal" style="display: none;"/>
-        </g>
-
-        <!-- Markers -->
-        <g id="markers">
-          <!-- Hospital -->
-          <circle id="marker-hospital" cx="300" cy="80" r="6" class="marker marker-hospital"/>
-          <text x="315" y="85" fill="#ef4444" font-size="8" font-family="Fira Code">HOSPITAL</text>
-
-          <!-- Shelter -->
-          <circle id="marker-shelter" cx="80" cy="200" r="6" class="marker marker-shelter"/>
-          <text x="95" y="205" fill="#10b981" font-size="8" font-family="Fira Code">SHELTER A</text>
-        </g>
-
-        <!-- Legend -->
-        <g id="map-legend" transform="translate(20, 260)">
-          <rect width="160" height="30" fill="rgba(30, 41, 59, 0.8)" rx="4"/>
-          <circle cx="15" cy="15" r="5" fill="#ef4444"/>
-          <text x="25" y="19" fill="#94a3b8" font-size="8">Risk Zone</text>
-          <line x1="70" y1="15" x2="100" y2="15" stroke="#10b981" stroke-width="2" stroke-dasharray="4 2"/>
-          <text x="105" y="19" fill="#94a3b8" font-size="8">Route</text>
-        </g>
-      </svg>
-
-      <!-- Risk Legend -->
-      <div class="risk-legend">
-        <div class="legend-item">
-          <div class="legend-color" style="background: rgba(239, 68, 68, 0.5);"></div>
-          <span>High Risk Zone</span>
-        </div>
-        <div class="legend-item">
-          <div class="legend-color" style="background: #10b981;"></div>
-          <span>Active Route</span>
-        </div>
-        <div class="legend-item">
-          <div class="legend-color" style="background: #3b82f6; box-shadow: 0 0 6px #3b82f6;"></div>
-          <span>Optimal Route</span>
+    <div class="flex-1 grid grid-cols-1 lg:grid-cols-4 gap-6 overflow-hidden">
+      <!-- Main Map Section -->
+      <div class="lg:col-span-3 bg-nexora-surface rounded-2xl border border-nexora-border relative overflow-hidden shadow-2xl">
+        <div class="absolute top-4 left-4 z-20 glass-box px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-white border border-white/10">Dynamic Risk Heatmap</div>
+        
+        <div id="map-container" class="absolute inset-0 flex items-center justify-center p-12">
+          <svg id="krypton-map" viewBox="0 0 800 500" class="w-full h-full opacity-60">
+             <!-- Simplified City Grid -->
+             <rect width="800" height="500" fill="transparent" />
+             <path d="M 0 100 Q 200 150 400 100 T 800 150" stroke="#334155" fill="none" stroke-width="8" /> <!-- River -->
+             <path d="M 400 0 L 400 500" stroke="#1e293b" fill="none" stroke-width="1" />
+             <path d="M 0 250 L 800 250" stroke="#1e293b" fill="none" stroke-width="1" />
+             
+             <!-- Dynamic Elements -->
+             <g id="risk-zones"></g>
+             <g id="route-overlays"></g>
+          </svg>
         </div>
       </div>
-    </div>
 
-    <!-- Right: Stats Panel -->
-    <div class="stats-panel">
-      <!-- Risk Level -->
-      <div class="stat-card">
-        <div class="stat-label">Risk Level</div>
-        <div class="stat-value" id="riskLevel">LOW</div>
-      </div>
-
-      <!-- Casualties -->
-      <div class="stat-card">
-        <div class="stat-label">Casualty Estimate</div>
-        <div class="stat-value critical" id="casualtyCount">0</div>
-      </div>
-
-      <!-- Population at Risk -->
-      <div class="stat-card">
-        <div class="stat-label">Population at Risk</div>
-        <div class="stat-value warning" id="populationAtRisk">0</div>
-      </div>
-
-      <!-- Active Routes -->
-      <div class="stat-card">
-        <div class="stat-label">Supply Routes</div>
-        <div id="routeStatus" style="font-size: 0.875rem; color: var(--nexora-muted);">All clear</div>
-      </div>
-
-      <!-- Agent Status -->
-      <div class="stat-card">
-        <div class="stat-label" style="margin-bottom: 0.75rem;">Agent Status</div>
-        <div class="agent-status-grid">
-          <div class="agent-item">
-            <span class="agent-name">Early Warning</span>
-            <span class="agent-badge badge-idle" id="ew-badge">IDLE</span>
-          </div>
-          <div class="agent-item">
-            <span class="agent-name">Situational</span>
-            <span class="agent-badge badge-idle" id="sa-badge">IDLE</span>
-          </div>
-          <div class="agent-item">
-            <span class="agent-name">Resource</span>
-            <span class="agent-badge badge-idle" id="ra-badge">IDLE</span>
+      <!-- Live Statistics -->
+      <div class="space-y-6 flex flex-col h-full overflow-hidden">
+        <div class="card border-nexora-agent/30 bg-blue-500/5">
+          <h2 class="text-[10px] font-black text-nexora-muted uppercase tracking-widest mb-4">Hazard Analytics</h2>
+          <div class="text-4xl font-black mb-1" id="prediction-level">STABLE</div>
+          <p class="text-[10px] text-nexora-muted mb-4 uppercase">Confidence: 92.4%</p>
+          <div class="h-1 bg-nexora-border rounded-full overflow-hidden">
+             <div id="risk-bar" class="h-full bg-nexora-agent transition-all duration-1000" style="width: 5%"></div>
           </div>
         </div>
-      </div>
 
-      <!-- Presenter Script -->
-      <div class="stat-card" style="border-left: 3px solid var(--nexora-agent);">
-        <div class="stat-label">Current Narrative</div>
-        <p id="presenterScript" style="font-size: 0.875rem; color: var(--nexora-text); margin-top: 0.5rem; font-style: italic; line-height: 1.5;">
-          Loading...
-        </p>
+        <div class="card flex-1 flex flex-col overflow-hidden border-white/5">
+          <h2 class="text-[10px] font-black text-nexora-muted uppercase tracking-widest mb-4">Mission Status</h2>
+          <div class="space-y-4 flex-1 overflow-y-auto pr-2" id="mission-log">
+             <div class="text-xs italic text-nexora-muted">Awaiting system initialization...</div>
+          </div>
+        </div>
+
+        <div class="card border-nexora-warning/40 bg-amber-500/5">
+           <h2 class="text-[10px] font-black text-nexora-warning uppercase tracking-widest mb-3">Commander Action</h2>
+           <div id="auth-panel" class="hidden">
+              <p class="text-[11px] text-white/80 italic mb-4 leading-relaxed">AI recommends immediate deployment of medical units via the Mountain Trail.</p>
+              <button class="w-full py-3 bg-nexora-warning text-black font-black rounded-lg text-xs tracking-tighter hover:bg-yellow-400 transition-all active:scale-95 shadow-[0_0_20px_rgba(245,158,11,0.2)]">AUTHORIZE DEPLOYMENT</button>
+           </div>
+           <div id="auth-idle" class="text-[10px] text-nexora-muted uppercase tracking-widest text-center py-4">No Pending Decisions</div>
+        </div>
       </div>
     </div>
   </div>
 
   <script src="story.js"></script>
-  <script src="story-client.js"></script>
+  <script src="story-controller.js"></script>
   <script>
-    const client = new StoryClient('ws://localhost:8080');
-    let currentFrame = 0;
+    const controller = new StoryController(window.THE_STORY);
+    
+    controller.onFrameChange = (frameIndex) => {
+      const frame = window.THE_STORY[frameIndex];
+      const state = frame.ui_state;
+      
+      // Header Status
+      document.getElementById('connection-status').textContent = 'Live Frame: ' + (frameIndex + 1);
 
-    client.loadStory(THE_STORY);
+      // Prediction Stats
+      const isCritical = state.eoc_map.risk_visible;
+      document.getElementById('prediction-level').textContent = isCritical ? 'CRITICAL' : 'STABLE';
+      document.getElementById('prediction-level').className = 'text-4xl font-black mb-1 ' + (isCritical ? 'text-nexora-critical' : 'text-nexora-agent');
+      document.getElementById('risk-bar').style.width = isCritical ? '92%' : '5%';
+      document.getElementById('risk-bar').className = 'h-full transition-all duration-1000 ' + (isCritical ? 'bg-nexora-critical shadow-[0_0_10px_#EF4444]' : 'bg-nexora-agent');
+      
+      // Mission Log
+      const log = document.getElementById('mission-log');
+      log.innerHTML = `<div class="p-3 bg-black/40 rounded border-l-2 border-nexora-agent animate-in fade-in slide-in-from-top-2">
+        <div class="text-[10px] font-bold text-nexora-agent mb-1 uppercase tracking-widest">Active Insight</div>
+        <div class="text-xs text-white/90 leading-relaxed font-medium">\${state.ueb_log}</div>
+      </div>`;
+      
+      // Authorization
+      const needsAuth = state.agent_statuses.resource === 'pending_approval';
+      document.getElementById('auth-panel').classList.toggle('hidden', !needsAuth);
+      document.getElementById('auth-idle').classList.toggle('hidden', needsAuth);
 
-    client.onConnect = () => {
-      document.getElementById('statusDot').classList.add('connected');
-      document.getElementById('statusText').textContent = 'Live';
-    };
-
-    client.onFrameChange = (frameIndex) => {
-      currentFrame = frameIndex;
-      renderFrame(frameIndex);
-    };
-
-    function renderFrame(frameIndex) {
-      const frame = THE_STORY[frameIndex];
-      if (!frame) return;
-
-      const uiState = frame.ui_state;
-
-      // Update presenter script
-      document.getElementById('presenterScript').textContent = frame.presenter_script;
-
-      // Update agent badges
-      updateBadge('ew-badge', uiState.agent_statuses.early_warning);
-      updateBadge('sa-badge', uiState.agent_statuses.situational);
-      updateBadge('ra-badge', uiState.agent_statuses.resource);
-
-      // Update EOC map
-      updateEOCMap(uiState.eoc_map);
-
-      // Update stats based on frame
-      updateStats(frameIndex);
-    }
-
-    function updateBadge(elementId, status) {
-      const el = document.getElementById(elementId);
-      if (!el) return;
-
-      el.className = 'agent-badge';
-      switch(status) {
-        case 'idle':
-          el.classList.add('badge-idle');
-          el.textContent = 'IDLE';
-          break;
-        case 'processing':
-          el.classList.add('badge-processing');
-          el.textContent = 'ACTIVE';
-          break;
-        case 'complete':
-          el.classList.add('badge-complete');
-          el.textContent = 'DONE';
-          break;
-        case 'pending_approval':
-          el.classList.add('badge-warning');
-          el.textContent = 'PENDING';
-          break;
-        default:
-          el.classList.add('badge-idle');
-          el.textContent = status.toUpperCase().substring(0, 6);
+      // Map Visualization
+      const riskZones = document.getElementById('risk-zones');
+      riskZones.innerHTML = '';
+      if (isCritical) {
+        const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        circle.setAttribute("cx", "300");
+        circle.setAttribute("cy", "200");
+        circle.setAttribute("r", "100");
+        circle.setAttribute("class", "heatmap-zone");
+        riskZones.appendChild(circle);
       }
-    }
-
-    function updateEOCMap(mapData) {
-      // Toggle zone visibility
-      const zoneA = document.getElementById('zone-a');
-      if (mapData.risk_visible) {
-        zoneA.classList.add('active');
-      } else {
-        zoneA.classList.remove('active');
-      }
-
-      // Update routes
-      const route12 = document.getElementById('route-12');
-      const route14Alt = document.getElementById('route-14-alt');
-
-      if (mapData.routes) {
-        mapData.routes.forEach(route => {
-          if (route.id === 'route-12') {
-            route12.style.display = 'block';
-            if (route.status === 'blocked') {
-              route12.classList.remove('route-normal');
-              route12.classList.add('route-blocked');
-            }
-          }
-          if (route.id === 'route-14-alt') {
-            route14Alt.style.display = 'block';
-            if (route.is_optimal) {
-              route14Alt.classList.add('route-optimal');
-            }
-          }
+      
+      const routes = document.getElementById('route-overlays');
+      routes.innerHTML = '';
+      if (state.eoc_map.routes) {
+        state.eoc_map.routes.forEach(r => {
+           const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+           path.setAttribute("d", r.id === 'route-main' ? "M 50 150 L 200 50 L 350 150" : "M 50 150 L 200 250 L 350 150");
+           path.setAttribute("class", r.status === 'blocked' ? 'route-blocked' : 'route-active');
+           if(r.is_optimal) path.setAttribute("class", "route-optimal animate-pulse");
+           routes.appendChild(path);
         });
       }
-    }
-
-    function updateStats(frameIndex) {
-      const stats = [
-        { el: 'riskLevel', values: ['LOW', 'HIGH', 'HIGH', 'HIGH', 'HIGH', 'CRITICAL', 'LOW'] },
-        { el: 'casualtyCount', values: ['0', '0', '12', '12', '12', '47', '0'] },
-        { el: 'populationAtRisk', values: ['0', '5000', '12500', '12500', '12500', '12500', '0'] },
-      ];
-
-      stats.forEach(stat => {
-        const el = document.getElementById(stat.el);
-        if (el && stat.values[frameIndex]) {
-          el.textContent = stat.values[frameIndex];
-        }
-      });
-
-      // Route status
-      const routeStatus = document.getElementById('routeStatus');
-      if (routeStatus) {
-        if (frameIndex >= 4) {
-          routeStatus.innerHTML = '<span style="color: #10b981;">Route 14 Alt: OPTIMAL</span>';
-        } else if (frameIndex >= 2) {
-          routeStatus.innerHTML = '<span style="color: #ef4444;">Route 12: BLOCKED</span>';
-        } else {
-          routeStatus.textContent = 'All routes clear';
-        }
-      }
-    }
-
-    // Initial render
-    renderFrame(0);
-
-    // client.connect();
+    };
+    
+    // Initial Render
+    controller.goToFrame(controller.currentFrame);
   </script>
 </body>
 </html>

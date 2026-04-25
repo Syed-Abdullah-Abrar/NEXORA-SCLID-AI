@@ -3,343 +3,124 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NEXORA AI Orchestrator</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+  <title>NEXORA AI Orchestrator (Presenter)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="styles.css">
   <style>
-    body {
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-    }
-    .main-content {
-      flex: 1;
-      display: grid;
-      grid-template-columns: 1fr 320px;
-      gap: 1.5rem;
-      padding: 1.5rem;
-      max-width: 1400px;
-      margin: 0 auto;
-      width: 100%;
-    }
-    .panel-header {
-      font-size: 0.75rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: var(--nexora-muted);
-      margin-bottom: 1rem;
-      padding-bottom: 0.5rem;
-      border-bottom: 1px solid var(--nexora-border);
-    }
-    /* UEB Log Panel */
-    .ueb-log-panel {
-      display: flex;
-      flex-direction: column;
-    }
-    .ueb-log {
-      flex: 1;
-      background: #050505;
-      border: 1px solid var(--nexora-border);
-      border-radius: 0.5rem;
-      padding: 1rem;
-      font-family: 'Fira Code', monospace;
-      font-size: 0.875rem;
-      overflow-y: auto;
-      min-height: 400px;
-    }
-    .ueb-entry {
-      margin-bottom: 0.5rem;
-      padding: 0.5rem;
-      border-radius: 0.25rem;
-      background: var(--nexora-surface);
-    }
-    .ueb-entry.event {
-      border-left: 3px solid var(--nexora-agent);
-    }
-    .ueb-entry.warning {
-      border-left: 3px solid var(--nexora-warning);
-    }
-    .ueb-entry.critical {
-      border-left: 3px solid var(--nexora-critical);
-    }
-    .ueb-entry.success {
-      border-left: 3px solid var(--nexora-success);
-    }
-    /* Memory Bank Panel */
-    .memory-panel {
-      display: flex;
-      flex-direction: column;
-    }
-    .memory-bank {
-      flex: 1;
-      overflow-y: auto;
-      max-height: 400px;
-    }
-    .memory-artifact {
-      background: var(--nexora-surface);
-      border: 1px solid var(--nexora-border);
-      border-radius: 0.5rem;
-      padding: 0.75rem;
-      margin-bottom: 0.5rem;
-    }
-    .artifact-source {
-      font-size: 0.75rem;
-      color: var(--nexora-agent);
-      font-weight: 600;
-      margin-bottom: 0.25rem;
-    }
-    .artifact-data {
-      font-family: 'Fira Code', monospace;
-      font-size: 0.75rem;
-      color: var(--nexora-muted);
-    }
-    /* Navigation Controls */
-    .nav-controls {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 1rem;
-      padding: 1.5rem;
-      background: var(--nexora-surface);
-      border-top: 1px solid var(--nexora-border);
-    }
-    .nav-btn {
-      padding: 0.75rem 1.5rem;
-      border-radius: 0.5rem;
-      font-weight: 600;
-      transition: all 0.2s;
-    }
-    .nav-btn.prev {
-      background: var(--nexora-surface);
-      border: 1px solid var(--nexora-border);
-      color: var(--nexora-text);
-    }
-    .nav-btn.prev:hover:not(:disabled) {
-      background: var(--nexora-border);
-    }
-    .nav-btn.next {
-      background: var(--nexora-agent);
-      color: white;
-    }
-    .nav-btn.next:hover:not(:disabled) {
-      background: rgba(59, 130, 246, 0.8);
-    }
-    .nav-btn:disabled {
-      opacity: 0.4;
-      cursor: not-allowed;
-    }
-    .frame-indicator {
-      font-family: 'Fira Code', monospace;
-      font-size: 1rem;
-      color: var(--nexora-muted);
-      min-width: 80px;
-      text-align: center;
-    }
-    /* Presenter Script */
-    .presenter-script {
-      background: var(--nexora-surface);
-      border: 1px solid var(--nexora-border);
-      border-radius: 0.5rem;
-      padding: 1rem;
-      margin-bottom: 1rem;
-      font-style: italic;
-      color: var(--nexora-text);
-      line-height: 1.6;
-    }
-    /* Connection Status */
-    .connection-status {
-      position: fixed;
-      top: 1rem;
-      right: 1rem;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 0.5rem 1rem;
-      background: var(--nexora-surface);
-      border-radius: 2rem;
-      font-size: 0.75rem;
-    }
-    .status-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--nexora-muted);
-    }
-    .status-dot.connected {
-      background: var(--nexora-success);
-    }
-    .status-dot.error {
-      background: var(--nexora-critical);
-    }
+    .neural-bg { background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%); }
+    .status-badge { @apply px-2 py-1 rounded-md text-[10px] font-bold uppercase border; }
+    .status-idle { @apply border-nexora-border text-nexora-muted bg-nexora-bg; }
+    .status-processing { @apply border-nexora-agent text-nexora-agent bg-blue-500/10; }
+    .status-complete { @apply border-nexora-success text-nexora-success bg-emerald-500/10; }
+    .status-pending_approval { @apply border-nexora-warning text-nexora-warning bg-amber-500/10; }
   </style>
 </head>
-<body>
-  <!-- Connection Status -->
-  <div class="connection-status">
-    <div class="status-dot" id="statusDot"></div>
-    <span id="statusText">Connecting...</span>
-  </div>
+<body class="neural-bg text-nexora-text h-screen overflow-hidden flex flex-col p-6 font-sans">
+  <header class="mb-8 flex justify-between items-end">
+    <div>
+      <h1 class="text-4xl font-black text-nexora-agent tracking-tighter">PROJECT NEXORA <span class="text-white font-light text-xl ml-2">PRESENTER</span></h1>
+      <p class="text-nexora-muted uppercase text-xs tracking-[0.5em] mt-1">Autonomous Disaster Orchestration</p>
+    </div>
+    <div class="px-4 py-2 glass-box border border-nexora-success/30 text-nexora-success text-[10px] font-bold tracking-widest uppercase">
+      KRYPTON DEPLOYMENT ACTIVE
+    </div>
+  </header>
 
-  <!-- Main Content -->
-  <div class="main-content">
-    <!-- Left: UEB Log -->
-    <div class="ueb-log-panel glass-box">
-      <div class="panel-header">Unified Event Bus (UEB) Log</div>
-      <div class="ueb-log" id="uebLog">
-        <div class="ueb-entry">System initializing...</div>
-      </div>
+  <div class="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-8 overflow-hidden mb-24">
+    <!-- UEB Log -->
+    <div class="lg:col-span-2 flex flex-col space-y-4 overflow-hidden">
+      <div class="text-[10px] font-bold text-nexora-agent uppercase tracking-widest">Unified Event Bus (UEB) Real-Time Stream</div>
+      <div id="uebLog" class="flex-1 bg-black/50 border border-nexora-border rounded-xl p-6 font-mono text-sm overflow-y-auto space-y-3"></div>
     </div>
 
-    <!-- Right: Memory Bank + Script -->
-    <div class="memory-panel">
-      <div class="panel-header">Memory Bank</div>
-      <div class="memory-bank" id="memoryBank">
-        <div class="text-muted" style="font-size: 0.875rem;">No artifacts stored</div>
+    <!-- Sidebar -->
+    <div class="space-y-8">
+      <!-- LLM Thought -->
+      <div>
+        <div class="text-[10px] font-bold text-nexora-warning uppercase tracking-widest mb-2">MiniMax MLLM Thought Process</div>
+        <div class="bg-nexora-surface border border-nexora-warning/30 rounded-xl p-4 min-h-[140px] flex items-center justify-center">
+           <div id="llm-process" class="text-sm italic text-center">Awaiting data burst...</div>
+        </div>
       </div>
 
-      <div class="panel-header" style="margin-top: 1.5rem;">Presenter Script</div>
-      <div class="presenter-script" id="presenterScript">
-        Loading...
-      </div>
-
-      <div class="panel-header" style="margin-top: 1.5rem;">Agent Status</div>
-      <div class="card" id="agentStatuses">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-          <span>Early Warning</span>
-          <span class="status-badge status-idle" id="ew-status">IDLE</span>
-        </div>
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-          <span>Situational</span>
-          <span class="status-badge status-idle" id="sa-status">IDLE</span>
-        </div>
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-          <span>Resource</span>
-          <span class="status-badge status-idle" id="ra-status">IDLE</span>
+      <!-- Agent Grid -->
+      <div>
+        <div class="text-[10px] font-bold text-nexora-muted uppercase tracking-widest mb-3">Agent Pipeline Status</div>
+        <div class="grid grid-cols-1 gap-3">
+           <div class="flex justify-between items-center bg-nexora-bg/50 p-3 rounded-lg border border-nexora-border">
+              <span class="text-xs font-medium">Early Warning Agent</span>
+              <span id="ew-status" class="status-badge status-idle">IDLE</span>
+           </div>
+           <div class="flex justify-between items-center bg-nexora-bg/50 p-3 rounded-lg border border-nexora-border">
+              <span class="text-xs font-medium">Situational Awareness</span>
+              <span id="sa-status" class="status-badge status-idle">IDLE</span>
+           </div>
+           <div class="flex justify-between items-center bg-nexora-bg/50 p-3 rounded-lg border border-nexora-border">
+              <span class="text-xs font-medium">Resource Allocation</span>
+              <span id="ra-status" class="status-badge status-idle">IDLE</span>
+           </div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Navigation Controls -->
-  <div class="nav-controls">
-    <button class="nav-btn prev" id="prevBtn" onclick="prevFrame()">← Prev</button>
-    <span class="frame-indicator" id="frameIndicator">Frame 1/7</span>
-    <button class="nav-btn next" id="nextBtn" onclick="nextFrame()">Next →</button>
+  <!-- Presenter Bar -->
+  <div class="fixed bottom-0 left-0 right-0 glass-box m-6 p-6 flex justify-between items-center border border-white/10 shadow-2xl">
+    <div class="max-w-xl">
+       <h2 id="frame-title" class="text-nexora-agent font-bold text-sm mb-1 uppercase tracking-widest">...</h2>
+       <p id="presenterScript" class="text-white/80 text-base italic leading-relaxed">...</p>
+    </div>
+    <div class="flex items-center gap-6">
+       <button onclick="controller.prevFrame()" id="prevBtn" class="px-6 py-3 bg-nexora-surface border border-nexora-border rounded-lg hover:bg-slate-700 font-bold transition-all disabled:opacity-30">← PREV</button>
+       <div id="frameIndicator" class="text-3xl font-black font-mono w-24 text-center">00/00</div>
+       <button onclick="controller.nextFrame()" id="nextBtn" class="px-10 py-4 bg-nexora-agent text-white rounded-xl hover:bg-blue-600 font-black shadow-[0_0_40px_rgba(59,130,246,0.3)] transform hover:scale-105 active:scale-95 transition-all">NEXT STEP →</button>
+    </div>
   </div>
 
   <script src="story.js"></script>
-  <script src="story-client.js"></script>
+  <script src="story-controller.js"></script>
   <script>
-    // Initialize story client
-    const client = new StoryClient('ws://localhost:8080');
-    let currentFrame = 0;
-    let connected = false;
+    const controller = new StoryController(window.THE_STORY);
 
-    // Load story data
-    client.loadStory(THE_STORY);
+    controller.onFrameChange = (frameIndex) => {
+      const frame = window.THE_STORY[frameIndex];
+      const state = frame.ui_state;
 
-    // Connection status
-    client.onConnect = () => {
-      connected = true;
-      document.getElementById('statusDot').classList.add('connected');
-      document.getElementById('statusText').textContent = 'Connected';
-    };
-
-    client.onError = () => {
-      document.getElementById('statusDot').classList.add('error');
-      document.getElementById('statusText').textContent = 'Offline';
-    };
-
-    // Frame change handler
-    client.onFrameChange = (frameIndex) => {
-      currentFrame = frameIndex;
-      renderFrame(frameIndex);
-    };
-
-    // Render frame UI
-    function renderFrame(frameIndex) {
-      const frame = THE_STORY[frameIndex];
-      if (!frame) return;
-
-      const uiState = frame.ui_state;
-
-      // Update presenter script
+      // Header & Navigation
+      document.getElementById('frame-title').textContent = frame.title;
       document.getElementById('presenterScript').textContent = frame.presenter_script;
-
-      // Update UEB log
-      const uebLog = document.getElementById('uebLog');
-      uebLog.innerHTML = `<div class="ueb-entry event">${uiState.ueb_log}</div>`;
-
-      // Update memory bank
-      const memoryBank = document.getElementById('memoryBank');
-      if (uiState.memory_bank && uiState.memory_bank.length > 0) {
-        memoryBank.innerHTML = uiState.memory_bank.map(artifact => `
-          <div class="memory-artifact">
-            <div class="artifact-source">${artifact.source}</div>
-            <div class="artifact-data">${artifact.data}</div>
-          </div>
-        `).join('');
-      } else {
-        memoryBank.innerHTML = '<div class="text-muted" style="font-size: 0.875rem;">No artifacts stored</div>';
-      }
-
-      // Update agent statuses
-      updateAgentStatus('ew-status', uiState.agent_statuses.early_warning);
-      updateAgentStatus('sa-status', uiState.agent_statuses.situational);
-      updateAgentStatus('ra-status', uiState.agent_statuses.resource);
-
-      // Update navigation
-      document.getElementById('frameIndicator').textContent = `Frame ${frameIndex + 1}/${THE_STORY.length}`;
+      document.getElementById('frameIndicator').textContent = \`\${(frameIndex + 1).toString().padStart(2, '0')}/\${window.THE_STORY.length.toString().padStart(2, '0')}\`;
       document.getElementById('prevBtn').disabled = frameIndex === 0;
-      document.getElementById('nextBtn').disabled = frameIndex === THE_STORY.length - 1;
+      document.getElementById('nextBtn').disabled = frameIndex === window.THE_STORY.length - 1;
+
+      // UEB Log
+      const uebLog = document.getElementById('uebLog');
+      const logEntry = document.createElement('div');
+      logEntry.className = 'p-3 bg-slate-900/80 border-l-2 border-nexora-agent rounded-r animate-in fade-in slide-in-from-left-4 duration-500';
+      logEntry.innerHTML = \`<span class="text-nexora-muted text-xs mr-2">[\${new Date().toLocaleTimeString()}]</span> \${state.ueb_log}\`;
+      uebLog.appendChild(logEntry);
+      uebLog.scrollTop = uebLog.scrollHeight;
+
+      // LLM Thought
+      const llmBox = document.getElementById('llm-process');
+      if (frameIndex === 1) llmBox.textContent = "QUERY: Analyze Silver River spike... RESULT: 92% match to 1998 Flood Pattern. ACTION: Issue Critical Warning.";
+      else if (frameIndex === 4) llmBox.textContent = "REROUTING: A* Search initiated. OBSTACLE: Highland Pass. RESULT: Mountain Trail optimized. Time Saved: 180m.";
+      else if (frameIndex === 0) llmBox.textContent = "IDLE. Awaiting mission objectives.";
+
+      // Agent Status
+      updateAgent('ew', state.agent_statuses.early_warning);
+      updateAgent('sa', state.agent_statuses.situational);
+      updateAgent('ra', state.agent_statuses.resource);
+    };
+
+    function updateAgent(id, status) {
+      const el = document.getElementById(\`\${id}-status\`);
+      el.className = 'status-badge status-' + status;
+      el.textContent = status.replace('_', ' ');
     }
 
-    function updateAgentStatus(elementId, status) {
-      const el = document.getElementById(elementId);
-      if (!el) return;
-
-      el.className = 'status-badge';
-      switch(status) {
-        case 'idle':
-          el.classList.add('status-idle');
-          el.textContent = 'IDLE';
-          break;
-        case 'processing':
-          el.classList.add('status-processing');
-          el.textContent = 'PROCESSING';
-          break;
-        case 'complete':
-          el.classList.add('status-complete');
-          el.textContent = 'COMPLETE';
-          break;
-        case 'pending_approval':
-          el.classList.add('status-pending_approval');
-          el.textContent = 'PENDING';
-          break;
-        default:
-          el.classList.add('status-idle');
-          el.textContent = status.toUpperCase();
-      }
-    }
-
-    function nextFrame() {
-      if (currentFrame < THE_STORY.length - 1) {
-        client.goToFrame(currentFrame + 1);
-      }
-    }
-
-    function prevFrame() {
-      if (currentFrame > 0) {
-        client.goToFrame(currentFrame - 1);
-      }
-    }
-
-    // Initial render
-    renderFrame(0);
-
-    // Connect to server (optional - works offline too)
-    // client.connect();
+    // Initialize UI
+    controller.goToFrame(controller.currentFrame);
   </script>
 </body>
 </html>
