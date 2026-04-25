@@ -8,11 +8,11 @@
   <link rel="stylesheet" href="styles.css">
   <style>
     .neural-bg { background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%); }
-    .status-badge { @apply px-2 py-1 rounded-md text-[10px] font-bold uppercase border; }
-    .status-idle { @apply border-nexora-border text-nexora-muted bg-nexora-bg; }
-    .status-processing { @apply border-nexora-agent text-nexora-agent bg-blue-500/10; }
-    .status-complete { @apply border-nexora-success text-nexora-success bg-emerald-500/10; }
-    .status-pending_approval { @apply border-nexora-warning text-nexora-warning bg-amber-500/10; }
+    .status-badge { padding: 4px 8px; border-radius: 6px; font-size: 10px; font-weight: bold; text-transform: uppercase; border: 1px solid transparent; }
+    .status-idle { border-color: #334155; color: #94A3B8; background: #0F172A; }
+    .status-processing { border-color: #3B82F6; color: #3B82F6; background: rgba(59, 130, 246, 0.1); }
+    .status-complete { border-color: #10B981; color: #10B981; background: rgba(16, 185, 129, 0.1); }
+    .status-pending_approval { border-color: #F59E0B; color: #F59E0B; background: rgba(245, 158, 11, 0.1); }
   </style>
 </head>
 <body class="neural-bg text-nexora-text h-screen overflow-hidden flex flex-col p-6 font-sans">
@@ -21,8 +21,9 @@
       <h1 class="text-4xl font-black text-nexora-agent tracking-tighter">PROJECT NEXORA <span class="text-white font-light text-xl ml-2">PRESENTER</span></h1>
       <p class="text-nexora-muted uppercase text-xs tracking-[0.5em] mt-1">Autonomous Disaster Orchestration</p>
     </div>
-    <div class="px-4 py-2 glass-box border border-nexora-success/30 text-nexora-success text-[10px] font-bold tracking-widest uppercase">
-      KRYPTON DEPLOYMENT ACTIVE
+    <div class="px-4 py-2 glass-box border border-nexora-success/30 text-nexora-success text-[10px] font-bold tracking-widest uppercase flex items-center gap-2">
+      <div id="statusDot" class="w-2 h-2 rounded-full bg-nexora-muted"></div>
+      <span id="statusText">Syncing...</span>
     </div>
   </header>
 
@@ -30,7 +31,9 @@
     <!-- UEB Log -->
     <div class="lg:col-span-2 flex flex-col space-y-4 overflow-hidden">
       <div class="text-[10px] font-bold text-nexora-agent uppercase tracking-widest">Unified Event Bus (UEB) Real-Time Stream</div>
-      <div id="uebLog" class="flex-1 bg-black/50 border border-nexora-border rounded-xl p-6 font-mono text-sm overflow-y-auto space-y-3"></div>
+      <div id="uebLog" class="flex-1 bg-black/50 border border-nexora-border rounded-xl p-6 font-mono text-sm overflow-y-auto space-y-3">
+         <div class="text-nexora-muted italic">Awaiting System State...</div>
+      </div>
     </div>
 
     <!-- Sidebar -->
@@ -39,7 +42,7 @@
       <div>
         <div class="text-[10px] font-bold text-nexora-warning uppercase tracking-widest mb-2">MiniMax MLLM Thought Process</div>
         <div class="bg-nexora-surface border border-nexora-warning/30 rounded-xl p-4 min-h-[140px] flex items-center justify-center">
-           <div id="llm-process" class="text-sm italic text-center">Awaiting data burst...</div>
+           <div id="llm-process" class="text-sm italic text-center leading-relaxed">Awaiting data burst...</div>
         </div>
       </div>
 
@@ -67,8 +70,8 @@
   <!-- Presenter Bar -->
   <div class="fixed bottom-0 left-0 right-0 glass-box m-6 p-6 flex justify-between items-center border border-white/10 shadow-2xl">
     <div class="max-w-xl">
-       <h2 id="frame-title" class="text-nexora-agent font-bold text-sm mb-1 uppercase tracking-widest">...</h2>
-       <p id="presenterScript" class="text-white/80 text-base italic leading-relaxed">...</p>
+       <h2 id="frame-title" class="text-nexora-agent font-bold text-sm mb-1 uppercase tracking-widest">Krypton Response</h2>
+       <p id="presenterScript" class="text-white/80 text-base italic leading-relaxed">System Ready. Awaiting trigger.</p>
     </div>
     <div class="flex items-center gap-6">
        <button id="prevBtn" class="px-6 py-3 bg-nexora-surface border border-nexora-border rounded-lg hover:bg-slate-700 font-bold transition-all disabled:opacity-30">← PREV</button>
@@ -79,35 +82,42 @@
 
   <script src="story-client.js"></script>
   <script>
-    const client = new StoryClient('ws://localhost:8080');
+    console.log("Presenter UI Initializing...");
+    const client = new StoryClient('ws://' + window.location.hostname + ':8080');
+
+    client.onConnect = () => {
+      console.log("Connected to LangGraph Server");
+      document.getElementById('statusDot').style.backgroundColor = '#10B981';
+      document.getElementById('statusText').textContent = 'Live Sync';
+    };
 
     client.onStateChange = (state) => {
+      console.log("State Update Received:", state);
       const uiState = state.ui_state;
 
       // Header & Navigation
       document.getElementById('frame-title').textContent = state.title;
       document.getElementById('presenterScript').textContent = state.presenter_script;
-      document.getElementById('frameIndicator').textContent = \`\${(state.frameIndex + 1).toString().padStart(2, '0')}/\${state.totalFrames.toString().padStart(2, '0')}\`;
+      document.getElementById('frameIndicator').textContent = `${(state.frameIndex + 1).toString().padStart(2, '0')}/${state.totalFrames.toString().padStart(2, '0')}`;
       document.getElementById('prevBtn').disabled = state.frameIndex === 0;
       document.getElementById('nextBtn').disabled = state.frameIndex === state.totalFrames - 1;
 
       // UEB Log
-      const uebLog = document.getElementById('uebLog');
-      uebLog.innerHTML = '';
       if (uiState.ueb_log) {
+        const uebLog = document.getElementById('uebLog');
         const logEntry = document.createElement('div');
         logEntry.className = 'p-3 bg-slate-900/80 border-l-2 border-nexora-agent rounded-r animate-in fade-in slide-in-from-left-4 duration-500';
-        logEntry.innerHTML = \`<span class="text-nexora-muted text-xs mr-2">[\${new Date().toLocaleTimeString()}]</span> \${uiState.ueb_log}\`;
+        logEntry.innerHTML = `<span class="text-nexora-muted text-xs mr-2">[${new Date().toLocaleTimeString()}]</span> ${uiState.ueb_log}`;
         uebLog.appendChild(logEntry);
+        uebLog.scrollTop = uebLog.scrollHeight;
       }
-      uebLog.scrollTop = uebLog.scrollHeight;
 
-      // LLM Thought
+      // LLM Thought Box
       const llmBox = document.getElementById('llm-process');
       if (state.frameIndex === 1) llmBox.textContent = "QUERY: Analyze Silver River spike... RESULT: 92% match to 1998 Flood Pattern. ACTION: Issue Critical Warning.";
       else if (state.frameIndex === 4) llmBox.textContent = "REROUTING: A* Search initiated. OBSTACLE: Highland Pass. RESULT: Mountain Trail optimized. Time Saved: 180m.";
       else if (state.frameIndex === 0) llmBox.textContent = "IDLE. Awaiting mission objectives.";
-      else llmBox.textContent = "PROCESSING SYSTEM STATE...";
+      else llmBox.textContent = "MLLM: Orchestrating agent workflow based on " + state.title + "...";
 
       // Agent Status
       updateAgent('ew', uiState.agent_statuses.early_warning);
@@ -116,13 +126,21 @@
     };
 
     function updateAgent(id, status) {
-      const el = document.getElementById(\`\${id}-status\`);
-      el.className = 'status-badge status-' + status;
-      el.textContent = status.replace('_', ' ');
+      const el = document.getElementById(`${id}-status`);
+      if (el) {
+        el.className = 'status-badge status-' + (status || 'idle');
+        el.textContent = (status || 'idle').replace('_', ' ');
+      }
     }
 
-    document.getElementById('nextBtn').addEventListener('click', () => client.nextFrame());
-    document.getElementById('prevBtn').addEventListener('click', () => client.prevFrame());
+    document.getElementById('nextBtn').addEventListener('click', () => {
+      console.log("Next button clicked");
+      client.nextFrame();
+    });
+    document.getElementById('prevBtn').addEventListener('click', () => {
+      console.log("Prev button clicked");
+      client.prevFrame();
+    });
 
     client.connect();
   </script>
